@@ -1,0 +1,306 @@
+html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title>Netflix Rows Einstellungen</title>
+    <style>
+        .configSection {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .configSection h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .inputContainer {
+            margin: 10px 0;
+        }
+        .inputContainer label {
+            display: inline-block;
+            width: 200px;
+            font-weight: bold;
+        }
+        .genreList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .genreItem {
+            display: flex;
+            align-items: center;
+        }
+        .genreItem input {
+            margin-right: 8px;
+        }
+        .rowTypeList {
+            margin: 10px 0;
+        }
+        .rowTypeItem {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .rowTypeItem input {
+            margin-right: 8px;
+        }
+        .saveButton {
+            background-color: #0078d4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .saveButton:hover {
+            background-color: #106ebe;
+        }
+        .description {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="NetflixRowsConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="NetflixRowsConfigForm">
+                    <h2>Netflix Rows Plugin Einstellungen</h2>
+
+                    <!-- Allgemeine Einstellungen -->
+                    <div class="configSection">
+                        <h3>Allgemeine Einstellungen</h3>
+                        
+                        <div class="inputContainer">
+                            <label for="maxRows">Maximale Anzahl Rows:</label>
+                            <input is="emby-input" type="number" id="maxRows" name="maxRows" min="1" max="20" value="8" />
+                            <div class="description">Maximale Anzahl der Rows auf der Startseite (1-20)</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label for="minItemsPerRow">Min. Items pro Row:</label>
+                            <input is="emby-input" type="number" id="minItemsPerRow" name="minItemsPerRow" min="1" max="50" value="10" />
+                            <div class="description">Minimale Anzahl Items pro Row</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label for="maxItemsPerRow">Max. Items pro Row:</label>
+                            <input is="emby-input" type="number" id="maxItemsPerRow" name="maxItemsPerRow" min="1" max="100" value="25" />
+                            <div class="description">Maximale Anzahl Items pro Row</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label for="replaceHeartWithPlus">Herz-Icon durch Plus ersetzen:</label>
+                            <input is="emby-checkbox" type="checkbox" id="replaceHeartWithPlus" name="replaceHeartWithPlus" checked />
+                            <div class="description">Ersetzt das Herz-Symbol durch ein Plus-Symbol für die Watchlist</div>
+                        </div>
+                    </div>
+
+                    <!-- Row-spezifische Einstellungen -->
+                    <div class="configSection">
+                        <h3>Row-Einstellungen</h3>
+                        
+                        <div class="inputContainer">
+                            <label for="recentlyAddedDays">Kürzlich hinzugefügt (Tage):</label>
+                            <input is="emby-input" type="number" id="recentlyAddedDays" name="recentlyAddedDays" min="1" max="365" value="30" />
+                            <div class="description">Inhalte der letzten X Tage als "kürzlich hinzugefügt" anzeigen</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label for="longNotWatchedMonths">Lange nicht gesehen (Monate):</label>
+                            <input is="emby-input" type="number" id="longNotWatchedMonths" name="longNotWatchedMonths" min="1" max="120" value="6" />
+                            <div class="description">Inhalte älter als X Monate, die nie abgespielt wurden</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label for="myListLimit">Meine Liste Limit:</label>
+                            <input is="emby-input" type="number" id="myListLimit" name="myListLimit" min="1" max="500" value="50" />
+                            <div class="description">Maximale Anzahl Items in "Meine Liste"</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label for="minGenreItems">Min. Items für Genre-Row:</label>
+                            <input is="emby-input" type="number" id="minGenreItems" name="minGenreItems" min="1" max="50" value="5" />
+                            <div class="description">Mindestanzahl Items erforderlich, um eine Genre-Row anzuzeigen</div>
+                        </div>
+                    </div>
+
+                    <!-- Row-Typen aktivieren/deaktivieren -->
+                    <div class="configSection">
+                        <h3>Aktive Row-Typen</h3>
+                        <div class="rowTypeList">
+                            <div class="rowTypeItem">
+                                <input is="emby-checkbox" type="checkbox" id="enableMyList" name="enableMyList" checked />
+                                <label for="enableMyList">Meine Liste</label>
+                            </div>
+                            <div class="rowTypeItem">
+                                <input is="emby-checkbox" type="checkbox" id="enableRecentlyAdded" name="enableRecentlyAdded" checked />
+                                <label for="enableRecentlyAdded">Kürzlich hinzugefügt</label>
+                            </div>
+                            <div class="rowTypeItem">
+                                <input is="emby-checkbox" type="checkbox" id="enableRandomPicks" name="enableRandomPicks" checked />
+                                <label for="enableRandomPicks">Zufällige Auswahl</label>
+                            </div>
+                            <div class="rowTypeItem">
+                                <input is="emby-checkbox" type="checkbox" id="enableGenres" name="enableGenres" checked />
+                                <label for="enableGenres">Genre-Rows</label>
+                            </div>
+                            <div class="rowTypeItem">
+                                <input is="emby-checkbox" type="checkbox" id="enableLongNotWatched" name="enableLongNotWatched" />
+                                <label for="enableLongNotWatched">Lange nicht gesehen</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Genre-Einstellungen -->
+                    <div class="configSection">
+                        <h3>Genre-Einstellungen</h3>
+                        <p>Wählen Sie die Genres aus, die als Rows angezeigt werden sollen:</p>
+                        
+                        <div class="genreList" id="genreList">
+                            <!-- Wird dynamisch gefüllt -->
+                        </div>
+
+                        <h4>Blacklist Genres</h4>
+                        <div class="inputContainer">
+                            <label for="blacklistedGenres">Ausgeschlossene Genres (kommagetrennt):</label>
+                            <input is="emby-input" type="text" id="blacklistedGenres" name="blacklistedGenres" placeholder="z.B. Horror, Documentary" />
+                            <div class="description">Diese Genres werden niemals als Rows angezeigt</div>
+                        </div>
+                    </div>
+
+                    <button is="emby-button" type="submit" class="saveButton">
+                        <span>Einstellungen speichern</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (function () {
+            const pluginId = "6c0b8d8a-6b1c-4c5a-9b0a-1b2c3d4e5f6a";
+
+            // Häufige Genres für die Auswahl
+            const commonGenres = [
+                'Action', 'Adventure', 'Animation', 'Anime', 'Comedy', 'Crime', 
+                'Documentary', 'Drama', 'Family', 'Fantasy', 'History', 'Horror', 
+                'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 
+                'War', 'Western', 'Biography', 'Musical', 'Sport'
+            ];
+
+            function loadPage() {
+                Dashboard.showLoadingMsg();
+
+                ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    // Allgemeine Einstellungen laden
+                    document.getElementById('maxRows').value = config.MaxRows || 8;
+                    document.getElementById('minItemsPerRow').value = config.MinItemsPerRow || 10;
+                    document.getElementById('maxItemsPerRow').value = config.MaxItemsPerRow || 25;
+                    document.getElementById('recentlyAddedDays').value = config.RecentlyAddedDays || 30;
+                    document.getElementById('longNotWatchedMonths').value = config.LongNotWatchedMonths || 6;
+                    document.getElementById('myListLimit').value = config.MyListLimit || 50;
+                    document.getElementById('minGenreItems').value = config.MinGenreItems || 5;
+                    document.getElementById('replaceHeartWithPlus').checked = config.ReplaceHeartWithPlus !== false;
+
+                    // Row-Typen laden
+                    const enabledRowTypes = config.EnabledRowTypes || {};
+                    document.getElementById('enableMyList').checked = enabledRowTypes.MyList !== false;
+                    document.getElementById('enableRecentlyAdded').checked = enabledRowTypes.RecentlyAdded !== false;
+                    document.getElementById('enableRandomPicks').checked = enabledRowTypes.RandomPicks !== false;
+                    document.getElementById('enableGenres').checked = enabledRowTypes.Genres !== false;
+                    document.getElementById('enableLongNotWatched').checked = enabledRowTypes.LongNotWatched === true;
+
+                    // Blacklisted Genres laden
+                    const blacklistedGenres = config.BlacklistedGenres || [];
+                    document.getElementById('blacklistedGenres').value = blacklistedGenres.join(', ');
+
+                    // Genre-Checkboxen erstellen
+                    createGenreCheckboxes(config.EnabledGenres || []);
+
+                    Dashboard.hideLoadingMsg();
+                });
+            }
+
+            function createGenreCheckboxes(enabledGenres) {
+                const genreList = document.getElementById('genreList');
+                genreList.innerHTML = '';
+
+                commonGenres.forEach(function (genre) {
+                    const genreItem = document.createElement('div');
+                    genreItem.className = 'genreItem';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = 'genre_' + genre.replace(/\s+/g, '');
+                    checkbox.value = genre;
+                    checkbox.checked = enabledGenres.includes(genre);
+
+                    const label = document.createElement('label');
+                    label.setAttribute('for', checkbox.id);
+                    label.textContent = genre;
+
+                    genreItem.appendChild(checkbox);
+                    genreItem.appendChild(label);
+                    genreList.appendChild(genreItem);
+                });
+            }
+
+            function onSubmit(e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+
+                const form = this;
+
+                // Aktivierte Genres sammeln
+                const enabledGenres = [];
+                document.querySelectorAll('#genreList input[type="checkbox"]:checked').forEach(function (checkbox) {
+                    enabledGenres.push(checkbox.value);
+                });
+
+                // Blacklisted Genres parsen
+                const blacklistedGenresText = document.getElementById('blacklistedGenres').value;
+                const blacklistedGenres = blacklistedGenresText
+                    .split(',')
+                    .map(g => g.trim())
+                    .filter(g => g.length > 0);
+
+                const config = {
+                    MaxRows: parseInt(document.getElementById('maxRows').value),
+                    MinItemsPerRow: parseInt(document.getElementById('minItemsPerRow').value),
+                    MaxItemsPerRow: parseInt(document.getElementById('maxItemsPerRow').value),
+                    RecentlyAddedDays: parseInt(document.getElementById('recentlyAddedDays').value),
+                    LongNotWatchedMonths: parseInt(document.getElementById('longNotWatchedMonths').value),
+                    MyListLimit: parseInt(document.getElementById('myListLimit').value),
+                    MinGenreItems: parseInt(document.getElementById('minGenreItems').value),
+                    ReplaceHeartWithPlus: document.getElementById('replaceHeartWithPlus').checked,
+                    EnabledGenres: enabledGenres,
+                    BlacklistedGenres: blacklistedGenres,
+                    EnabledRowTypes: {
+                        MyList: document.getElementById('enableMyList').checked,
+                        RecentlyAdded: document.getElementById('enableRecentlyAdded').checked,
+                        RandomPicks: document.getElementById('enableRandomPicks').checked,
+                        Genres: document.getElementById('enableGenres').checked,
+                        LongNotWatched: document.getElementById('enableLongNotWatched').checked
+                    }
+                };
+
+                ApiClient.updatePluginConfiguration(pluginId, config).then(function (result) {
+                    Dashboard.processPluginConfigurationUpdateResult(result);
+                });
+
+                return false;
+            }
+
+            document.getElementById('NetflixRowsConfigForm').addEventListener('submit', onSubmit);
+
+            loadPage();
+        })();
+    </script>
+</body>
+</html>

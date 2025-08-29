@@ -1,0 +1,59 @@
+name: Build Plugin
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore -c Release
+      
+    - name: Test
+      run: dotnet test --no-build -c Release --verbosity normal
+      
+    - name: Publish
+      run: dotnet publish -c Release --no-build -o publish/
+      
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: plugin-build
+        path: publish/
+        
+    - name: Create Release Package
+      if: github.event_name == 'release'
+      run: |
+        mkdir -p release
+        cp publish/Jellyfin.Plugin.NetflixRows.dll release/
+        cp meta.json release/
+        cd release
+        zip -r ../jellyfin-plugin-netflix-rows-${{ github.event.release.tag_name }}.zip .
+        
+    - name: Upload Release Asset
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: jellyfin-plugin-netflix-rows-${{ github.event.release.tag_name }}.zip
+        asset_name: jellyfin-plugin-netflix-rows-${{ github.event.release.tag_name }}.zip
+        asset_content_type: application/zip
