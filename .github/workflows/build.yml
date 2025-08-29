@@ -86,4 +86,4 @@ jobs:
           
           Or install via repository: `https://raw.githubusercontent.com/FigmaCode/jellyfin-plugin-netflix-rows/main/repository.json`
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
