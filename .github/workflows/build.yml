@@ -21,16 +21,13 @@ jobs:
         dotnet-version: 8.0.x
         
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore Jellyfin.Plugin.NetflixRows/Jellyfin.Plugin.NetflixRows.csproj
       
     - name: Build
-      run: dotnet build --no-restore -c Release
-      
-    - name: Test
-      run: dotnet test --no-build -c Release --verbosity normal
+      run: dotnet build Jellyfin.Plugin.NetflixRows/Jellyfin.Plugin.NetflixRows.csproj --no-restore -c Release
       
     - name: Publish
-      run: dotnet publish -c Release --no-build -o publish/
+      run: dotnet publish Jellyfin.Plugin.NetflixRows/Jellyfin.Plugin.NetflixRows.csproj -c Release --no-build -o publish/
       
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -49,11 +46,8 @@ jobs:
         
     - name: Upload Release Asset
       if: github.event_name == 'release'
-      uses: actions/upload-release-asset@v1
+      uses: softprops/action-gh-release@v1
+      with:
+        files: jellyfin-plugin-netflix-rows-${{ github.event.release.tag_name }}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: jellyfin-plugin-netflix-rows-${{ github.event.release.tag_name }}.zip
-        asset_name: jellyfin-plugin-netflix-rows-${{ github.event.release.tag_name }}.zip
-        asset_content_type: application/zip

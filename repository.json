@@ -6,15 +6,14 @@
     "overview": "Netflix-style home screen rows for Jellyfin",
     "owner": "FigmaCode",
     "category": "General",
-    "imageUrl": "https://raw.githubusercontent.com/FigmaCode/jellyfin-plugin-netflix-rows/main/images/logo.png",
     "versions": [
       {
         "version": "1.0.0.0",
         "changelog": "Initial release with Netflix-style rows for Jellyfin home screen",
         "targetAbi": "10.10.0.0",
         "sourceUrl": "https://github.com/FigmaCode/jellyfin-plugin-netflix-rows/releases/download/v1.0.0/jellyfin-plugin-netflix-rows-1.0.0.zip",
-        "checksum": "MD5-HASH-HIER",
-        "timestamp": "2024-01-15T00:00:00.0000000Z"
+        "checksum": "00000000000000000000000000000000",
+        "timestamp": "2024-08-29T00:00:00.0000000Z"
       }
     ]
   }
