@@ -1,12 +1,11 @@
-name: Build Plugin
+name: Build and Release Plugin
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
-  release:
-    types: [ published ]
 
 jobs:
   build:
@@ -29,25 +28,60 @@ jobs:
     - name: Publish
       run: dotnet publish Jellyfin.Plugin.NetflixRows/Jellyfin.Plugin.NetflixRows.csproj -c Release --no-build -o publish/
       
-    - name: Upload artifacts
+    - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: plugin-build
         path: publish/
         
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Build and Publish
+      run: |
+        dotnet restore Jellyfin.Plugin.NetflixRows/Jellyfin.Plugin.NetflixRows.csproj
+        dotnet publish Jellyfin.Plugin.NetflixRows/Jellyfin.Plugin.NetflixRows.csproj -c Release -o publish/
+        
     - name: Create Release Package
-      if: github.event_name == 'release'
       run: |
         mkdir -p release
         cp publish/Jellyfin.Plugin.NetflixRows.dll release/
         cp meta.json release/
         cd release
-        zip -r ../jellyfin-plugin-netflix-rows-${{ github.event.release.tag_name }}.zip .
+        zip -r ../jellyfin-plugin-netflix-rows-${GITHUB_REF#refs/tags/}.zip .
         
-    - name: Upload Release Asset
-      if: github.event_name == 'release'
+    - name: Generate MD5
+      id: md5
+      run: |
+        MD5=$(md5sum jellyfin-plugin-netflix-rows-${GITHUB_REF#refs/tags/}.zip | cut -d ' ' -f1)
+        echo "md5=$MD5" >> $GITHUB_OUTPUT
+        echo "Generated MD5: $MD5"
+        
+    - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: jellyfin-plugin-netflix-rows-${{ github.event.release.tag_name }}.zip
+        files: jellyfin-plugin-netflix-rows-${{ github.ref_name }}.zip
+        generate_release_notes: true
+        body: |
+          ## Netflix Rows Plugin ${{ github.ref_name }}
+          
+          **MD5 Checksum:** ${{ steps.md5.outputs.md5 }}
+          
+          ### Installation
+          1. Download the ZIP file
+          2. Extract to your Jellyfin plugins directory: `jellyfin/plugins/NetflixRows/`
+          3. Restart Jellyfin server
+          
+          Or install via repository: `https://raw.githubusercontent.com/FigmaCode/jellyfin-plugin-netflix-rows/main/repository.json`
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
