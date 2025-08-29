@@ -12,7 +12,8 @@ using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Querying;
 using Microsoft.Extensions.Logging;
-using Jellyfin.Data.Entities; // <- Das ist das fehlende Using für User!
+using Jellyfin.Data.Entities;
+using Jellyfin.Data.Enums;
 
 namespace Jellyfin.Plugin.NetflixRows.Services;
 
@@ -116,8 +117,6 @@ public class RowService : IRowService
             return new QueryResult<BaseItemDto>();
         }
 
-        var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-
         return rowType.ToLowerInvariant() switch
         {
             "mylist" => await GetMyListItemsAsync(user, startIndex, limit),
@@ -135,9 +134,9 @@ public class RowService : IRowService
         {
             IsFavorite = true,
             Recursive = true,
-            IncludeItemTypes = new[] { nameof(Movie), nameof(Series) },
-            OrderBy = new[] { (ItemSortBy.DateCreated, SortOrder.Descending) },
-            Limit = 6 // Preview items
+            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+            OrderBy = new[] { (BaseItemKind.Movie.ToString(), MediaBrowser.Model.Querying.SortOrder.Descending) },
+            Limit = 6
         };
 
         var result = _libraryManager.GetItemsResult(query);
@@ -165,8 +164,8 @@ public class RowService : IRowService
         {
             MinDateCreated = cutoffDate,
             Recursive = true,
-            IncludeItemTypes = new[] { nameof(Movie), nameof(Series) },
-            OrderBy = new[] { (ItemSortBy.DateCreated, SortOrder.Descending) },
+            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+            OrderBy = new[] { ("DateCreated", MediaBrowser.Model.Querying.SortOrder.Descending) },
             Limit = 6
         };
 
@@ -191,8 +190,8 @@ public class RowService : IRowService
         var query = new InternalItemsQuery(user)
         {
             Recursive = true,
-            IncludeItemTypes = new[] { nameof(Movie), nameof(Series) },
-            OrderBy = new[] { (ItemSortBy.Random, SortOrder.Ascending) },
+            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+            OrderBy = new[] { ("Random", MediaBrowser.Model.Querying.SortOrder.Ascending) },
             Limit = 6
         };
 
@@ -225,8 +224,8 @@ public class RowService : IRowService
             {
                 Genres = new[] { genre },
                 Recursive = true,
-                IncludeItemTypes = new[] { nameof(Movie), nameof(Series) },
-                OrderBy = new[] { (ItemSortBy.Random, SortOrder.Ascending) },
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+                OrderBy = new[] { ("Random", MediaBrowser.Model.Querying.SortOrder.Ascending) },
                 Limit = 6
             };
 
@@ -254,18 +253,19 @@ public class RowService : IRowService
         var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
         var cutoffDate = DateTime.UtcNow.AddMonths(-config.LongNotWatchedMonths);
 
+        // Get all items and filter client-side for long not watched
         var query = new InternalItemsQuery(user)
         {
-            MaxDateCreated = cutoffDate,
             IsPlayed = false,
             Recursive = true,
-            IncludeItemTypes = new[] { nameof(Movie), nameof(Series) },
-            OrderBy = new[] { (ItemSortBy.DateCreated, SortOrder.Ascending) },
-            Limit = 6
+            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+            OrderBy = new[] { ("DateCreated", MediaBrowser.Model.Querying.SortOrder.Ascending) }
         };
 
         var result = _libraryManager.GetItemsResult(query);
-        if (result.TotalRecordCount == 0)
+        var filteredItems = result.Items.Where(item => item.DateCreated <= cutoffDate).Take(6).ToList();
+        
+        if (!filteredItems.Any())
         {
             return null;
         }
@@ -275,8 +275,8 @@ public class RowService : IRowService
             Id = "longnotwatched",
             Title = "Lange nicht gesehen",
             Type = "LongNotWatched",
-            ItemCount = result.TotalRecordCount,
-            PreviewItems = await ConvertToBaseItemDtos(result.Items, user)
+            ItemCount = filteredItems.Count,
+            PreviewItems = await ConvertToBaseItemDtos(filteredItems, user)
         };
     }
 
@@ -288,8 +288,8 @@ public class RowService : IRowService
         {
             IsFavorite = true,
             Recursive = true,
-            IncludeItemTypes = new[] { nameof(Movie), nameof(Series) },
-            OrderBy = new[] { (ItemSortBy.DateCreated, SortOrder.Descending) },
+            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+            OrderBy = new[] { ("DateCreated", MediaBrowser.Model.Querying.SortOrder.Descending) },
             StartIndex = startIndex,
             Limit = Math.Min(limit, config.MyListLimit)
         };
@@ -314,8 +314,8 @@ public class RowService : IRowService
         {
             MinDateCreated = cutoffDate,
             Recursive = true,
-            IncludeItemTypes = new[] { nameof(Movie), nameof(Series) },
-            OrderBy = new[] { (ItemSortBy.DateCreated, SortOrder.Descending) },
+            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+            OrderBy = new[] { ("DateCreated", MediaBrowser.Model.Querying.SortOrder.Descending) },
             StartIndex = startIndex,
             Limit = Math.Min(limit, config.MaxItemsPerRow)
         };
@@ -338,8 +338,8 @@ public class RowService : IRowService
         var query = new InternalItemsQuery(user)
         {
             Recursive = true,
-            IncludeItemTypes = new[] { nameof(Movie), nameof(Series) },
-            OrderBy = new[] { (ItemSortBy.Random, SortOrder.Ascending) },
+            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+            OrderBy = new[] { ("Random", MediaBrowser.Model.Querying.SortOrder.Ascending) },
             StartIndex = startIndex,
             Limit = Math.Min(limit, config.MaxItemsPerRow)
         };
@@ -363,8 +363,8 @@ public class RowService : IRowService
         {
             Genres = new[] { genre },
             Recursive = true,
-            IncludeItemTypes = new[] { nameof(Movie), nameof(Series) },
-            OrderBy = new[] { (ItemSortBy.Random, SortOrder.Ascending) },
+            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+            OrderBy = new[] { ("Random", MediaBrowser.Model.Querying.SortOrder.Ascending) },
             StartIndex = startIndex,
             Limit = Math.Min(limit, config.MaxItemsPerRow)
         };
@@ -387,27 +387,30 @@ public class RowService : IRowService
 
         var query = new InternalItemsQuery(user)
         {
-            MaxDateCreated = cutoffDate,
             IsPlayed = false,
             Recursive = true,
-            IncludeItemTypes = new[] { nameof(Movie), nameof(Series) },
-            OrderBy = new[] { (ItemSortBy.DateCreated, SortOrder.Ascending) },
-            StartIndex = startIndex,
-            Limit = Math.Min(limit, config.MaxItemsPerRow)
+            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+            OrderBy = new[] { ("DateCreated", MediaBrowser.Model.Querying.SortOrder.Ascending) }
         };
 
         var result = _libraryManager.GetItemsResult(query);
-        var dtos = await ConvertToBaseItemDtos(result.Items, user);
+        var filteredItems = result.Items
+            .Where(item => item.DateCreated <= cutoffDate)
+            .Skip(startIndex)
+            .Take(Math.Min(limit, config.MaxItemsPerRow))
+            .ToList();
+
+        var dtos = await ConvertToBaseItemDtos(filteredItems, user);
 
         return new QueryResult<BaseItemDto>
         {
             Items = dtos.ToArray(),
-            TotalRecordCount = result.TotalRecordCount,
+            TotalRecordCount = result.Items.Count(item => item.DateCreated <= cutoffDate),
             StartIndex = startIndex
         };
     }
 
-    private async Task<List<BaseItemDto>> ConvertToBaseItemDtos(IReadOnlyList<BaseItem> items, User user)
+    private async Task<List<BaseItemDto>> ConvertToBaseItemDtos(IEnumerable<BaseItem> items, User user)
     {
         var dtoOptions = new DtoOptions()
         {

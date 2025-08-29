@@ -2,14 +2,14 @@ name: Build and Release Plugin
 
 on:
   push:
-    branches: [ main ]
-    tags: [ 'v*' ]
+    tags: [ 'v*' ]  # Nur bei Tags ausführen
   pull_request:
     branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'pull_request'
     
     steps:
     - uses: actions/checkout@v4
@@ -25,17 +25,14 @@ jobs:
     - name: Build
       run: dotnet build Jellyfin.Plugin.NetflixRows/Jellyfin.Plugin.NetflixRows.csproj --no-restore -c Release
       
-    - name: Publish
-      run: dotnet publish Jellyfin.Plugin.NetflixRows/Jellyfin.Plugin.NetflixRows.csproj -c Release --no-build -o publish/
-      
-    - name: Upload Build Artifacts
+    - name: Upload Build Artifacts (PR only)
+      if: github.event_name == 'pull_request'
       uses: actions/upload-artifact@v4
       with:
         name: plugin-build
         path: publish/
         
   release:
-    needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     
@@ -77,11 +74,16 @@ jobs:
           
           **MD5 Checksum:** ${{ steps.md5.outputs.md5 }}
           
+          ### Changes
+          - Fixed Jellyfin 10.10.7 compatibility
+          - Updated API calls to use BaseItemKind enums
+          - Improved error handling
+          
           ### Installation
-          1. Download the ZIP file
+          1. Download the ZIP file below
           2. Extract to your Jellyfin plugins directory: `jellyfin/plugins/NetflixRows/`
           3. Restart Jellyfin server
           
           Or install via repository: `https://raw.githubusercontent.com/FigmaCode/jellyfin-plugin-netflix-rows/main/repository.json`
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }
