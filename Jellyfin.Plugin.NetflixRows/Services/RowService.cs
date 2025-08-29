@@ -1,4 +1,3 @@
-// Services/RowService.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +12,7 @@ using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Querying;
 using Microsoft.Extensions.Logging;
+using Jellyfin.Data.Entities; // <- Das ist das fehlende Using für User!
 
 namespace Jellyfin.Plugin.NetflixRows.Services;
 
