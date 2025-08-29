@@ -1,4 +1,3 @@
-csharp
 using System.Collections.Generic;
 using MediaBrowser.Model.Dto;
 

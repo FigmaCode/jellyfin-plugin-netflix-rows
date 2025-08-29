@@ -1,4 +1,3 @@
-csharp
 using Jellyfin.Plugin.NetflixRows.Services;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
