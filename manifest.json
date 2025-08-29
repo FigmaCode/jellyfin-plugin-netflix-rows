@@ -1,8 +1,0 @@
-{
-  "repositories": [
-    {
-      "name": "Netflix Rows Plugin Repository",
-      "url": "https://raw.githubusercontent.com/FigmaCode/jellyfin-plugin-netflix-rows/main/repository.json"
-    }
-  ]
-}
