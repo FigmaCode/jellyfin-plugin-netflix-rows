@@ -1,0 +1,21 @@
+[
+  {
+    "guid": "6c0b8d8a-6b1c-4c5a-9b0a-1b2c3d4e5f6a",
+    "name": "Netflix Rows",
+    "description": "Transforms your Jellyfin home screen into Netflix-style horizontal rows with configurable content sections including My List, Recently Added, Random Picks, Genre rows, and more.",
+    "overview": "Netflix-style home screen rows for Jellyfin",
+    "owner": "FigmaCode",
+    "category": "General",
+    "imageUrl": "https://raw.githubusercontent.com/FigmaCode/jellyfin-plugin-netflix-rows/main/images/logo.png",
+    "versions": [
+      {
+        "version": "1.0.0.0",
+        "changelog": "Initial release with Netflix-style rows for Jellyfin home screen",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/FigmaCode/jellyfin-plugin-netflix-rows/releases/download/v1.0.0/jellyfin-plugin-netflix-rows-1.0.0.zip",
+        "checksum": "MD5-HASH-HIER",
+        "timestamp": "2024-01-15T00:00:00.0000000Z"
+      }
+    ]
+  }
+]
