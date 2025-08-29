@@ -47,7 +47,7 @@ public class RowService : IRowService
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<NetflixRowDto>> GetRowsAsync(Guid userId)
+    public Task<IEnumerable<NetflixRowDto>> GetRowsAsync(Guid userId)
     {
         var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
         var user = _userManager.GetUserById(userId);
@@ -55,381 +55,419 @@ public class RowService : IRowService
 
         if (user == null)
         {
-            return rows;
+            return Task.FromResult<IEnumerable<NetflixRowDto>>(rows);
         }
 
-        // My List (immer zuerst wenn aktiviert)
-        if (config.EnabledRowTypes.GetValueOrDefault("MyList", false))
+        try
         {
-            var myListRow = await CreateMyListRowAsync(user);
-            if (myListRow != null)
+            // My List (immer zuerst wenn aktiviert)
+            if (config.EnabledRowTypes.GetValueOrDefault("MyList", false))
             {
-                rows.Add(myListRow);
+                var myListRow = CreateMyListRow(user);
+                if (myListRow != null)
+                {
+                    rows.Add(myListRow);
+                }
             }
-        }
 
-        // Recently Added
-        if (config.EnabledRowTypes.GetValueOrDefault("RecentlyAdded", false))
-        {
-            var recentRow = await CreateRecentlyAddedRowAsync(user);
-            if (recentRow != null)
+            // Recently Added
+            if (config.EnabledRowTypes.GetValueOrDefault("RecentlyAdded", false))
             {
-                rows.Add(recentRow);
+                var recentRow = CreateRecentlyAddedRow(user);
+                if (recentRow != null)
+                {
+                    rows.Add(recentRow);
+                }
             }
-        }
 
-        // Random Picks
-        if (config.EnabledRowTypes.GetValueOrDefault("RandomPicks", false))
-        {
-            var randomRow = await CreateRandomPicksRowAsync(user);
-            if (randomRow != null)
+            // Random Picks
+            if (config.EnabledRowTypes.GetValueOrDefault("RandomPicks", false))
             {
-                rows.Add(randomRow);
+                var randomRow = CreateRandomPicksRow(user);
+                if (randomRow != null)
+                {
+                    rows.Add(randomRow);
+                }
             }
-        }
 
-        // Genre Rows
-        if (config.EnabledRowTypes.GetValueOrDefault("Genres", false))
-        {
-            var genreRows = await CreateGenreRowsAsync(user, config);
-            rows.AddRange(genreRows);
-        }
-
-        // Long Not Watched
-        if (config.EnabledRowTypes.GetValueOrDefault("LongNotWatched", false))
-        {
-            var longNotWatchedRow = await CreateLongNotWatchedRowAsync(user);
-            if (longNotWatchedRow != null)
+            // Genre Rows
+            if (config.EnabledRowTypes.GetValueOrDefault("Genres", false))
             {
-                rows.Add(longNotWatchedRow);
+                var genreRows = CreateGenreRows(user, config);
+                rows.AddRange(genreRows);
             }
-        }
 
-        return rows.Take(config.MaxRows);
+            return Task.FromResult<IEnumerable<NetflixRowDto>>(rows.Take(config.MaxRows));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating rows for user {UserId}", userId);
+            return Task.FromResult<IEnumerable<NetflixRowDto>>(new List<NetflixRowDto>());
+        }
     }
 
     /// <inheritdoc />
-    public async Task<QueryResult<BaseItemDto>> GetRowItemsAsync(Guid userId, string rowType, string? genre, int startIndex, int limit)
+    public Task<QueryResult<BaseItemDto>> GetRowItemsAsync(Guid userId, string rowType, string? genre, int startIndex, int limit)
     {
         var user = _userManager.GetUserById(userId);
         if (user == null)
         {
-            return new QueryResult<BaseItemDto>();
+            return Task.FromResult(new QueryResult<BaseItemDto>());
         }
 
-        return rowType.ToLowerInvariant() switch
+        try
         {
-            "mylist" => await GetMyListItemsAsync(user, startIndex, limit),
-            "recentlyadded" => await GetRecentlyAddedItemsAsync(user, startIndex, limit),
-            "randompicks" => await GetRandomPicksItemsAsync(user, startIndex, limit),
-            "genre" when !string.IsNullOrEmpty(genre) => await GetGenreItemsAsync(user, genre, startIndex, limit),
-            "longnotwatched" => await GetLongNotWatchedItemsAsync(user, startIndex, limit),
-            _ => new QueryResult<BaseItemDto>()
-        };
+            return Task.FromResult(rowType.ToLowerInvariant() switch
+            {
+                "mylist" => GetMyListItems(user, startIndex, limit),
+                "recentlyadded" => GetRecentlyAddedItems(user, startIndex, limit),
+                "randompicks" => GetRandomPicksItems(user, startIndex, limit),
+                "genre" when !string.IsNullOrEmpty(genre) => GetGenreItems(user, genre, startIndex, limit),
+                _ => new QueryResult<BaseItemDto>()
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting row items for user {UserId}, rowType {RowType}", userId, rowType);
+            return Task.FromResult(new QueryResult<BaseItemDto>());
+        }
     }
 
-    private async Task<NetflixRowDto?> CreateMyListRowAsync(User user)
+    private NetflixRowDto? CreateMyListRow(User user)
     {
-        var query = new InternalItemsQuery(user)
+        try
         {
-            IsFavorite = true,
-            Recursive = true,
-            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-            OrderBy = new[] { (BaseItemKind.Movie.ToString(), MediaBrowser.Model.Querying.SortOrder.Descending) },
-            Limit = 6
-        };
+            var query = new InternalItemsQuery(user)
+            {
+                IsFavorite = true,
+                Recursive = true,
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+                Limit = 6
+            };
 
-        var result = _libraryManager.GetItemsResult(query);
-        if (result.TotalRecordCount == 0)
+            var result = _libraryManager.GetItemsResult(query);
+            if (result.TotalRecordCount == 0)
+            {
+                return null;
+            }
+
+            return new NetflixRowDto
+            {
+                Id = "mylist",
+                Title = "Meine Liste",
+                Type = "MyList",
+                ItemCount = result.TotalRecordCount,
+                PreviewItems = ConvertToBaseItemDtos(result.Items.Take(6), user)
+            };
+        }
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error creating MyList row");
             return null;
         }
-
-        return new NetflixRowDto
-        {
-            Id = "mylist",
-            Title = "Meine Liste",
-            Type = "MyList",
-            ItemCount = result.TotalRecordCount,
-            PreviewItems = await ConvertToBaseItemDtos(result.Items, user)
-        };
     }
 
-    private async Task<NetflixRowDto?> CreateRecentlyAddedRowAsync(User user)
+    private NetflixRowDto? CreateRecentlyAddedRow(User user)
     {
-        var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-        var cutoffDate = DateTime.UtcNow.AddDays(-config.RecentlyAddedDays);
-
-        var query = new InternalItemsQuery(user)
+        try
         {
-            MinDateCreated = cutoffDate,
-            Recursive = true,
-            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-            OrderBy = new[] { ("DateCreated", MediaBrowser.Model.Querying.SortOrder.Descending) },
-            Limit = 6
-        };
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            var cutoffDate = DateTime.UtcNow.AddDays(-config.RecentlyAddedDays);
 
-        var result = _libraryManager.GetItemsResult(query);
-        if (result.TotalRecordCount == 0)
+            var query = new InternalItemsQuery(user)
+            {
+                MinDateCreated = cutoffDate,
+                Recursive = true,
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+                Limit = 6
+            };
+
+            var result = _libraryManager.GetItemsResult(query);
+            if (result.TotalRecordCount == 0)
+            {
+                return null;
+            }
+
+            return new NetflixRowDto
+            {
+                Id = "recentlyadded",
+                Title = "Kürzlich hinzugefügt",
+                Type = "RecentlyAdded",
+                ItemCount = result.TotalRecordCount,
+                PreviewItems = ConvertToBaseItemDtos(result.Items.Take(6), user)
+            };
+        }
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error creating RecentlyAdded row");
             return null;
         }
-
-        return new NetflixRowDto
-        {
-            Id = "recentlyadded",
-            Title = "Kürzlich hinzugefügt",
-            Type = "RecentlyAdded",
-            ItemCount = result.TotalRecordCount,
-            PreviewItems = await ConvertToBaseItemDtos(result.Items, user)
-        };
     }
 
-    private async Task<NetflixRowDto?> CreateRandomPicksRowAsync(User user)
+    private NetflixRowDto? CreateRandomPicksRow(User user)
     {
-        var query = new InternalItemsQuery(user)
+        try
         {
-            Recursive = true,
-            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-            OrderBy = new[] { ("Random", MediaBrowser.Model.Querying.SortOrder.Ascending) },
-            Limit = 6
-        };
+            var query = new InternalItemsQuery(user)
+            {
+                Recursive = true,
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series }
+            };
 
-        var result = _libraryManager.GetItemsResult(query);
-        if (result.TotalRecordCount == 0)
+            var result = _libraryManager.GetItemsResult(query);
+            if (result.TotalRecordCount == 0)
+            {
+                return null;
+            }
+
+            // Manual random selection since OrderBy is problematic
+            var random = new Random();
+            var randomItems = result.Items
+                .OrderBy(x => random.Next())
+                .Take(6)
+                .ToList();
+
+            return new NetflixRowDto
+            {
+                Id = "randompicks",
+                Title = "Zufällige Auswahl",
+                Type = "RandomPicks",
+                ItemCount = result.TotalRecordCount,
+                PreviewItems = ConvertToBaseItemDtos(randomItems, user)
+            };
+        }
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Error creating RandomPicks row");
             return null;
         }
-
-        return new NetflixRowDto
-        {
-            Id = "randompicks",
-            Title = "Zufällige Auswahl",
-            Type = "RandomPicks",
-            ItemCount = result.TotalRecordCount,
-            PreviewItems = await ConvertToBaseItemDtos(result.Items, user)
-        };
     }
 
-    private async Task<List<NetflixRowDto>> CreateGenreRowsAsync(User user, PluginConfiguration config)
+    private List<NetflixRowDto> CreateGenreRows(User user, PluginConfiguration config)
     {
         var rows = new List<NetflixRowDto>();
 
         foreach (var genre in config.EnabledGenres)
         {
-            if (config.BlacklistedGenres.Contains(genre))
-                continue;
-
-            var query = new InternalItemsQuery(user)
+            try
             {
-                Genres = new[] { genre },
-                Recursive = true,
-                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-                OrderBy = new[] { ("Random", MediaBrowser.Model.Querying.SortOrder.Ascending) },
-                Limit = 6
-            };
+                if (config.BlacklistedGenres.Contains(genre))
+                    continue;
 
-            var result = _libraryManager.GetItemsResult(query);
-
-            if (result.TotalRecordCount >= config.MinGenreItems)
-            {
-                rows.Add(new NetflixRowDto
+                var query = new InternalItemsQuery(user)
                 {
-                    Id = $"genre-{genre.ToLowerInvariant()}",
-                    Title = genre,
-                    Type = "Genre",
-                    Genre = genre,
-                    ItemCount = result.TotalRecordCount,
-                    PreviewItems = await ConvertToBaseItemDtos(result.Items, user)
-                });
+                    Genres = new[] { genre },
+                    Recursive = true,
+                    IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series }
+                };
+
+                var result = _libraryManager.GetItemsResult(query);
+
+                if (result.TotalRecordCount >= config.MinGenreItems)
+                {
+                    // Manual random selection
+                    var random = new Random();
+                    var randomItems = result.Items
+                        .OrderBy(x => random.Next())
+                        .Take(6)
+                        .ToList();
+
+                    rows.Add(new NetflixRowDto
+                    {
+                        Id = $"genre-{genre.ToLowerInvariant()}",
+                        Title = genre,
+                        Type = "Genre",
+                        Genre = genre,
+                        ItemCount = result.TotalRecordCount,
+                        PreviewItems = ConvertToBaseItemDtos(randomItems, user)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating genre row for {Genre}", genre);
             }
         }
 
         return rows;
     }
 
-    private async Task<NetflixRowDto?> CreateLongNotWatchedRowAsync(User user)
+    private QueryResult<BaseItemDto> GetMyListItems(User user, int startIndex, int limit)
     {
-        var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-        var cutoffDate = DateTime.UtcNow.AddMonths(-config.LongNotWatchedMonths);
-
-        // Get all items and filter client-side for long not watched
-        var query = new InternalItemsQuery(user)
+        try
         {
-            IsPlayed = false,
-            Recursive = true,
-            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-            OrderBy = new[] { ("DateCreated", MediaBrowser.Model.Querying.SortOrder.Ascending) }
-        };
-
-        var result = _libraryManager.GetItemsResult(query);
-        var filteredItems = result.Items.Where(item => item.DateCreated <= cutoffDate).Take(6).ToList();
-        
-        if (!filteredItems.Any())
-        {
-            return null;
-        }
-
-        return new NetflixRowDto
-        {
-            Id = "longnotwatched",
-            Title = "Lange nicht gesehen",
-            Type = "LongNotWatched",
-            ItemCount = filteredItems.Count,
-            PreviewItems = await ConvertToBaseItemDtos(filteredItems, user)
-        };
-    }
-
-    private async Task<QueryResult<BaseItemDto>> GetMyListItemsAsync(User user, int startIndex, int limit)
-    {
-        var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-        
-        var query = new InternalItemsQuery(user)
-        {
-            IsFavorite = true,
-            Recursive = true,
-            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-            OrderBy = new[] { ("DateCreated", MediaBrowser.Model.Querying.SortOrder.Descending) },
-            StartIndex = startIndex,
-            Limit = Math.Min(limit, config.MyListLimit)
-        };
-
-        var result = _libraryManager.GetItemsResult(query);
-        var dtos = await ConvertToBaseItemDtos(result.Items, user);
-
-        return new QueryResult<BaseItemDto>
-        {
-            Items = dtos.ToArray(),
-            TotalRecordCount = result.TotalRecordCount,
-            StartIndex = startIndex
-        };
-    }
-
-    private async Task<QueryResult<BaseItemDto>> GetRecentlyAddedItemsAsync(User user, int startIndex, int limit)
-    {
-        var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-        var cutoffDate = DateTime.UtcNow.AddDays(-config.RecentlyAddedDays);
-
-        var query = new InternalItemsQuery(user)
-        {
-            MinDateCreated = cutoffDate,
-            Recursive = true,
-            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-            OrderBy = new[] { ("DateCreated", MediaBrowser.Model.Querying.SortOrder.Descending) },
-            StartIndex = startIndex,
-            Limit = Math.Min(limit, config.MaxItemsPerRow)
-        };
-
-        var result = _libraryManager.GetItemsResult(query);
-        var dtos = await ConvertToBaseItemDtos(result.Items, user);
-
-        return new QueryResult<BaseItemDto>
-        {
-            Items = dtos.ToArray(),
-            TotalRecordCount = result.TotalRecordCount,
-            StartIndex = startIndex
-        };
-    }
-
-    private async Task<QueryResult<BaseItemDto>> GetRandomPicksItemsAsync(User user, int startIndex, int limit)
-    {
-        var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-
-        var query = new InternalItemsQuery(user)
-        {
-            Recursive = true,
-            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-            OrderBy = new[] { ("Random", MediaBrowser.Model.Querying.SortOrder.Ascending) },
-            StartIndex = startIndex,
-            Limit = Math.Min(limit, config.MaxItemsPerRow)
-        };
-
-        var result = _libraryManager.GetItemsResult(query);
-        var dtos = await ConvertToBaseItemDtos(result.Items, user);
-
-        return new QueryResult<BaseItemDto>
-        {
-            Items = dtos.ToArray(),
-            TotalRecordCount = result.TotalRecordCount,
-            StartIndex = startIndex
-        };
-    }
-
-    private async Task<QueryResult<BaseItemDto>> GetGenreItemsAsync(User user, string genre, int startIndex, int limit)
-    {
-        var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-
-        var query = new InternalItemsQuery(user)
-        {
-            Genres = new[] { genre },
-            Recursive = true,
-            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-            OrderBy = new[] { ("Random", MediaBrowser.Model.Querying.SortOrder.Ascending) },
-            StartIndex = startIndex,
-            Limit = Math.Min(limit, config.MaxItemsPerRow)
-        };
-
-        var result = _libraryManager.GetItemsResult(query);
-        var dtos = await ConvertToBaseItemDtos(result.Items, user);
-
-        return new QueryResult<BaseItemDto>
-        {
-            Items = dtos.ToArray(),
-            TotalRecordCount = result.TotalRecordCount,
-            StartIndex = startIndex
-        };
-    }
-
-    private async Task<QueryResult<BaseItemDto>> GetLongNotWatchedItemsAsync(User user, int startIndex, int limit)
-    {
-        var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-        var cutoffDate = DateTime.UtcNow.AddMonths(-config.LongNotWatchedMonths);
-
-        var query = new InternalItemsQuery(user)
-        {
-            IsPlayed = false,
-            Recursive = true,
-            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-            OrderBy = new[] { ("DateCreated", MediaBrowser.Model.Querying.SortOrder.Ascending) }
-        };
-
-        var result = _libraryManager.GetItemsResult(query);
-        var filteredItems = result.Items
-            .Where(item => item.DateCreated <= cutoffDate)
-            .Skip(startIndex)
-            .Take(Math.Min(limit, config.MaxItemsPerRow))
-            .ToList();
-
-        var dtos = await ConvertToBaseItemDtos(filteredItems, user);
-
-        return new QueryResult<BaseItemDto>
-        {
-            Items = dtos.ToArray(),
-            TotalRecordCount = result.Items.Count(item => item.DateCreated <= cutoffDate),
-            StartIndex = startIndex
-        };
-    }
-
-    private async Task<List<BaseItemDto>> ConvertToBaseItemDtos(IEnumerable<BaseItem> items, User user)
-    {
-        var dtoOptions = new DtoOptions()
-        {
-            EnableImages = true,
-            Fields = new[]
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            
+            var query = new InternalItemsQuery(user)
             {
-                ItemFields.PrimaryImageAspectRatio,
-                ItemFields.BasicSyncInfo,
-                ItemFields.MediaSourceCount
-            }
-        };
+                IsFavorite = true,
+                Recursive = true,
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+                StartIndex = startIndex,
+                Limit = Math.Min(limit, config.MyListLimit)
+            };
 
-        var dtos = new List<BaseItemDto>();
-        foreach (var item in items)
-        {
-            var dto = _dtoService.GetBaseItemDto(item, dtoOptions, user);
-            dtos.Add(dto);
+            var result = _libraryManager.GetItemsResult(query);
+            var dtos = ConvertToBaseItemDtos(result.Items, user);
+
+            return new QueryResult<BaseItemDto>
+            {
+                Items = dtos.ToArray(),
+                TotalRecordCount = result.TotalRecordCount,
+                StartIndex = startIndex
+            };
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting MyList items");
+            return new QueryResult<BaseItemDto>();
+        }
+    }
 
-        return dtos;
+    private QueryResult<BaseItemDto> GetRecentlyAddedItems(User user, int startIndex, int limit)
+    {
+        try
+        {
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            var cutoffDate = DateTime.UtcNow.AddDays(-config.RecentlyAddedDays);
+
+            var query = new InternalItemsQuery(user)
+            {
+                MinDateCreated = cutoffDate,
+                Recursive = true,
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+                StartIndex = startIndex,
+                Limit = Math.Min(limit, config.MaxItemsPerRow)
+            };
+
+            var result = _libraryManager.GetItemsResult(query);
+            var dtos = ConvertToBaseItemDtos(result.Items, user);
+
+            return new QueryResult<BaseItemDto>
+            {
+                Items = dtos.ToArray(),
+                TotalRecordCount = result.TotalRecordCount,
+                StartIndex = startIndex
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting recently added items");
+            return new QueryResult<BaseItemDto>();
+        }
+    }
+
+    private QueryResult<BaseItemDto> GetRandomPicksItems(User user, int startIndex, int limit)
+    {
+        try
+        {
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+
+            var query = new InternalItemsQuery(user)
+            {
+                Recursive = true,
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series }
+            };
+
+            var result = _libraryManager.GetItemsResult(query);
+            
+            // Manual random selection and pagination
+            var random = new Random();
+            var randomItems = result.Items
+                .OrderBy(x => random.Next())
+                .Skip(startIndex)
+                .Take(Math.Min(limit, config.MaxItemsPerRow))
+                .ToList();
+
+            var dtos = ConvertToBaseItemDtos(randomItems, user);
+
+            return new QueryResult<BaseItemDto>
+            {
+                Items = dtos.ToArray(),
+                TotalRecordCount = result.TotalRecordCount,
+                StartIndex = startIndex
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting random picks items");
+            return new QueryResult<BaseItemDto>();
+        }
+    }
+
+    private QueryResult<BaseItemDto> GetGenreItems(User user, string genre, int startIndex, int limit)
+    {
+        try
+        {
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+
+            var query = new InternalItemsQuery(user)
+            {
+                Genres = new[] { genre },
+                Recursive = true,
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series }
+            };
+
+            var result = _libraryManager.GetItemsResult(query);
+            
+            // Manual random selection and pagination
+            var random = new Random();
+            var randomItems = result.Items
+                .OrderBy(x => random.Next())
+                .Skip(startIndex)
+                .Take(Math.Min(limit, config.MaxItemsPerRow))
+                .ToList();
+
+            var dtos = ConvertToBaseItemDtos(randomItems, user);
+
+            return new QueryResult<BaseItemDto>
+            {
+                Items = dtos.ToArray(),
+                TotalRecordCount = result.TotalRecordCount,
+                StartIndex = startIndex
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting genre items for {Genre}", genre);
+            return new QueryResult<BaseItemDto>();
+        }
+    }
+
+    private List<BaseItemDto> ConvertToBaseItemDtos(IEnumerable<BaseItem> items, User user)
+    {
+        try
+        {
+            var dtoOptions = new DtoOptions()
+            {
+                EnableImages = true,
+                Fields = new[]
+                {
+                    ItemFields.PrimaryImageAspectRatio,
+                    ItemFields.MediaSourceCount
+                }
+            };
+
+            var dtos = new List<BaseItemDto>();
+            foreach (var item in items)
+            {
+                try
+                {
+                    var dto = _dtoService.GetBaseItemDto(item, dtoOptions, user);
+                    dtos.Add(dto);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Error converting item {ItemId} to DTO", item.Id);
+                }
+            }
+
+            return dtos;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error converting items to DTOs");
+            return new List<BaseItemDto>();
+        }
     }
 }
