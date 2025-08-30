@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using System.Text.Json;
 using Jellyfin.Plugin.NetflixRows.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
@@ -33,8 +31,12 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         Instance = this;
         _logger = logger;
 
-        // Initialize frontend transformation
-        InitializeFrontendTransformation();
+        // Initialize frontend transformation AFTER plugin is fully loaded
+        Task.Run(async () =>
+        {
+            await Task.Delay(2000); // Wait for all plugins to load
+            InitializeFrontendTransformation();
+        });
     }
 
     /// <inheritdoc />
@@ -67,34 +69,14 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         {
             _logger.LogInformation("Initializing Netflix Rows frontend transformation");
 
-            // Register main home screen transformation
+            // Register main index.html transformation for home page injection
             RegisterTransformation(new
             {
-                id = Guid.NewGuid(),
-                fileNamePattern = @"home\.html$",
+                id = Guid.NewGuid().ToString(),
+                fileNamePattern = @"index\.html$",
                 callbackAssembly = GetType().Assembly.FullName,
                 callbackClass = "Jellyfin.Plugin.NetflixRows.Frontend.HomeTransformation",
-                callbackMethod = "TransformHome"
-            });
-
-            // Register CSS injection
-            RegisterTransformation(new
-            {
-                id = Guid.NewGuid(),
-                fileNamePattern = @"bundle\.css$",
-                callbackAssembly = GetType().Assembly.FullName,
-                callbackClass = "Jellyfin.Plugin.NetflixRows.Frontend.CSSTransformation",
-                callbackMethod = "InjectNetflixCSS"
-            });
-
-            // Register JavaScript injection
-            RegisterTransformation(new
-            {
-                id = Guid.NewGuid(),
-                fileNamePattern = @"bundle\.js$",
-                callbackAssembly = GetType().Assembly.FullName,
-                callbackClass = "Jellyfin.Plugin.NetflixRows.Frontend.JSTransformation",
-                callbackMethod = "InjectNetflixJS"
+                callbackMethod = "TransformIndex"
             });
 
             _logger.LogInformation("Netflix Rows frontend transformations registered successfully");
@@ -109,8 +91,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         try
         {
-            var payloadJson = JsonSerializer.Serialize(payload);
-
             Assembly? fileTransformationAssembly = AssemblyLoadContext.All
                 .SelectMany(x => x.Assemblies)
                 .FirstOrDefault(x => x.FullName?.Contains(".FileTransformation") ?? false);
@@ -120,8 +100,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 Type? pluginInterfaceType = fileTransformationAssembly.GetType("Jellyfin.Plugin.FileTransformation.PluginInterface");
                 if (pluginInterfaceType != null)
                 {
-                    pluginInterfaceType.GetMethod("RegisterTransformation")?.Invoke(null, new object?[] { payloadJson });
-                    _logger.LogDebug("Registered transformation: {Pattern}", payload.GetType().GetProperty("fileNamePattern")?.GetValue(payload));
+                    // Pass object directly, not JSON string
+                    pluginInterfaceType.GetMethod("RegisterTransformation")?.Invoke(null, new object?[] { payload });
+                    _logger.LogDebug("Registered transformation for pattern: {Pattern}", 
+                        payload.GetType().GetProperty("fileNamePattern")?.GetValue(payload));
                 }
                 else
                 {
@@ -135,7 +117,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error registering transformation");
+            _logger.LogError(ex, "Error registering transformation: {Error}", ex.Message);
         }
     }
 }
