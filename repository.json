@@ -11,7 +11,7 @@
         "version": "1.0.6.0",
         "changelog": "Fixed Jellyfin 10.10.7 compatibility with simplified API calls",
         "targetAbi": "10.10.0.0",
-        "sourceUrl": "https://github.com/FigmaCode/jellyfin-plugin-netflix-rows/releases/download/v1.0.6/jellyfin-plugin-netflix-rows-1.0.6.zip",
+        "sourceUrl": "https://github.com/FigmaCode/jellyfin-plugin-netflix-rows/releases/download/v1.0.6/jellyfin-plugin-netflix-rows-v1.0.6.zip",
         "checksum": "c7ed9ffa0f569b7fa7ccb5ec9f88b5d9",
         "timestamp": "2024-08-29T00:00:00.0000000Z"
       }
