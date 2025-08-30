@@ -6,12 +6,13 @@
         .configSection {
             margin: 20px 0;
             padding: 15px;
-            border: 1px solid #ddd;
+            border: 1px solid #333;
             border-radius: 5px;
+            background: rgba(0,0,0,0.3);
         }
         .configSection h3 {
             margin-top: 0;
-            color: #333;
+            color: #00a4dc;
         }
         .inputContainer {
             margin: 10px 0;
@@ -20,6 +21,7 @@
             display: inline-block;
             width: 200px;
             font-weight: bold;
+            color: #fff;
         }
         .genreList {
             display: grid;
@@ -34,6 +36,10 @@
         .genreItem input {
             margin-right: 8px;
         }
+        .genreItem label {
+            color: #fff;
+            width: auto;
+        }
         .rowTypeList {
             margin: 10px 0;
         }
@@ -45,8 +51,12 @@
         .rowTypeItem input {
             margin-right: 8px;
         }
+        .rowTypeItem label {
+            color: #fff;
+            width: auto;
+        }
         .saveButton {
-            background-color: #0078d4;
+            background-color: #00a4dc;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -55,21 +65,39 @@
             font-size: 14px;
         }
         .saveButton:hover {
-            background-color: #106ebe;
+            background-color: #0f7b96;
         }
         .description {
-            color: #666;
+            color: #aaa;
             font-size: 12px;
             margin-top: 5px;
+        }
+        .statusMessage {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        .statusMessage.success {
+            background-color: rgba(70, 211, 105, 0.2);
+            border: 1px solid #46d369;
+            color: #46d369;
+        }
+        .statusMessage.error {
+            background-color: rgba(255, 107, 107, 0.2);
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
         }
     </style>
 </head>
 <body>
-    <div id="NetflixRowsConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
+    <div id="NetflixRowsConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
         <div data-role="content">
             <div class="content-primary">
                 <form id="NetflixRowsConfigForm">
                     <h2>Netflix Rows Plugin Einstellungen</h2>
+                    
+                    <div id="statusMessage" class="statusMessage"></div>
 
                     <!-- Allgemeine Einstellungen -->
                     <div class="configSection">
@@ -77,26 +105,20 @@
                         
                         <div class="inputContainer">
                             <label for="maxRows">Maximale Anzahl Rows:</label>
-                            <input is="emby-input" type="number" id="maxRows" name="maxRows" min="1" max="20" value="8" />
+                            <input type="number" id="maxRows" name="maxRows" min="1" max="20" value="8" />
                             <div class="description">Maximale Anzahl der Rows auf der Startseite (1-20)</div>
                         </div>
 
                         <div class="inputContainer">
                             <label for="minItemsPerRow">Min. Items pro Row:</label>
-                            <input is="emby-input" type="number" id="minItemsPerRow" name="minItemsPerRow" min="1" max="50" value="10" />
+                            <input type="number" id="minItemsPerRow" name="minItemsPerRow" min="1" max="50" value="10" />
                             <div class="description">Minimale Anzahl Items pro Row</div>
                         </div>
 
                         <div class="inputContainer">
                             <label for="maxItemsPerRow">Max. Items pro Row:</label>
-                            <input is="emby-input" type="number" id="maxItemsPerRow" name="maxItemsPerRow" min="1" max="100" value="25" />
+                            <input type="number" id="maxItemsPerRow" name="maxItemsPerRow" min="1" max="100" value="25" />
                             <div class="description">Maximale Anzahl Items pro Row</div>
-                        </div>
-
-                        <div class="inputContainer">
-                            <label for="replaceHeartWithPlus">Herz-Icon durch Plus ersetzen:</label>
-                            <input is="emby-checkbox" type="checkbox" id="replaceHeartWithPlus" name="replaceHeartWithPlus" checked />
-                            <div class="description">Ersetzt das Herz-Symbol durch ein Plus-Symbol für die Watchlist</div>
                         </div>
                     </div>
 
@@ -106,25 +128,19 @@
                         
                         <div class="inputContainer">
                             <label for="recentlyAddedDays">Kürzlich hinzugefügt (Tage):</label>
-                            <input is="emby-input" type="number" id="recentlyAddedDays" name="recentlyAddedDays" min="1" max="365" value="30" />
+                            <input type="number" id="recentlyAddedDays" name="recentlyAddedDays" min="1" max="365" value="30" />
                             <div class="description">Inhalte der letzten X Tage als "kürzlich hinzugefügt" anzeigen</div>
                         </div>
 
                         <div class="inputContainer">
-                            <label for="longNotWatchedMonths">Lange nicht gesehen (Monate):</label>
-                            <input is="emby-input" type="number" id="longNotWatchedMonths" name="longNotWatchedMonths" min="1" max="120" value="6" />
-                            <div class="description">Inhalte älter als X Monate, die nie abgespielt wurden</div>
-                        </div>
-
-                        <div class="inputContainer">
                             <label for="myListLimit">Meine Liste Limit:</label>
-                            <input is="emby-input" type="number" id="myListLimit" name="myListLimit" min="1" max="500" value="50" />
+                            <input type="number" id="myListLimit" name="myListLimit" min="1" max="500" value="50" />
                             <div class="description">Maximale Anzahl Items in "Meine Liste"</div>
                         </div>
 
                         <div class="inputContainer">
                             <label for="minGenreItems">Min. Items für Genre-Row:</label>
-                            <input is="emby-input" type="number" id="minGenreItems" name="minGenreItems" min="1" max="50" value="5" />
+                            <input type="number" id="minGenreItems" name="minGenreItems" min="1" max="50" value="5" />
                             <div class="description">Mindestanzahl Items erforderlich, um eine Genre-Row anzuzeigen</div>
                         </div>
                     </div>
@@ -134,24 +150,20 @@
                         <h3>Aktive Row-Typen</h3>
                         <div class="rowTypeList">
                             <div class="rowTypeItem">
-                                <input is="emby-checkbox" type="checkbox" id="enableMyList" name="enableMyList" checked />
+                                <input type="checkbox" id="enableMyList" name="enableMyList" checked />
                                 <label for="enableMyList">Meine Liste</label>
                             </div>
                             <div class="rowTypeItem">
-                                <input is="emby-checkbox" type="checkbox" id="enableRecentlyAdded" name="enableRecentlyAdded" checked />
+                                <input type="checkbox" id="enableRecentlyAdded" name="enableRecentlyAdded" checked />
                                 <label for="enableRecentlyAdded">Kürzlich hinzugefügt</label>
                             </div>
                             <div class="rowTypeItem">
-                                <input is="emby-checkbox" type="checkbox" id="enableRandomPicks" name="enableRandomPicks" checked />
+                                <input type="checkbox" id="enableRandomPicks" name="enableRandomPicks" checked />
                                 <label for="enableRandomPicks">Zufällige Auswahl</label>
                             </div>
                             <div class="rowTypeItem">
-                                <input is="emby-checkbox" type="checkbox" id="enableGenres" name="enableGenres" checked />
+                                <input type="checkbox" id="enableGenres" name="enableGenres" checked />
                                 <label for="enableGenres">Genre-Rows</label>
-                            </div>
-                            <div class="rowTypeItem">
-                                <input is="emby-checkbox" type="checkbox" id="enableLongNotWatched" name="enableLongNotWatched" />
-                                <label for="enableLongNotWatched">Lange nicht gesehen</label>
                             </div>
                         </div>
                     </div>
@@ -168,13 +180,13 @@
                         <h4>Blacklist Genres</h4>
                         <div class="inputContainer">
                             <label for="blacklistedGenres">Ausgeschlossene Genres (kommagetrennt):</label>
-                            <input is="emby-input" type="text" id="blacklistedGenres" name="blacklistedGenres" placeholder="z.B. Horror, Documentary" />
+                            <input type="text" id="blacklistedGenres" name="blacklistedGenres" placeholder="z.B. Horror, Documentary" />
                             <div class="description">Diese Genres werden niemals als Rows angezeigt</div>
                         </div>
                     </div>
 
-                    <button is="emby-button" type="submit" class="saveButton">
-                        <span>Einstellungen speichern</span>
+                    <button type="submit" class="saveButton">
+                        Einstellungen speichern
                     </button>
                 </form>
             </div>
@@ -193,8 +205,21 @@
                 'War', 'Western', 'Biography', 'Musical', 'Sport'
             ];
 
+            function showStatus(message, isError = false) {
+                const statusDiv = document.getElementById('statusMessage');
+                statusDiv.textContent = message;
+                statusDiv.className = `statusMessage ${isError ? 'error' : 'success'}`;
+                statusDiv.style.display = 'block';
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+            }
+
             function loadPage() {
-                Dashboard.showLoadingMsg();
+                if (typeof ApiClient === 'undefined') {
+                    showStatus('Jellyfin API nicht verfügbar. Bitte Seite neu laden.', true);
+                    return;
+                }
 
                 ApiClient.getPluginConfiguration(pluginId).then(function (config) {
                     // Allgemeine Einstellungen laden
@@ -202,10 +227,8 @@
                     document.getElementById('minItemsPerRow').value = config.MinItemsPerRow || 10;
                     document.getElementById('maxItemsPerRow').value = config.MaxItemsPerRow || 25;
                     document.getElementById('recentlyAddedDays').value = config.RecentlyAddedDays || 30;
-                    document.getElementById('longNotWatchedMonths').value = config.LongNotWatchedMonths || 6;
                     document.getElementById('myListLimit').value = config.MyListLimit || 50;
                     document.getElementById('minGenreItems').value = config.MinGenreItems || 5;
-                    document.getElementById('replaceHeartWithPlus').checked = config.ReplaceHeartWithPlus !== false;
 
                     // Row-Typen laden
                     const enabledRowTypes = config.EnabledRowTypes || {};
@@ -213,16 +236,17 @@
                     document.getElementById('enableRecentlyAdded').checked = enabledRowTypes.RecentlyAdded !== false;
                     document.getElementById('enableRandomPicks').checked = enabledRowTypes.RandomPicks !== false;
                     document.getElementById('enableGenres').checked = enabledRowTypes.Genres !== false;
-                    document.getElementById('enableLongNotWatched').checked = enabledRowTypes.LongNotWatched === true;
 
                     // Blacklisted Genres laden
                     const blacklistedGenres = config.BlacklistedGenres || [];
                     document.getElementById('blacklistedGenres').value = blacklistedGenres.join(', ');
 
                     // Genre-Checkboxen erstellen
-                    createGenreCheckboxes(config.EnabledGenres || []);
+                    createGenreCheckboxes(config.EnabledGenres || ['Action', 'Comedy', 'Drama', 'Animation', 'Anime']);
 
-                    Dashboard.hideLoadingMsg();
+                    showStatus('Einstellungen erfolgreich geladen');
+                }).catch(function(error) {
+                    showStatus('Fehler beim Laden der Einstellungen: ' + error.message, true);
                 });
             }
 
@@ -252,9 +276,11 @@
 
             function onSubmit(e) {
                 e.preventDefault();
-                Dashboard.showLoadingMsg();
 
-                const form = this;
+                if (typeof ApiClient === 'undefined') {
+                    showStatus('Jellyfin API nicht verfügbar', true);
+                    return;
+                }
 
                 // Aktivierte Genres sammeln
                 const enabledGenres = [];
@@ -274,31 +300,51 @@
                     MinItemsPerRow: parseInt(document.getElementById('minItemsPerRow').value),
                     MaxItemsPerRow: parseInt(document.getElementById('maxItemsPerRow').value),
                     RecentlyAddedDays: parseInt(document.getElementById('recentlyAddedDays').value),
-                    LongNotWatchedMonths: parseInt(document.getElementById('longNotWatchedMonths').value),
                     MyListLimit: parseInt(document.getElementById('myListLimit').value),
                     MinGenreItems: parseInt(document.getElementById('minGenreItems').value),
-                    ReplaceHeartWithPlus: document.getElementById('replaceHeartWithPlus').checked,
                     EnabledGenres: enabledGenres,
                     BlacklistedGenres: blacklistedGenres,
                     EnabledRowTypes: {
                         MyList: document.getElementById('enableMyList').checked,
                         RecentlyAdded: document.getElementById('enableRecentlyAdded').checked,
                         RandomPicks: document.getElementById('enableRandomPicks').checked,
-                        Genres: document.getElementById('enableGenres').checked,
-                        LongNotWatched: document.getElementById('enableLongNotWatched').checked
+                        Genres: document.getElementById('enableGenres').checked
                     }
                 };
 
                 ApiClient.updatePluginConfiguration(pluginId, config).then(function (result) {
-                    Dashboard.processPluginConfigurationUpdateResult(result);
+                    showStatus('Einstellungen erfolgreich gespeichert!');
+                    
+                    // Optional: Seite nach kurzer Zeit neu laden um Änderungen zu reflektieren
+                    setTimeout(() => {
+                        if (confirm('Möchten Sie die Seite neu laden, um die Änderungen zu übernehmen?')) {
+                            window.location.reload();
+                        }
+                    }, 2000);
+                }).catch(function(error) {
+                    showStatus('Fehler beim Speichern: ' + error.message, true);
                 });
 
                 return false;
             }
 
-            document.getElementById('NetflixRowsConfigForm').addEventListener('submit', onSubmit);
+            // Event Listeners hinzufügen
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.getElementById('NetflixRowsConfigForm');
+                if (form) {
+                    form.addEventListener('submit', onSubmit);
+                }
+                loadPage();
+            });
 
-            loadPage();
+            // Falls DOM bereits geladen ist
+            if (document.readyState !== 'loading') {
+                const form = document.getElementById('NetflixRowsConfigForm');
+                if (form) {
+                    form.addEventListener('submit', onSubmit);
+                }
+                loadPage();
+            }
         })();
     </script>
 </body>

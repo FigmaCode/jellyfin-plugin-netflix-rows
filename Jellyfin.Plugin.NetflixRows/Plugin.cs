@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
+using System.Text.Json;
 using Jellyfin.Plugin.NetflixRows.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.NetflixRows;
 
@@ -15,15 +19,22 @@ namespace Jellyfin.Plugin.NetflixRows;
 /// </summary>
 public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
+    private readonly ILogger<Plugin> _logger;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
     /// </summary>
     /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
     /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
-    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer)
+    /// <param name="logger">Instance of the <see cref="ILogger{Plugin}"/> interface.</param>
+    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ILogger<Plugin> logger)
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
+        _logger = logger;
+
+        // Initialize frontend transformation
+        InitializeFrontendTransformation();
     }
 
     /// <inheritdoc />
@@ -45,8 +56,86 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             new PluginPageInfo
             {
                 Name = this.Name,
-                EmbeddedResourcePath = GetType().Namespace + ".Configuration.configPage.html"
+                EmbeddedResourcePath = "Jellyfin.Plugin.NetflixRows.Configuration.configPage.html"
             }
         };
+    }
+
+    private void InitializeFrontendTransformation()
+    {
+        try
+        {
+            _logger.LogInformation("Initializing Netflix Rows frontend transformation");
+
+            // Register main home screen transformation
+            RegisterTransformation(new
+            {
+                id = Guid.NewGuid(),
+                fileNamePattern = @"home\.html$",
+                callbackAssembly = GetType().Assembly.FullName,
+                callbackClass = "Jellyfin.Plugin.NetflixRows.Frontend.HomeTransformation",
+                callbackMethod = "TransformHome"
+            });
+
+            // Register CSS injection
+            RegisterTransformation(new
+            {
+                id = Guid.NewGuid(),
+                fileNamePattern = @"bundle\.css$",
+                callbackAssembly = GetType().Assembly.FullName,
+                callbackClass = "Jellyfin.Plugin.NetflixRows.Frontend.CSSTransformation",
+                callbackMethod = "InjectNetflixCSS"
+            });
+
+            // Register JavaScript injection
+            RegisterTransformation(new
+            {
+                id = Guid.NewGuid(),
+                fileNamePattern = @"bundle\.js$",
+                callbackAssembly = GetType().Assembly.FullName,
+                callbackClass = "Jellyfin.Plugin.NetflixRows.Frontend.JSTransformation",
+                callbackMethod = "InjectNetflixJS"
+            });
+
+            _logger.LogInformation("Netflix Rows frontend transformations registered successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to initialize frontend transformations");
+        }
+    }
+
+    private void RegisterTransformation(object payload)
+    {
+        try
+        {
+            var payloadJson = JsonSerializer.Serialize(payload);
+
+            Assembly? fileTransformationAssembly = AssemblyLoadContext.All
+                .SelectMany(x => x.Assemblies)
+                .FirstOrDefault(x => x.FullName?.Contains(".FileTransformation") ?? false);
+
+            if (fileTransformationAssembly != null)
+            {
+                Type? pluginInterfaceType = fileTransformationAssembly.GetType("Jellyfin.Plugin.FileTransformation.PluginInterface");
+                if (pluginInterfaceType != null)
+                {
+                    pluginInterfaceType.GetMethod("RegisterTransformation")?.Invoke(null, new object?[] { payloadJson });
+                    _logger.LogDebug("Registered transformation: {Pattern}", payload.GetType().GetProperty("fileNamePattern")?.GetValue(payload));
+                }
+                else
+                {
+                    _logger.LogWarning("FileTransformation PluginInterface not found");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("FileTransformation plugin not found. Please install File Transformation plugin first.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error registering transformation");
+        }
     }
 }

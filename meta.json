@@ -1,12 +1,12 @@
 {
     "category": "General",
-    "changelog": "Fixed Jellyfin 10.10.7 compatibility with simplified API calls",
-    "description": "Transforms your Jellyfin home screen into Netflix-style horizontal rows with configurable content sections including My List, Recently Added, Random Picks, Genre rows, and more.",
+    "changelog": "Complete Netflix-style frontend integration with File Transformation support",
+    "description": "Transforms your Jellyfin home screen into Netflix-style horizontal rows with configurable content sections. Features include My List, Recently Added, Random Picks, Genre rows, and complete frontend integration.",
     "guid": "6c0b8d8a-6b1c-4c5a-9b0a-1b2c3d4e5f6a",
     "name": "Netflix Rows",
-    "overview": "Netflix-style home screen rows for Jellyfin",
+    "overview": "Complete Netflix-style home screen transformation for Jellyfin",
     "owner": "FigmaCode",
     "targetAbi": "10.10.0.0",
     "timestamp": "2024-08-30T12:00:00.0000000Z",
-    "version": "1.0.6.0"
+    "version": "2.0.0.0"
 }
