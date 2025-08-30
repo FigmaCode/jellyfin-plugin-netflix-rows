@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Threading.Tasks;
 using Jellyfin.Plugin.NetflixRows.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
@@ -34,7 +35,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         // Initialize frontend transformation AFTER plugin is fully loaded
         Task.Run(async () =>
         {
-            await Task.Delay(2000); // Wait for all plugins to load
+            await Task.Delay(3000); // Wait for all plugins to load
             InitializeFrontendTransformation();
         });
     }
