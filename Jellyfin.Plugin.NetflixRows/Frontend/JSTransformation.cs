@@ -20,6 +20,7 @@ public class JSTransformation
             var data = JsonSerializer.Deserialize<TransformationData>(input);
             if (data?.Contents == null) return input;
 
+            // Use @ literal string und escape $ mit $$
             var netflixJS = @"
 // Netflix Rows JavaScript
 (function() {
@@ -71,10 +72,10 @@ public class JSTransformation
             if (!container || !this.userId) return;
             
             try {
-                const response = await fetch(`${this.apiBase}/Rows?userId=${this.userId}`);
+                const response = await fetch(this.apiBase + '/Rows?userId=' + this.userId);
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    throw new Error('HTTP ' + response.status);
                 }
                 
                 const rows = await response.json();
@@ -85,7 +86,7 @@ public class JSTransformation
                 this.renderRows(rows, container);
             } catch (error) {
                 console.error('Netflix Rows: Failed to load rows', error);
-                loading.innerHTML = `<div style='color: #ff6b6b; text-align: center;'>Failed to load Netflix Rows</div>`;
+                loading.innerHTML = '<div style=""color: #ff6b6b; text-align: center;"">Failed to load Netflix Rows</div>';
             }
         }
         
@@ -101,18 +102,20 @@ public class JSTransformation
         createRowElement(row) {
             const rowDiv = document.createElement('div');
             rowDiv.className = 'netflix-row';
-            rowDiv.innerHTML = `
-                <div class='netflix-row-header'>
-                    <h2 class='netflix-row-title'>${this.escapeHtml(row.title)}</h2>
-                </div>
-                <div class='netflix-row-container'>
-                    <button class='netflix-scroll-button netflix-scroll-left' data-row='${row.id}'>‹</button>
-                    <div class='netflix-row-scroller' data-row='${row.id}'>
-                        ${row.previewItems.map(item => this.createCardHTML(item, row.type)).join('')}
-                    </div>
-                    <button class='netflix-scroll-button netflix-scroll-right' data-row='${row.id}'>›</button>
-                </div>
-            `;
+            
+            const headerHTML = '<div class=""netflix-row-header"">' +
+                '<h2 class=""netflix-row-title"">' + this.escapeHtml(row.title) + '</h2>' +
+                '</div>';
+            
+            const scrollerHTML = '<div class=""netflix-row-container"">' +
+                '<button class=""netflix-scroll-button netflix-scroll-left"" data-row=""' + row.id + '"">‹</button>' +
+                '<div class=""netflix-row-scroller"" data-row=""' + row.id + '"">' +
+                row.previewItems.map(item => this.createCardHTML(item, row.type)).join('') +
+                '</div>' +
+                '<button class=""netflix-scroll-button netflix-scroll-right"" data-row=""' + row.id + '"">›</button>' +
+                '</div>';
+            
+            rowDiv.innerHTML = headerHTML + scrollerHTML;
             
             // Add scroll functionality
             this.addScrollListeners(rowDiv, row.id);
@@ -124,28 +127,26 @@ public class JSTransformation
             const imageUrl = this.getImageUrl(item);
             const isInMyList = this.isItemInMyList(item);
             const myListButton = rowType !== 'MyList' ? 
-                `<button class='netflix-my-list-button ${isInMyList ? 'added' : ''}' 
-                         data-item-id='${item.Id}' 
-                         onclick='netflixRows.toggleMyList(this, \"${item.Id}\")'>
-                    ${isInMyList ? '✓' : '+'}
-                 </button>` : '';
+                '<button class=""netflix-my-list-button ' + (isInMyList ? 'added' : '') + '"" ' +
+                'data-item-id=""' + item.Id + '"" ' + 
+                'onclick=""netflixRows.toggleMyList(this, \'' + item.Id + '\')"">' +
+                (isInMyList ? '✓' : '+') +
+                '</button>' : '';
             
-            return `
-                <div class='netflix-card' data-item-id='${item.Id}' onclick='netflixRows.playItem(\"${item.Id}\")'>
-                    <img class='netflix-card-image' 
-                         src='${imageUrl}' 
-                         alt='${this.escapeHtml(item.Name)}'
-                         loading='lazy' />
-                    <div class='netflix-card-title'>${this.escapeHtml(item.Name)}</div>
-                    ${myListButton}
-                </div>
-            `;
+            return '<div class=""netflix-card"" data-item-id=""' + item.Id + '"" onclick=""netflixRows.playItem(\'' + item.Id + '\')"">' +
+                '<img class=""netflix-card-image"" ' +
+                'src=""' + imageUrl + '"" ' +
+                'alt=""' + this.escapeHtml(item.Name) + '"" ' +
+                'loading=""lazy"" />' +
+                '<div class=""netflix-card-title"">' + this.escapeHtml(item.Name) + '</div>' +
+                myListButton +
+                '</div>';
         }
         
         addScrollListeners(rowElement, rowId) {
-            const scroller = rowElement.querySelector(`[data-row='${rowId}'].netflix-row-scroller`);
-            const leftBtn = rowElement.querySelector(`[data-row='${rowId}'].netflix-scroll-left`);
-            const rightBtn = rowElement.querySelector(`[data-row='${rowId}'].netflix-scroll-right`);
+            const scroller = rowElement.querySelector('[data-row=""' + rowId + '""].netflix-row-scroller');
+            const leftBtn = rowElement.querySelector('[data-row=""' + rowId + '""].netflix-scroll-left');
+            const rightBtn = rowElement.querySelector('[data-row=""' + rowId + '""].netflix-scroll-right');
             
             if (scroller && leftBtn && rightBtn) {
                 leftBtn.addEventListener('click', () => {
@@ -163,7 +164,7 @@ public class JSTransformation
                 // Toggle favorite status
                 const isFavorite = button.classList.contains('added');
                 
-                await fetch(`/Users/${this.userId}/FavoriteItems/${itemId}`, {
+                await fetch('/Users/' + this.userId + '/FavoriteItems/' + itemId, {
                     method: isFavorite ? 'DELETE' : 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -181,13 +182,13 @@ public class JSTransformation
         
         playItem(itemId) {
             if (typeof ApiClient !== 'undefined' && ApiClient.getCurrentUserId) {
-                window.location.href = `#!/details?id=${itemId}`;
+                window.location.href = '#!/details?id=' + itemId;
             }
         }
         
         getImageUrl(item) {
             if (item.ImageTags && item.ImageTags.Primary) {
-                return `/Items/${item.Id}/Images/Primary?maxWidth=400&tag=${item.ImageTags.Primary}`;
+                return '/Items/' + item.Id + '/Images/Primary?maxWidth=400&tag=' + item.ImageTags.Primary;
             }
             return '/web/assets/img/icon-transparent.png';
         }
