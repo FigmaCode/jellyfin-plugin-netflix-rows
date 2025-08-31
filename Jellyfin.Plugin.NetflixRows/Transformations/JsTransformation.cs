@@ -38,15 +38,13 @@ public static class JsTransformation
 
     private static string GetNetflixRowsJs()
     {
-        return """
+        return @"
 // Netflix Rows Plugin - Injected JavaScript
 (function() {
     'use strict';
 
-    // Configuration
     let netflixConfig = null;
     
-    // Load configuration
     async function loadConfig() {
         try {
             const response = await fetch('/NetflixRows/Config');
@@ -58,7 +56,6 @@ public static class JsTransformation
         }
     }
 
-    // Replace heart icons with plus icons
     function replaceHeartWithPlus() {
         if (!netflixConfig?.replaceHeartWithPlus) return;
         
@@ -66,7 +63,6 @@ public static class JsTransformation
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
                     if (node.nodeType === Node.ELEMENT_NODE) {
-                        // Find heart icons and replace with plus
                         const heartIcons = node.querySelectorAll?.('.material-icons') || [];
                         heartIcons.forEach((icon) => {
                             if (icon.textContent === 'favorite') {
@@ -88,23 +84,14 @@ public static class JsTransformation
         });
     }
 
-    // Create Netflix-style rows
     function createNetflixRows() {
-        const homeView = document.querySelector('.homeView, .view[data-type="home"]');
+        const homeView = document.querySelector('.homeView, .view[data-type=\""home\""]');
         if (!homeView) return;
 
         const rowsContainer = document.createElement('div');
         rowsContainer.className = 'netflix-rows-container';
-        rowsContainer.innerHTML = `
-            <div class='netflix-rows' id='netflix-rows'>
-                <div class='loading-indicator'>
-                    <div class='loading-spinner'></div>
-                    <p>Lädt Netflix Rows...</p>
-                </div>
-            </div>
-        `;
+        rowsContainer.innerHTML = '<div class=\""netflix-rows\"" id=\""netflix-rows\""><div class=\""loading-indicator\""><div class=\""loading-spinner\""></div><p>Lädt Netflix Rows...</p></div></div>';
         
-        // Replace or insert rows
         const existingContent = homeView.querySelector('.sections, .homePageContent');
         if (existingContent) {
             existingContent.parentNode.replaceChild(rowsContainer, existingContent);
@@ -115,7 +102,6 @@ public static class JsTransformation
         loadNetflixRows();
     }
 
-    // Load and display Netflix rows
     async function loadNetflixRows() {
         if (!netflixConfig) {
             await loadConfig();
@@ -130,14 +116,13 @@ public static class JsTransformation
 
             rowsContainer.innerHTML = '';
             
-            // Load enabled rows
             const rows = [];
             
             if (netflixConfig.enableMyList) {
                 rows.push({
                     id: 'my-list',
                     title: 'Meine Liste',
-                    endpoint: `/NetflixRows/MyList?userId=${userId}&limit=${netflixConfig.maxItemsPerRow}`,
+                    endpoint: '/NetflixRows/MyList?userId=' + userId + '&limit=' + netflixConfig.maxItemsPerRow,
                     priority: 0
                 });
             }
@@ -146,7 +131,7 @@ public static class JsTransformation
                 rows.push({
                     id: 'recently-added',
                     title: 'Kürzlich hinzugefügt',
-                    endpoint: `/NetflixRows/RecentlyAdded?userId=${userId}&limit=${netflixConfig.maxItemsPerRow}`,
+                    endpoint: '/NetflixRows/RecentlyAdded?userId=' + userId + '&limit=' + netflixConfig.maxItemsPerRow,
                     priority: 1
                 });
             }
@@ -155,7 +140,7 @@ public static class JsTransformation
                 rows.push({
                     id: 'random-picks',
                     title: 'Zufallsauswahl',
-                    endpoint: `/NetflixRows/RandomPicks?userId=${userId}&limit=${netflixConfig.maxItemsPerRow}`,
+                    endpoint: '/NetflixRows/RandomPicks?userId=' + userId + '&limit=' + netflixConfig.maxItemsPerRow,
                     priority: 2
                 });
             }
@@ -164,36 +149,33 @@ public static class JsTransformation
                 rows.push({
                     id: 'long-not-watched',
                     title: 'Lange nicht gesehen',
-                    endpoint: `/NetflixRows/LongNotWatched?userId=${userId}&limit=${netflixConfig.maxItemsPerRow}`,
+                    endpoint: '/NetflixRows/LongNotWatched?userId=' + userId + '&limit=' + netflixConfig.maxItemsPerRow,
                     priority: 3
                 });
             }
             
-            // Add genre rows
             if (netflixConfig.enabledGenres) {
-                netflixConfig.enabledGenres.forEach((genre, index) => {
+                netflixConfig.enabledGenres.forEach(function(genre, index) {
                     const displayName = netflixConfig.genreDisplayNames[genre] || genre;
                     rows.push({
-                        id: `genre-${genre.toLowerCase()}`,
+                        id: 'genre-' + genre.toLowerCase(),
                         title: displayName,
-                        endpoint: `/NetflixRows/Genre/${genre}?userId=${userId}&limit=${netflixConfig.maxItemsPerRow}`,
+                        endpoint: '/NetflixRows/Genre/' + genre + '?userId=' + userId + '&limit=' + netflixConfig.maxItemsPerRow,
                         priority: 4 + index
                     });
                 });
             }
             
-            // Sort rows by priority (unless random order is enabled)
             if (!netflixConfig.randomRowOrder) {
-                rows.sort((a, b) => a.priority - b.priority);
+                rows.sort(function(a, b) { return a.priority - b.priority; });
             } else {
-                rows.sort(() => Math.random() - 0.5);
+                rows.sort(function() { return Math.random() - 0.5; });
             }
             
-            // Limit number of rows
             const limitedRows = rows.slice(0, netflixConfig.maxRows || 8);
             
-            // Create row elements
-            for (const row of limitedRows) {
+            for (let i = 0; i < limitedRows.length; i++) {
+                const row = limitedRows[i];
                 const rowElement = createRowElement(row);
                 rowsContainer.appendChild(rowElement);
                 
@@ -206,32 +188,21 @@ public static class JsTransformation
             
         } catch (error) {
             console.error('Netflix Rows: Error loading rows:', error);
-            rowsContainer.innerHTML = '<p class="error">Fehler beim Laden der Netflix Rows</p>';
+            rowsContainer.innerHTML = '<p class=\""error\"">Fehler beim Laden der Netflix Rows</p>';
         }
     }
     
-    // Create row element
     function createRowElement(row) {
         const rowDiv = document.createElement('div');
         rowDiv.className = 'netflix-row';
         rowDiv.setAttribute('data-row-id', row.id);
-        rowDiv.innerHTML = `
-            <div class='netflix-row-header'>
-                <h2 class='netflix-row-title'>${row.title}</h2>
-            </div>
-            <div class='netflix-row-content'>
-                <div class='netflix-row-scroller'>
-                    <div class='loading-placeholder'>Lädt...</div>
-                </div>
-            </div>
-        `;
+        rowDiv.innerHTML = '<div class=\""netflix-row-header\""><h2 class=\""netflix-row-title\"">' + row.title + '</h2></div><div class=\""netflix-row-content\""><div class=\""netflix-row-scroller\""><div class=\""loading-placeholder\"">Lädt...</div></div></div>';
         return rowDiv;
     }
     
-    // Lazy loading observer
     function observeRowForLazyLoading(rowElement, rowData) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
                 if (entry.isIntersecting) {
                     loadRowContent(rowElement, rowData);
                     observer.unobserve(entry.target);
@@ -244,7 +215,6 @@ public static class JsTransformation
         observer.observe(rowElement);
     }
     
-    // Load row content
     async function loadRowContent(rowElement, rowData) {
         const scrollerElement = rowElement.querySelector('.netflix-row-scroller');
         if (!scrollerElement) return;
@@ -256,81 +226,48 @@ public static class JsTransformation
             const data = await response.json();
             
             if (!data.Items || data.Items.length === 0) {
-                scrollerElement.innerHTML = '<p class="no-items">Keine Inhalte gefunden</p>';
+                scrollerElement.innerHTML = '<p class=\""no-items\"">Keine Inhalte gefunden</p>';
                 return;
             }
             
-            // Create item cards
-            const itemsHtml = data.Items.map(item => createItemCard(item)).join('');
-            scrollerElement.innerHTML = `
-                <div class='netflix-row-items'>
-                    ${itemsHtml}
-                </div>
-            `;
+            const itemsHtml = data.Items.map(function(item) { return createItemCard(item); }).join('');
+            scrollerElement.innerHTML = '<div class=\""netflix-row-items\"">' + itemsHtml + '</div>';
             
-            // Add scroll functionality
             addRowScrollFunctionality(rowElement);
             
         } catch (error) {
             console.error('Netflix Rows: Error loading row content:', error);
-            scrollerElement.innerHTML = '<p class="error">Fehler beim Laden</p>';
+            scrollerElement.innerHTML = '<p class=\""error\"">Fehler beim Laden</p>';
         }
     }
     
-    // Create item card
     function createItemCard(item) {
         const imageUrl = getItemImageUrl(item);
         const itemUrl = getItemUrl(item);
+        const isFavorite = item.UserData && item.UserData.IsFavorite;
         
-        return `
-            <div class='netflix-item-card' data-item-id='${item.Id}'>
-                <a href='${itemUrl}' class='netflix-item-link'>
-                    <div class='netflix-item-image-container'>
-                        <img class='netflix-item-image' src='${imageUrl}' alt='${item.Name}' loading='lazy'>
-                        <div class='netflix-item-overlay'>
-                            <div class='netflix-item-actions'>
-                                <button class='netflix-item-favorite' data-item-id='${item.Id}' title='${item.UserData?.IsFavorite ? 'Aus meiner Liste entfernen' : 'Zu meiner Liste hinzufügen'}'>
-                                    <i class='material-icons'>${item.UserData?.IsFavorite ? 'remove' : 'add'}</i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class='netflix-item-info'>
-                        <h3 class='netflix-item-title'>${item.Name}</h3>
-                        ${item.ProductionYear ? `<span class='netflix-item-year'>${item.ProductionYear}</span>` : ''}
-                    </div>
-                </a>
-            </div>
-        `;
+        return '<div class=\""netflix-item-card\"" data-item-id=\""' + item.Id + '\""><a href=\""' + itemUrl + '\"" class=\""netflix-item-link\""><div class=\""netflix-item-image-container\""><img class=\""netflix-item-image\"" src=\""' + imageUrl + '\"" alt=\""' + item.Name + '\"" loading=\""lazy\""><div class=\""netflix-item-overlay\""><div class=\""netflix-item-actions\""><button class=\""netflix-item-favorite\"" data-item-id=\""' + item.Id + '\"" title=\""' + (isFavorite ? 'Aus meiner Liste entfernen' : 'Zu meiner Liste hinzufügen') + '\""><i class=\""material-icons\"">' + (isFavorite ? 'remove' : 'add') + '</i></button></div></div></div><div class=\""netflix-item-info\""><h3 class=\""netflix-item-title\"">' + item.Name + '</h3>' + (item.ProductionYear ? '<span class=\""netflix-item-year\"">' + item.ProductionYear + '</span>' : '') + '</div></a></div>';
     }
     
-    // Get item image URL
     function getItemImageUrl(item) {
         const baseUrl = getApiBaseUrl();
-        if (item.ImageTags?.Primary) {
-            return `${baseUrl}/Items/${item.Id}/Images/Primary?width=300&height=450&quality=90`;
-        } else if (item.ImageTags?.Thumb) {
-            return `${baseUrl}/Items/${item.Id}/Images/Thumb?width=300&height=450&quality=90`;
+        if (item.ImageTags && item.ImageTags.Primary) {
+            return baseUrl + '/Items/' + item.Id + '/Images/Primary?width=300&height=450&quality=90';
+        } else if (item.ImageTags && item.ImageTags.Thumb) {
+            return baseUrl + '/Items/' + item.Id + '/Images/Thumb?width=300&height=450&quality=90';
         }
         return '/web/assets/img/icon-transparent.png';
     }
     
-    // Get item URL
     function getItemUrl(item) {
-        if (item.Type === 'Movie') {
-            return `#!/details?id=${item.Id}`;
-        } else if (item.Type === 'Series') {
-            return `#!/details?id=${item.Id}`;
-        }
-        return `#!/details?id=${item.Id}`;
+        return '#!/details?id=' + item.Id;
     }
     
-    // Add row scroll functionality
     function addRowScrollFunctionality(rowElement) {
         const scroller = rowElement.querySelector('.netflix-row-items');
         if (!scroller) return;
         
-        scroller.addEventListener('wheel', (e) => {
+        scroller.addEventListener('wheel', function(e) {
             if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
             
             e.preventDefault();
@@ -338,8 +275,7 @@ public static class JsTransformation
             scroller.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         });
         
-        // Add favorite functionality
-        scroller.addEventListener('click', (e) => {
+        scroller.addEventListener('click', function(e) {
             if (e.target.closest('.netflix-item-favorite')) {
                 e.preventDefault();
                 const button = e.target.closest('.netflix-item-favorite');
@@ -349,11 +285,10 @@ public static class JsTransformation
         });
     }
     
-    // Toggle favorite status
     async function toggleFavorite(itemId, buttonElement) {
         try {
             const userId = getCurrentUserId();
-            const response = await fetch(`/Users/${userId}/FavoriteItems/${itemId}`, {
+            const response = await fetch('/Users/' + userId + '/FavoriteItems/' + itemId, {
                 method: 'POST'
             });
             
@@ -374,37 +309,34 @@ public static class JsTransformation
         }
     }
     
-    // Utility functions
     function getCurrentUserId() {
-        return window.ApiClient?.getCurrentUserId?.() || 
-               window.Dashboard?.getCurrentUserId?.() ||
+        return (window.ApiClient && window.ApiClient.getCurrentUserId && window.ApiClient.getCurrentUserId()) || 
+               (window.Dashboard && window.Dashboard.getCurrentUserId && window.Dashboard.getCurrentUserId()) ||
                localStorage.getItem('userId');
     }
     
     function getApiBaseUrl() {
-        return window.ApiClient?.serverAddress?.() || 
-               window.ApiClient?.baseUrl || 
+        return (window.ApiClient && window.ApiClient.serverAddress && window.ApiClient.serverAddress()) || 
+               (window.ApiClient && window.ApiClient.baseUrl) || 
                window.location.origin;
     }
     
-    // Initialize when DOM is ready
     function init() {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
             return;
         }
         
-        loadConfig().then(() => {
+        loadConfig().then(function() {
             replaceHeartWithPlus();
             
-            // Watch for navigation changes
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
                     if (mutation.addedNodes) {
-                        mutation.addedNodes.forEach((node) => {
+                        mutation.addedNodes.forEach(function(node) {
                             if (node.nodeType === Node.ELEMENT_NODE && 
-                                (node.classList?.contains('homeView') || 
-                                 node.querySelector?.('.homeView'))) {
+                                (node.classList && node.classList.contains('homeView') || 
+                                 node.querySelector && node.querySelector('.homeView'))) {
                                 setTimeout(createNetflixRows, 100);
                             }
                         });
@@ -417,8 +349,7 @@ public static class JsTransformation
                 subtree: true
             });
             
-            // Initial check for home view
-            if (document.querySelector('.homeView, .view[data-type="home"]')) {
+            if (document.querySelector('.homeView, .view[data-type=\""home\""]')) {
                 setTimeout(createNetflixRows, 100);
             }
         });
@@ -426,7 +357,7 @@ public static class JsTransformation
     
     init();
 })();
-""";
+";
     }
 
     /// <summary>
