@@ -29,7 +29,7 @@ public class PluginConfiguration : BasePluginConfiguration
             { "Genres", true }
         };
         MyListLimit = 50;
-        ReplaceHeartWithPlus = true;
+        MinGenreItems = 5;
     }
 
     /// <summary>
@@ -78,12 +78,7 @@ public class PluginConfiguration : BasePluginConfiguration
     public int MyListLimit { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether to replace heart with plus icon.
-    /// </summary>
-    public bool ReplaceHeartWithPlus { get; set; }
-
-    /// <summary>
     /// Gets or sets the minimum items required to show a genre row.
     /// </summary>
-    public int MinGenreItems { get; set; } = 5;
+    public int MinGenreItems { get; set; }
 }

@@ -3,6 +3,10 @@
 <head>
     <title>Netflix Rows Einstellungen</title>
     <style>
+        .configPage {
+            padding: 20px;
+            color: white;
+        }
         .configSection {
             margin: 20px 0;
             padding: 15px;
@@ -11,341 +15,210 @@
             background: rgba(0,0,0,0.3);
         }
         .configSection h3 {
-            margin-top: 0;
             color: #00a4dc;
+            margin-top: 0;
         }
         .inputContainer {
-            margin: 10px 0;
+            margin: 15px 0;
         }
         .inputContainer label {
-            display: inline-block;
-            width: 200px;
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
-            color: #fff;
         }
-        .genreList {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
+        .inputContainer input, .inputContainer select {
+            width: 200px;
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 3px;
+            background: #333;
+            color: white;
+        }
+        .checkboxContainer {
             margin: 10px 0;
         }
-        .genreItem {
-            display: flex;
-            align-items: center;
-        }
-        .genreItem input {
-            margin-right: 8px;
-        }
-        .genreItem label {
-            color: #fff;
+        .checkboxContainer input {
             width: auto;
-        }
-        .rowTypeList {
-            margin: 10px 0;
-        }
-        .rowTypeItem {
-            display: flex;
-            align-items: center;
-            margin: 5px 0;
-        }
-        .rowTypeItem input {
             margin-right: 8px;
-        }
-        .rowTypeItem label {
-            color: #fff;
-            width: auto;
         }
         .saveButton {
-            background-color: #00a4dc;
+            background: #00a4dc;
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
+            margin-top: 20px;
         }
         .saveButton:hover {
-            background-color: #0f7b96;
+            background: #0080b0;
         }
-        .description {
-            color: #aaa;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-        .statusMessage {
+        .status {
             padding: 10px;
             margin: 10px 0;
             border-radius: 4px;
             display: none;
         }
-        .statusMessage.success {
-            background-color: rgba(70, 211, 105, 0.2);
-            border: 1px solid #46d369;
-            color: #46d369;
+        .status.success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+            color: #4CAF50;
         }
-        .statusMessage.error {
-            background-color: rgba(255, 107, 107, 0.2);
-            border: 1px solid #ff6b6b;
-            color: #ff6b6b;
+        .status.error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #f44336;
         }
     </style>
 </head>
 <body>
-    <div id="NetflixRowsConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
-        <div data-role="content">
-            <div class="content-primary">
-                <form id="NetflixRowsConfigForm">
-                    <h2>Netflix Rows Plugin Einstellungen</h2>
-                    
-                    <div id="statusMessage" class="statusMessage"></div>
-
-                    <!-- Allgemeine Einstellungen -->
-                    <div class="configSection">
-                        <h3>Allgemeine Einstellungen</h3>
-                        
-                        <div class="inputContainer">
-                            <label for="maxRows">Maximale Anzahl Rows:</label>
-                            <input type="number" id="maxRows" name="maxRows" min="1" max="20" value="8" />
-                            <div class="description">Maximale Anzahl der Rows auf der Startseite (1-20)</div>
-                        </div>
-
-                        <div class="inputContainer">
-                            <label for="minItemsPerRow">Min. Items pro Row:</label>
-                            <input type="number" id="minItemsPerRow" name="minItemsPerRow" min="1" max="50" value="10" />
-                            <div class="description">Minimale Anzahl Items pro Row</div>
-                        </div>
-
-                        <div class="inputContainer">
-                            <label for="maxItemsPerRow">Max. Items pro Row:</label>
-                            <input type="number" id="maxItemsPerRow" name="maxItemsPerRow" min="1" max="100" value="25" />
-                            <div class="description">Maximale Anzahl Items pro Row</div>
-                        </div>
-                    </div>
-
-                    <!-- Row-spezifische Einstellungen -->
-                    <div class="configSection">
-                        <h3>Row-Einstellungen</h3>
-                        
-                        <div class="inputContainer">
-                            <label for="recentlyAddedDays">Kürzlich hinzugefügt (Tage):</label>
-                            <input type="number" id="recentlyAddedDays" name="recentlyAddedDays" min="1" max="365" value="30" />
-                            <div class="description">Inhalte der letzten X Tage als "kürzlich hinzugefügt" anzeigen</div>
-                        </div>
-
-                        <div class="inputContainer">
-                            <label for="myListLimit">Meine Liste Limit:</label>
-                            <input type="number" id="myListLimit" name="myListLimit" min="1" max="500" value="50" />
-                            <div class="description">Maximale Anzahl Items in "Meine Liste"</div>
-                        </div>
-
-                        <div class="inputContainer">
-                            <label for="minGenreItems">Min. Items für Genre-Row:</label>
-                            <input type="number" id="minGenreItems" name="minGenreItems" min="1" max="50" value="5" />
-                            <div class="description">Mindestanzahl Items erforderlich, um eine Genre-Row anzuzeigen</div>
-                        </div>
-                    </div>
-
-                    <!-- Row-Typen aktivieren/deaktivieren -->
-                    <div class="configSection">
-                        <h3>Aktive Row-Typen</h3>
-                        <div class="rowTypeList">
-                            <div class="rowTypeItem">
-                                <input type="checkbox" id="enableMyList" name="enableMyList" checked />
-                                <label for="enableMyList">Meine Liste</label>
-                            </div>
-                            <div class="rowTypeItem">
-                                <input type="checkbox" id="enableRecentlyAdded" name="enableRecentlyAdded" checked />
-                                <label for="enableRecentlyAdded">Kürzlich hinzugefügt</label>
-                            </div>
-                            <div class="rowTypeItem">
-                                <input type="checkbox" id="enableRandomPicks" name="enableRandomPicks" checked />
-                                <label for="enableRandomPicks">Zufällige Auswahl</label>
-                            </div>
-                            <div class="rowTypeItem">
-                                <input type="checkbox" id="enableGenres" name="enableGenres" checked />
-                                <label for="enableGenres">Genre-Rows</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Genre-Einstellungen -->
-                    <div class="configSection">
-                        <h3>Genre-Einstellungen</h3>
-                        <p>Wählen Sie die Genres aus, die als Rows angezeigt werden sollen:</p>
-                        
-                        <div class="genreList" id="genreList">
-                            <!-- Wird dynamisch gefüllt -->
-                        </div>
-
-                        <h4>Blacklist Genres</h4>
-                        <div class="inputContainer">
-                            <label for="blacklistedGenres">Ausgeschlossene Genres (kommagetrennt):</label>
-                            <input type="text" id="blacklistedGenres" name="blacklistedGenres" placeholder="z.B. Horror, Documentary" />
-                            <div class="description">Diese Genres werden niemals als Rows angezeigt</div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="saveButton">
-                        Einstellungen speichern
-                    </button>
-                </form>
+    <div class="configPage">
+        <h1>Netflix Rows Plugin Einstellungen</h1>
+        
+        <div id="statusMessage" class="status"></div>
+        
+        <form id="configForm">
+            <div class="configSection">
+                <h3>Basis-Einstellungen</h3>
+                
+                <div class="inputContainer">
+                    <label for="maxRows">Maximale Anzahl Rows:</label>
+                    <input type="number" id="maxRows" min="1" max="20" value="8">
+                </div>
+                
+                <div class="inputContainer">
+                    <label for="maxItemsPerRow">Items pro Row:</label>
+                    <input type="number" id="maxItemsPerRow" min="5" max="50" value="25">
+                </div>
+                
+                <div class="inputContainer">
+                    <label for="recentlyAddedDays">Kürzlich hinzugefügt (Tage):</label>
+                    <input type="number" id="recentlyAddedDays" min="1" max="365" value="30">
+                </div>
             </div>
-        </div>
+            
+            <div class="configSection">
+                <h3>Aktive Row-Typen</h3>
+                
+                <div class="checkboxContainer">
+                    <input type="checkbox" id="enableMyList" checked>
+                    <label for="enableMyList">Meine Liste</label>
+                </div>
+                
+                <div class="checkboxContainer">
+                    <input type="checkbox" id="enableRecentlyAdded" checked>
+                    <label for="enableRecentlyAdded">Kürzlich hinzugefügt</label>
+                </div>
+                
+                <div class="checkboxContainer">
+                    <input type="checkbox" id="enableRandomPicks" checked>
+                    <label for="enableRandomPicks">Zufällige Auswahl</label>
+                </div>
+                
+                <div class="checkboxContainer">
+                    <input type="checkbox" id="enableGenres" checked>
+                    <label for="enableGenres">Genre-Rows</label>
+                </div>
+            </div>
+            
+            <button type="submit" class="saveButton">Einstellungen speichern</button>
+        </form>
     </div>
 
-    <script type="text/javascript">
-        (function () {
-            const pluginId = "6c0b8d8a-6b1c-4c5a-9b0a-1b2c3d4e5f6a";
+    <script>
+        const pluginId = "6c0b8d8a-6b1c-4c5a-9b0a-1b2c3d4e5f6a";
+        
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('statusMessage');
+            status.textContent = message;
+            status.className = 'status ' + (isError ? 'error' : 'success');
+            status.style.display = 'block';
+            setTimeout(() => status.style.display = 'none', 3000);
+        }
 
-            // Häufige Genres für die Auswahl
-            const commonGenres = [
-                'Action', 'Adventure', 'Animation', 'Anime', 'Comedy', 'Crime', 
-                'Documentary', 'Drama', 'Family', 'Fantasy', 'History', 'Horror', 
-                'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 
-                'War', 'Western', 'Biography', 'Musical', 'Sport'
-            ];
-
-            function showStatus(message, isError = false) {
-                const statusDiv = document.getElementById('statusMessage');
-                statusDiv.textContent = message;
-                statusDiv.className = `statusMessage ${isError ? 'error' : 'success'}`;
-                statusDiv.style.display = 'block';
-                setTimeout(() => {
-                    statusDiv.style.display = 'none';
-                }, 3000);
+        function loadConfig() {
+            console.log('Loading Netflix Rows configuration...');
+            
+            if (typeof ApiClient === 'undefined') {
+                showStatus('ApiClient not available', true);
+                return;
             }
 
-            function loadPage() {
-                if (typeof ApiClient === 'undefined') {
-                    showStatus('Jellyfin API nicht verfügbar. Bitte Seite neu laden.', true);
-                    return;
-                }
-
-                ApiClient.getPluginConfiguration(pluginId).then(function (config) {
-                    // Allgemeine Einstellungen laden
-                    document.getElementById('maxRows').value = config.MaxRows || 8;
-                    document.getElementById('minItemsPerRow').value = config.MinItemsPerRow || 10;
-                    document.getElementById('maxItemsPerRow').value = config.MaxItemsPerRow || 25;
-                    document.getElementById('recentlyAddedDays').value = config.RecentlyAddedDays || 30;
-                    document.getElementById('myListLimit').value = config.MyListLimit || 50;
-                    document.getElementById('minGenreItems').value = config.MinGenreItems || 5;
-
-                    // Row-Typen laden
-                    const enabledRowTypes = config.EnabledRowTypes || {};
-                    document.getElementById('enableMyList').checked = enabledRowTypes.MyList !== false;
-                    document.getElementById('enableRecentlyAdded').checked = enabledRowTypes.RecentlyAdded !== false;
-                    document.getElementById('enableRandomPicks').checked = enabledRowTypes.RandomPicks !== false;
-                    document.getElementById('enableGenres').checked = enabledRowTypes.Genres !== false;
-
-                    // Blacklisted Genres laden
-                    const blacklistedGenres = config.BlacklistedGenres || [];
-                    document.getElementById('blacklistedGenres').value = blacklistedGenres.join(', ');
-
-                    // Genre-Checkboxen erstellen
-                    createGenreCheckboxes(config.EnabledGenres || ['Action', 'Comedy', 'Drama', 'Animation', 'Anime']);
-
-                    showStatus('Einstellungen erfolgreich geladen');
-                }).catch(function(error) {
-                    showStatus('Fehler beim Laden der Einstellungen: ' + error.message, true);
-                });
-            }
-
-            function createGenreCheckboxes(enabledGenres) {
-                const genreList = document.getElementById('genreList');
-                genreList.innerHTML = '';
-
-                commonGenres.forEach(function (genre) {
-                    const genreItem = document.createElement('div');
-                    genreItem.className = 'genreItem';
-
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = 'genre_' + genre.replace(/\s+/g, '');
-                    checkbox.value = genre;
-                    checkbox.checked = enabledGenres.includes(genre);
-
-                    const label = document.createElement('label');
-                    label.setAttribute('for', checkbox.id);
-                    label.textContent = genre;
-
-                    genreItem.appendChild(checkbox);
-                    genreItem.appendChild(label);
-                    genreList.appendChild(genreItem);
-                });
-            }
-
-            function onSubmit(e) {
-                e.preventDefault();
-
-                if (typeof ApiClient === 'undefined') {
-                    showStatus('Jellyfin API nicht verfügbar', true);
-                    return;
-                }
-
-                // Aktivierte Genres sammeln
-                const enabledGenres = [];
-                document.querySelectorAll('#genreList input[type="checkbox"]:checked').forEach(function (checkbox) {
-                    enabledGenres.push(checkbox.value);
-                });
-
-                // Blacklisted Genres parsen
-                const blacklistedGenresText = document.getElementById('blacklistedGenres').value;
-                const blacklistedGenres = blacklistedGenresText
-                    .split(',')
-                    .map(g => g.trim())
-                    .filter(g => g.length > 0);
-
-                const config = {
-                    MaxRows: parseInt(document.getElementById('maxRows').value),
-                    MinItemsPerRow: parseInt(document.getElementById('minItemsPerRow').value),
-                    MaxItemsPerRow: parseInt(document.getElementById('maxItemsPerRow').value),
-                    RecentlyAddedDays: parseInt(document.getElementById('recentlyAddedDays').value),
-                    MyListLimit: parseInt(document.getElementById('myListLimit').value),
-                    MinGenreItems: parseInt(document.getElementById('minGenreItems').value),
-                    EnabledGenres: enabledGenres,
-                    BlacklistedGenres: blacklistedGenres,
-                    EnabledRowTypes: {
-                        MyList: document.getElementById('enableMyList').checked,
-                        RecentlyAdded: document.getElementById('enableRecentlyAdded').checked,
-                        RandomPicks: document.getElementById('enableRandomPicks').checked,
-                        Genres: document.getElementById('enableGenres').checked
-                    }
-                };
-
-                ApiClient.updatePluginConfiguration(pluginId, config).then(function (result) {
-                    showStatus('Einstellungen erfolgreich gespeichert!');
-                    
-                    // Optional: Seite nach kurzer Zeit neu laden um Änderungen zu reflektieren
-                    setTimeout(() => {
-                        if (confirm('Möchten Sie die Seite neu laden, um die Änderungen zu übernehmen?')) {
-                            window.location.reload();
-                        }
-                    }, 2000);
-                }).catch(function(error) {
-                    showStatus('Fehler beim Speichern: ' + error.message, true);
-                });
-
-                return false;
-            }
-
-            // Event Listeners hinzufügen
-            document.addEventListener('DOMContentLoaded', function() {
-                const form = document.getElementById('NetflixRowsConfigForm');
-                if (form) {
-                    form.addEventListener('submit', onSubmit);
-                }
-                loadPage();
+            ApiClient.getPluginConfiguration(pluginId).then(config => {
+                console.log('Loaded config:', config);
+                
+                document.getElementById('maxRows').value = config.MaxRows || 8;
+                document.getElementById('maxItemsPerRow').value = config.MaxItemsPerRow || 25;
+                document.getElementById('recentlyAddedDays').value = config.RecentlyAddedDays || 30;
+                
+                const enabledRowTypes = config.EnabledRowTypes || {};
+                document.getElementById('enableMyList').checked = enabledRowTypes.MyList !== false;
+                document.getElementById('enableRecentlyAdded').checked = enabledRowTypes.RecentlyAdded !== false;
+                document.getElementById('enableRandomPicks').checked = enabledRowTypes.RandomPicks !== false;
+                document.getElementById('enableGenres').checked = enabledRowTypes.Genres !== false;
+                
+                showStatus('Einstellungen geladen');
+            }).catch(error => {
+                console.error('Config load error:', error);
+                showStatus('Fehler beim Laden: ' + error.message, true);
             });
+        }
 
-            // Falls DOM bereits geladen ist
-            if (document.readyState !== 'loading') {
-                const form = document.getElementById('NetflixRowsConfigForm');
-                if (form) {
-                    form.addEventListener('submit', onSubmit);
-                }
-                loadPage();
+        function saveConfig(e) {
+            e.preventDefault();
+            
+            console.log('Saving Netflix Rows configuration...');
+            
+            if (typeof ApiClient === 'undefined') {
+                showStatus('ApiClient not available', true);
+                return;
             }
-        })();
+
+            const config = {
+                MaxRows: parseInt(document.getElementById('maxRows').value),
+                MinItemsPerRow: 10,
+                MaxItemsPerRow: parseInt(document.getElementById('maxItemsPerRow').value),
+                RecentlyAddedDays: parseInt(document.getElementById('recentlyAddedDays').value),
+                LongNotWatchedMonths: 6,
+                MyListLimit: 50,
+                MinGenreItems: 5,
+                EnabledGenres: ["Action", "Comedy", "Drama", "Animation", "Anime"],
+                BlacklistedGenres: [],
+                EnabledRowTypes: {
+                    MyList: document.getElementById('enableMyList').checked,
+                    RecentlyAdded: document.getElementById('enableRecentlyAdded').checked,
+                    RandomPicks: document.getElementById('enableRandomPicks').checked,
+                    Genres: document.getElementById('enableGenres').checked,
+                    LongNotWatched: false
+                }
+            };
+            
+            console.log('Saving config:', config);
+
+            ApiClient.updatePluginConfiguration(pluginId, config).then(() => {
+                console.log('Configuration saved successfully');
+                showStatus('Einstellungen gespeichert!');
+            }).catch(error => {
+                console.error('Config save error:', error);
+                showStatus('Speicherfehler: ' + error.message, true);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Netflix Rows config page loaded');
+            document.getElementById('configForm').addEventListener('submit', saveConfig);
+            
+            // Load config after a short delay to ensure ApiClient is ready
+            setTimeout(loadConfig, 500);
+        });
+        
+        // Also try immediate load in case DOM is already ready
+        if (document.readyState !== 'loading') {
+            document.getElementById('configForm').addEventListener('submit', saveConfig);
+            setTimeout(loadConfig, 500);
+        }
     </script>
 </body>
-</html>
+</html> 
