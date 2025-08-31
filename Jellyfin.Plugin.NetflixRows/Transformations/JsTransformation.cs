@@ -58,65 +58,23 @@ public static class JsTransformation
             // Fall back to minimal JavaScript if resource loading fails
         }
         
-        // Minimal fallback - just inject a script tag to load external file
-        return GetMinimalJs();
+        // Ultra-minimal fallback - just create script tag to load external
+        return GetScriptLoader();
     }
 
-    private static string GetMinimalJs()
+    private static string GetScriptLoader()
     {
-        // Return minimal JavaScript that loads the external file
-        return @"
-(function() {
-    console.log('Netflix Rows Plugin - Loading external script');
-    
-    // Try to load from external script
-    var script = document.createElement('script');
-    script.src = '/NetflixRows/Script';
-    script.async = true;
-    script.onerror = function() {
-        console.warn('Could not load Netflix Rows external script, using fallback');
-        initFallback();
-    };
-    document.head.appendChild(script);
-    
-    function initFallback() {
-        console.log('Netflix Rows fallback initialization');
+        // Create JavaScript lines individually to avoid string escaping issues
+        var lines = new[]
+        {
+            "console.log('Netflix Rows Plugin - Loading');",
+            "var script = document.createElement('script');",
+            "script.src = '/NetflixRows/Script';",
+            "script.async = true;",
+            "document.head.appendChild(script);"
+        };
         
-        function createBasicRows() {
-            var homeView = document.querySelector('.homeView');
-            if (!homeView || document.getElementById('netflix-rows-container')) return;
-            
-            var container = document.createElement('div');
-            container.id = 'netflix-rows-container';
-            container.innerHTML = '<div style=\"padding: 20px; text-align: center; color: #fff;\">Netflix Rows Plugin Active<br><small>Configure in Admin Dashboard</small></div>';
-            
-            var existing = homeView.querySelector('.sections, .homePageContent');
-            if (existing) {
-                existing.parentNode.insertBefore(container, existing);
-            } else {
-                homeView.appendChild(container);
-            }
-        }
-        
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', createBasicRows);
-        } else {
-            createBasicRows();
-        }
-        
-        var observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                mutation.addedNodes.forEach(function(node) {
-                    if (node.nodeType === 1 && (node.classList.contains('homeView') || node.querySelector('.homeView'))) {
-                        setTimeout(createBasicRows, 100);
-                    }
-                });
-            });
-        });
-        
-        observer.observe(document.body, { childList: true, subtree: true });
-    }
-})();";
+        return string.Join(Environment.NewLine, lines);
     }
 
     /// <summary>
