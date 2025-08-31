@@ -43,7 +43,7 @@ This plugin requires the following dependencies:
 ### Method 1: Plugin Repository (Recommended)
 1. Open Jellyfin Admin Dashboard
 2. Navigate to **Plugins** → **Repositories**
-3. Add repository: `https://github.com/[YOUR-USERNAME]/jellyfin-plugin-netflix-rows/releases/latest/download/repository.json`
+3. Add repository: `https://github.com/FigmaCode/jellyfin-plugin-netflix-rows/releases/latest/download/repository.json`
 4. Go to **Plugins** → **Catalog**
 5. Find and install **"Netflix Rows"**
 6. Restart Jellyfin
