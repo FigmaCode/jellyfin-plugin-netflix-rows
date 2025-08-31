@@ -5,16 +5,8 @@ using System.Text.Json;
 
 namespace Jellyfin.Plugin.NetflixRows.Transformations;
 
-/// <summary>
-/// JavaScript transformation for injecting Netflix Rows functionality.
-/// </summary>
 public static class JsTransformation
 {
-    /// <summary>
-    /// Transforms JavaScript files to inject Netflix Rows functionality.
-    /// </summary>
-    /// <param name="data">Transformation data containing file contents.</param>
-    /// <returns>Modified file contents.</returns>
     public static string TransformJs(string data)
     {
         try
@@ -26,8 +18,6 @@ public static class JsTransformation
             }
 
             var jsCode = GetNetflixRowsJs();
-            
-            // Inject our Netflix Rows JavaScript at the end of the main file
             var modifiedContents = transformData.Contents + Environment.NewLine + jsCode;
 
             return JsonSerializer.Serialize(new { contents = modifiedContents });
@@ -40,7 +30,6 @@ public static class JsTransformation
 
     private static string GetNetflixRowsJs()
     {
-        // Try to load from embedded resource first
         try
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -55,17 +44,15 @@ public static class JsTransformation
         }
         catch
         {
-            // Fall back to minimal JavaScript if resource loading fails
+            // Ignore and use fallback
         }
         
-        // Ultra-minimal fallback - just create script tag to load external
         return GetScriptLoader();
     }
 
     private static string GetScriptLoader()
     {
-        // Create JavaScript lines individually to avoid string escaping issues
-        var lines = new[]
+        var scriptLines = new string[]
         {
             "console.log('Netflix Rows Plugin - Loading');",
             "var script = document.createElement('script');",
@@ -74,34 +61,11 @@ public static class JsTransformation
             "document.head.appendChild(script);"
         };
         
-        return string.Join(Environment.NewLine, lines);
+        return string.Join(Environment.NewLine, scriptLines);
     }
 
-    /// <summary>
-    /// Transform data structure.
-    /// </summary>
     public class TransformData
     {
-        /// <summary>
-        /// Gets or sets the file contents.
-        /// </summary>
-        public string? Contents { get; set; }
-    }
-}}
-    
-    init();
-})();
-""";
-    }
-
-    /// <summary>
-    /// Transform data structure.
-    /// </summary>
-    public class TransformData
-    {
-        /// <summary>
-        /// Gets or sets the file contents.
-        /// </summary>
         public string? Contents { get; set; }
     }
 }
