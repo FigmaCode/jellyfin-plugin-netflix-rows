@@ -26,9 +26,6 @@
     <None Include="Configuration\config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="meta.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <EmbeddedResource Include="Configuration\configPage.html" />
     <EmbeddedResource Include="Web\netflixRows.js" />
   </ItemGroup>

@@ -327,7 +327,7 @@ public class NetflixRowsController : ControllerBase
     /// <returns>List of available genres.</returns>
     [HttpGet("Genres")]
     [Authorize]
-    public async Task<ActionResult<IEnumerable<string>>> GetGenres([FromQuery] Guid userId)
+    public ActionResult<IEnumerable<string>> GetGenres([FromQuery] Guid userId)
     {
         try
         {
