@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Reflection;
 using System.Text.Json;
 
 namespace Jellyfin.Plugin.NetflixRows.Transformations;
@@ -26,7 +28,7 @@ public static class JsTransformation
             var jsCode = GetNetflixRowsJs();
             
             // Inject our Netflix Rows JavaScript at the end of the main file
-            var modifiedContents = transformData.Contents + "\n" + jsCode;
+            var modifiedContents = transformData.Contents + Environment.NewLine + jsCode;
 
             return JsonSerializer.Serialize(new { contents = modifiedContents });
         }
@@ -38,11 +40,34 @@ public static class JsTransformation
 
     private static string GetNetflixRowsJs()
     {
-        return @"
-// Netflix Rows Plugin - Injected JavaScript
-(function() {
-    'use strict';
+        // Try to load from embedded resource first
+        try
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "Jellyfin.Plugin.NetflixRows.Web.netflixRows.js";
+            
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream != null)
+            {
+                using var reader = new StreamReader(stream);
+                return reader.ReadToEnd();
+            }
+        }
+        catch
+        {
+            // Fall back to inline JavaScript if resource loading fails
+        }
+        
+        // Fallback inline JavaScript - simplified to avoid escaping issues
+        return GetInlineJs();
+    }
 
+    private static string GetInlineJs()
+    {
+        return @"
+(function() {
+    console.log('Netflix Rows Plugin loaded');
+    
     let netflixConfig = null;
     
     async function loadConfig() {
@@ -50,51 +75,41 @@ public static class JsTransformation
             const response = await fetch('/NetflixRows/Config');
             if (response.ok) {
                 netflixConfig = await response.json();
+                console.log('Netflix Rows config loaded:', netflixConfig);
             }
         } catch (e) {
-            console.warn('Netflix Rows: Could not load configuration');
+            console.warn('Netflix Rows: Could not load configuration', e);
         }
     }
 
-    function replaceHeartWithPlus() {
-        if (!netflixConfig?.replaceHeartWithPlus) return;
-        
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                        const heartIcons = node.querySelectorAll?.('.material-icons') || [];
-                        heartIcons.forEach((icon) => {
-                            if (icon.textContent === 'favorite') {
-                                icon.textContent = 'add';
-                                icon.title = 'Zu meiner Liste hinzufügen';
-                            } else if (icon.textContent === 'favorite_border') {
-                                icon.textContent = 'add_circle_outline';
-                                icon.title = 'Zu meiner Liste hinzufügen';
-                            }
-                        });
-                    }
-                });
-            });
-        });
-        
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-    }
-
     function createNetflixRows() {
-        const homeView = document.querySelector('.homeView, .view[data-type=\""home\""]');
-        if (!homeView) return;
+        console.log('Creating Netflix Rows...');
+        const homeView = document.querySelector('.homeView');
+        if (!homeView) {
+            console.log('No home view found');
+            return;
+        }
+
+        const existingRows = document.getElementById('netflix-rows');
+        if (existingRows) {
+            console.log('Netflix rows already exist');
+            return;
+        }
 
         const rowsContainer = document.createElement('div');
+        rowsContainer.id = 'netflix-rows-container';
         rowsContainer.className = 'netflix-rows-container';
-        rowsContainer.innerHTML = '<div class=\""netflix-rows\"" id=\""netflix-rows\""><div class=\""loading-indicator\""><div class=\""loading-spinner\""></div><p>Lädt Netflix Rows...</p></div></div>';
+        
+        const rowsDiv = document.createElement('div');
+        rowsDiv.id = 'netflix-rows';
+        rowsDiv.className = 'netflix-rows';
+        rowsDiv.innerHTML = '<div class=\"loading-indicator\"><p>Loading Netflix Rows...</p></div>';
+        
+        rowsContainer.appendChild(rowsDiv);
         
         const existingContent = homeView.querySelector('.sections, .homePageContent');
         if (existingContent) {
-            existingContent.parentNode.replaceChild(rowsContainer, existingContent);
+            existingContent.parentNode.insertBefore(rowsContainer, existingContent);
         } else {
             homeView.appendChild(rowsContainer);
         }
@@ -108,12 +123,18 @@ public static class JsTransformation
         }
         
         const rowsContainer = document.getElementById('netflix-rows');
-        if (!rowsContainer) return;
+        if (!rowsContainer || !netflixConfig) {
+            console.log('No rows container or config');
+            return;
+        }
 
         try {
             const userId = getCurrentUserId();
-            if (!userId) throw new Error('No user ID found');
+            if (!userId) {
+                throw new Error('No user ID found');
+            }
 
+            console.log('Loading rows for user:', userId);
             rowsContainer.innerHTML = '';
             
             const rows = [];
@@ -121,74 +142,31 @@ public static class JsTransformation
             if (netflixConfig.enableMyList) {
                 rows.push({
                     id: 'my-list',
-                    title: 'Meine Liste',
-                    endpoint: '/NetflixRows/MyList?userId=' + userId + '&limit=' + netflixConfig.maxItemsPerRow,
-                    priority: 0
+                    title: 'My List',
+                    endpoint: '/NetflixRows/MyList?userId=' + userId + '&limit=25'
                 });
             }
             
             if (netflixConfig.enableRecentlyAdded) {
                 rows.push({
                     id: 'recently-added',
-                    title: 'Kürzlich hinzugefügt',
-                    endpoint: '/NetflixRows/RecentlyAdded?userId=' + userId + '&limit=' + netflixConfig.maxItemsPerRow,
-                    priority: 1
+                    title: 'Recently Added',
+                    endpoint: '/NetflixRows/RecentlyAdded?userId=' + userId + '&limit=25'
                 });
             }
+
+            console.log('Creating', rows.length, 'rows');
             
-            if (netflixConfig.enableRandomPicks) {
-                rows.push({
-                    id: 'random-picks',
-                    title: 'Zufallsauswahl',
-                    endpoint: '/NetflixRows/RandomPicks?userId=' + userId + '&limit=' + netflixConfig.maxItemsPerRow,
-                    priority: 2
-                });
-            }
-            
-            if (netflixConfig.enableLongNotWatched) {
-                rows.push({
-                    id: 'long-not-watched',
-                    title: 'Lange nicht gesehen',
-                    endpoint: '/NetflixRows/LongNotWatched?userId=' + userId + '&limit=' + netflixConfig.maxItemsPerRow,
-                    priority: 3
-                });
-            }
-            
-            if (netflixConfig.enabledGenres) {
-                netflixConfig.enabledGenres.forEach(function(genre, index) {
-                    const displayName = netflixConfig.genreDisplayNames[genre] || genre;
-                    rows.push({
-                        id: 'genre-' + genre.toLowerCase(),
-                        title: displayName,
-                        endpoint: '/NetflixRows/Genre/' + genre + '?userId=' + userId + '&limit=' + netflixConfig.maxItemsPerRow,
-                        priority: 4 + index
-                    });
-                });
-            }
-            
-            if (!netflixConfig.randomRowOrder) {
-                rows.sort(function(a, b) { return a.priority - b.priority; });
-            } else {
-                rows.sort(function() { return Math.random() - 0.5; });
-            }
-            
-            const limitedRows = rows.slice(0, netflixConfig.maxRows || 8);
-            
-            for (let i = 0; i < limitedRows.length; i++) {
-                const row = limitedRows[i];
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
                 const rowElement = createRowElement(row);
                 rowsContainer.appendChild(rowElement);
-                
-                if (netflixConfig.lazyLoadRows) {
-                    observeRowForLazyLoading(rowElement, row);
-                } else {
-                    loadRowContent(rowElement, row);
-                }
+                loadRowContent(rowElement, row);
             }
             
         } catch (error) {
             console.error('Netflix Rows: Error loading rows:', error);
-            rowsContainer.innerHTML = '<p class=\""error\"">Fehler beim Laden der Netflix Rows</p>';
+            rowsContainer.innerHTML = '<p class=\"error\">Error loading Netflix Rows</p>';
         }
     }
     
@@ -196,23 +174,27 @@ public static class JsTransformation
         const rowDiv = document.createElement('div');
         rowDiv.className = 'netflix-row';
         rowDiv.setAttribute('data-row-id', row.id);
-        rowDiv.innerHTML = '<div class=\""netflix-row-header\""><h2 class=\""netflix-row-title\"">' + row.title + '</h2></div><div class=\""netflix-row-content\""><div class=\""netflix-row-scroller\""><div class=\""loading-placeholder\"">Lädt...</div></div></div>';
-        return rowDiv;
-    }
-    
-    function observeRowForLazyLoading(rowElement, rowData) {
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    loadRowContent(rowElement, rowData);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, {
-            rootMargin: '100px'
-        });
         
-        observer.observe(rowElement);
+        const header = document.createElement('div');
+        header.className = 'netflix-row-header';
+        
+        const title = document.createElement('h2');
+        title.className = 'netflix-row-title';
+        title.textContent = row.title;
+        
+        const content = document.createElement('div');
+        content.className = 'netflix-row-content';
+        
+        const scroller = document.createElement('div');
+        scroller.className = 'netflix-row-scroller';
+        scroller.innerHTML = '<div class=\"loading-placeholder\">Loading...</div>';
+        
+        header.appendChild(title);
+        content.appendChild(scroller);
+        rowDiv.appendChild(header);
+        rowDiv.appendChild(content);
+        
+        return rowDiv;
     }
     
     async function loadRowContent(rowElement, rowData) {
@@ -220,124 +202,121 @@ public static class JsTransformation
         if (!scrollerElement) return;
         
         try {
+            console.log('Loading content for row:', rowData.endpoint);
             const response = await fetch(rowData.endpoint);
-            if (!response.ok) throw new Error('Failed to load row data');
+            if (!response.ok) {
+                throw new Error('Failed to load row data: ' + response.status);
+            }
             
             const data = await response.json();
+            console.log('Row data loaded:', data);
             
             if (!data.Items || data.Items.length === 0) {
-                scrollerElement.innerHTML = '<p class=\""no-items\"">Keine Inhalte gefunden</p>';
+                scrollerElement.innerHTML = '<p class=\"no-items\">No content found</p>';
                 return;
             }
             
-            const itemsHtml = data.Items.map(function(item) { return createItemCard(item); }).join('');
-            scrollerElement.innerHTML = '<div class=\""netflix-row-items\"">' + itemsHtml + '</div>';
+            const itemsContainer = document.createElement('div');
+            itemsContainer.className = 'netflix-row-items';
             
-            addRowScrollFunctionality(rowElement);
+            for (let i = 0; i < data.Items.length; i++) {
+                const item = data.Items[i];
+                const itemCard = createItemCard(item);
+                itemsContainer.appendChild(itemCard);
+            }
+            
+            scrollerElement.innerHTML = '';
+            scrollerElement.appendChild(itemsContainer);
             
         } catch (error) {
             console.error('Netflix Rows: Error loading row content:', error);
-            scrollerElement.innerHTML = '<p class=\""error\"">Fehler beim Laden</p>';
+            scrollerElement.innerHTML = '<p class=\"error\">Error loading content</p>';
         }
     }
     
     function createItemCard(item) {
-        const imageUrl = getItemImageUrl(item);
-        const itemUrl = getItemUrl(item);
-        const isFavorite = item.UserData && item.UserData.IsFavorite;
+        const card = document.createElement('div');
+        card.className = 'netflix-item-card';
+        card.setAttribute('data-item-id', item.Id);
         
-        return '<div class=\""netflix-item-card\"" data-item-id=\""' + item.Id + '\""><a href=\""' + itemUrl + '\"" class=\""netflix-item-link\""><div class=\""netflix-item-image-container\""><img class=\""netflix-item-image\"" src=\""' + imageUrl + '\"" alt=\""' + item.Name + '\"" loading=\""lazy\""><div class=\""netflix-item-overlay\""><div class=\""netflix-item-actions\""><button class=\""netflix-item-favorite\"" data-item-id=\""' + item.Id + '\"" title=\""' + (isFavorite ? 'Aus meiner Liste entfernen' : 'Zu meiner Liste hinzufügen') + '\""><i class=\""material-icons\"">' + (isFavorite ? 'remove' : 'add') + '</i></button></div></div></div><div class=\""netflix-item-info\""><h3 class=\""netflix-item-title\"">' + item.Name + '</h3>' + (item.ProductionYear ? '<span class=\""netflix-item-year\"">' + item.ProductionYear + '</span>' : '') + '</div></a></div>';
+        const link = document.createElement('a');
+        link.href = '#!/details?id=' + item.Id;
+        link.className = 'netflix-item-link';
+        
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'netflix-item-image-container';
+        
+        const img = document.createElement('img');
+        img.className = 'netflix-item-image';
+        img.src = getItemImageUrl(item);
+        img.alt = item.Name || '';
+        img.loading = 'lazy';
+        
+        const info = document.createElement('div');
+        info.className = 'netflix-item-info';
+        
+        const title = document.createElement('h3');
+        title.className = 'netflix-item-title';
+        title.textContent = item.Name || '';
+        
+        imageContainer.appendChild(img);
+        info.appendChild(title);
+        link.appendChild(imageContainer);
+        link.appendChild(info);
+        card.appendChild(link);
+        
+        return card;
     }
     
     function getItemImageUrl(item) {
         const baseUrl = getApiBaseUrl();
         if (item.ImageTags && item.ImageTags.Primary) {
             return baseUrl + '/Items/' + item.Id + '/Images/Primary?width=300&height=450&quality=90';
-        } else if (item.ImageTags && item.ImageTags.Thumb) {
-            return baseUrl + '/Items/' + item.Id + '/Images/Thumb?width=300&height=450&quality=90';
         }
         return '/web/assets/img/icon-transparent.png';
     }
     
-    function getItemUrl(item) {
-        return '#!/details?id=' + item.Id;
-    }
-    
-    function addRowScrollFunctionality(rowElement) {
-        const scroller = rowElement.querySelector('.netflix-row-items');
-        if (!scroller) return;
-        
-        scroller.addEventListener('wheel', function(e) {
-            if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-            
-            e.preventDefault();
-            const scrollAmount = e.deltaY > 0 ? 300 : -300;
-            scroller.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-        });
-        
-        scroller.addEventListener('click', function(e) {
-            if (e.target.closest('.netflix-item-favorite')) {
-                e.preventDefault();
-                const button = e.target.closest('.netflix-item-favorite');
-                const itemId = button.getAttribute('data-item-id');
-                toggleFavorite(itemId, button);
-            }
-        });
-    }
-    
-    async function toggleFavorite(itemId, buttonElement) {
-        try {
-            const userId = getCurrentUserId();
-            const response = await fetch('/Users/' + userId + '/FavoriteItems/' + itemId, {
-                method: 'POST'
-            });
-            
-            if (response.ok) {
-                const icon = buttonElement.querySelector('.material-icons');
-                const isFavorite = icon.textContent === 'remove';
-                
-                if (isFavorite) {
-                    icon.textContent = 'add';
-                    buttonElement.title = 'Zu meiner Liste hinzufügen';
-                } else {
-                    icon.textContent = 'remove';
-                    buttonElement.title = 'Aus meiner Liste entfernen';
-                }
-            }
-        } catch (error) {
-            console.error('Netflix Rows: Error toggling favorite:', error);
-        }
-    }
-    
     function getCurrentUserId() {
-        return (window.ApiClient && window.ApiClient.getCurrentUserId && window.ApiClient.getCurrentUserId()) || 
-               (window.Dashboard && window.Dashboard.getCurrentUserId && window.Dashboard.getCurrentUserId()) ||
-               localStorage.getItem('userId');
+        if (window.ApiClient && window.ApiClient.getCurrentUserId) {
+            return window.ApiClient.getCurrentUserId();
+        }
+        if (window.Dashboard && window.Dashboard.getCurrentUserId) {
+            return window.Dashboard.getCurrentUserId();
+        }
+        return localStorage.getItem('userId');
     }
     
     function getApiBaseUrl() {
-        return (window.ApiClient && window.ApiClient.serverAddress && window.ApiClient.serverAddress()) || 
-               (window.ApiClient && window.ApiClient.baseUrl) || 
-               window.location.origin;
+        if (window.ApiClient && window.ApiClient.serverAddress) {
+            return window.ApiClient.serverAddress();
+        }
+        if (window.ApiClient && window.ApiClient.baseUrl) {
+            return window.ApiClient.baseUrl;
+        }
+        return window.location.origin;
     }
     
     function init() {
+        console.log('Netflix Rows init');
+        
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
             return;
         }
         
         loadConfig().then(function() {
-            replaceHeartWithPlus();
+            console.log('Config loaded, setting up observers');
             
             const observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
                     if (mutation.addedNodes) {
                         mutation.addedNodes.forEach(function(node) {
-                            if (node.nodeType === Node.ELEMENT_NODE && 
-                                (node.classList && node.classList.contains('homeView') || 
-                                 node.querySelector && node.querySelector('.homeView'))) {
-                                setTimeout(createNetflixRows, 100);
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                if (node.classList && node.classList.contains('homeView')) {
+                                    setTimeout(createNetflixRows, 100);
+                                } else if (node.querySelector && node.querySelector('.homeView')) {
+                                    setTimeout(createNetflixRows, 100);
+                                }
                             }
                         });
                     }
@@ -349,15 +328,14 @@ public static class JsTransformation
                 subtree: true
             });
             
-            if (document.querySelector('.homeView, .view[data-type=\""home\""]')) {
+            if (document.querySelector('.homeView')) {
                 setTimeout(createNetflixRows, 100);
             }
         });
     }
     
     init();
-})();
-";
+})();";
     }
 
     /// <summary>
