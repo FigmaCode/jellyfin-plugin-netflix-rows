@@ -31,7 +31,6 @@
     </None>
     <EmbeddedResource Include="Configuration\configPage.html" />
     <EmbeddedResource Include="Web\netflixRows.js" />
-    <EmbeddedResource Include="Web\netflixRows.css" />
   </ItemGroup>
 
 </Project>

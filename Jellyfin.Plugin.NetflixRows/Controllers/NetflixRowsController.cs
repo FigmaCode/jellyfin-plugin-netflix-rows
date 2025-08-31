@@ -59,7 +59,7 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with favorite items.</returns>
     [HttpGet("MyList")]
     [Authorize]
-    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetMyList(
+    public ActionResult<QueryResult<BaseItemDto>> GetMyList(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
@@ -108,7 +108,7 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with recently added items.</returns>
     [HttpGet("RecentlyAdded")]
     [Authorize]
-    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetRecentlyAdded(
+    public ActionResult<QueryResult<BaseItemDto>> GetRecentlyAdded(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
@@ -157,7 +157,7 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with random items.</returns>
     [HttpGet("RandomPicks")]
     [Authorize]
-    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetRandomPicks(
+    public ActionResult<QueryResult<BaseItemDto>> GetRandomPicks(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
@@ -204,7 +204,7 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with long not watched items.</returns>
     [HttpGet("LongNotWatched")]
     [Authorize]
-    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetLongNotWatched(
+    public ActionResult<QueryResult<BaseItemDto>> GetLongNotWatched(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
@@ -262,7 +262,7 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with items of the specified genre.</returns>
     [HttpGet("Genre/{genre}")]
     [Authorize]
-    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetGenre(
+    public ActionResult<QueryResult<BaseItemDto>> GetGenre(
         string genre,
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
