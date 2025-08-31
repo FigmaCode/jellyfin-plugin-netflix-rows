@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
@@ -218,24 +219,31 @@ public class NetflixRowsController : ControllerBase
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
             var cutoffDate = DateTime.UtcNow.AddMonths(-config.LongNotWatchedMonths);
 
-            var query = new InternalItemsQuery(user)
+            // Get all items first and then filter by date
+            var allItemsQuery = new InternalItemsQuery(user)
             {
                 IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
                 IsVirtualItem = false,
                 IsPlayed = false,
-                MaxDateCreated = cutoffDate,
-                OrderBy = new[] { (ItemSortBy.DateCreated, SortOrder.Ascending) },
-                Limit = Math.Min(limit, config.MaxItemsPerRow)
+                Recursive = true
             };
 
-            var items = _libraryManager.GetItemsResult(query);
+            var allItems = _libraryManager.GetItemsResult(allItemsQuery);
+            
+            // Filter by date created (since MaxDateCreated doesn't exist)
+            var filteredItems = allItems.Items
+                .Where(item => item.DateCreated <= cutoffDate)
+                .OrderBy(item => item.DateCreated)
+                .Take(Math.Min(limit, config.MaxItemsPerRow))
+                .ToArray();
+
             var dtoOptions = new DtoOptions(true);
-            var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
+            var dtos = filteredItems.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
 
             return new QueryResult<BaseItemDto>
             {
                 Items = dtos,
-                TotalRecordCount = items.TotalRecordCount
+                TotalRecordCount = filteredItems.Length
             };
         }
         catch (Exception ex)
