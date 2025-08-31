@@ -13,23 +13,41 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     public PluginConfiguration()
     {
+        // Default configuration for MVP
         MaxRows = 8;
         MinItemsPerRow = 10;
         MaxItemsPerRow = 25;
+        
+        EnableMyList = true;
+        EnableRecentlyAdded = true;
+        EnableRandomPicks = true;
+        EnableLongNotWatched = true;
+        
+        EnabledGenres = new List<string> { "Action", "Anime", "Comedy" };
+        BlacklistedGenres = new List<string>();
+        
+        GenreDisplayNames = new Dictionary<string, string>
+        {
+            { "Action", "Adrenalinkick" },
+            { "Comedy", "Zum Lachen" },
+            { "Drama", "Gefühlvoll" },
+            { "Horror", "Gruselig" },
+            { "Romance", "Romantisch" },
+            { "Thriller", "Spannend" },
+            { "Sci-Fi", "Science Fiction" },
+            { "Fantasy", "Fantasie" },
+            { "Crime", "Krimi" },
+            { "Documentary", "Dokumentation" }
+        };
+        
         RecentlyAddedDays = 30;
         LongNotWatchedMonths = 6;
-        EnabledGenres = new List<string> { "Action", "Comedy", "Drama", "Animation", "Anime" };
-        BlacklistedGenres = new List<string>();
-        EnabledRowTypes = new Dictionary<string, bool>
-        {
-            { "MyList", true },
-            { "RecentlyAdded", true },
-            { "RandomPicks", true },
-            { "LongNotWatched", false },
-            { "Genres", true }
-        };
-        MyListLimit = 50;
         MinGenreItems = 5;
+        MyListLimit = 50;
+        
+        RandomRowOrder = false;
+        LazyLoadRows = true;
+        ReplaceHeartWithPlus = true;
     }
 
     /// <summary>
@@ -38,47 +56,82 @@ public class PluginConfiguration : BasePluginConfiguration
     public int MaxRows { get; set; }
 
     /// <summary>
-    /// Gets or sets the minimum number of items per row.
+    /// Gets or sets the minimum items per row.
     /// </summary>
     public int MinItemsPerRow { get; set; }
 
     /// <summary>
-    /// Gets or sets the maximum number of items per row.
+    /// Gets or sets the maximum items per row.
     /// </summary>
     public int MaxItemsPerRow { get; set; }
 
     /// <summary>
-    /// Gets or sets the number of days for recently added items.
+    /// Gets or sets a value indicating whether "My List" row is enabled.
     /// </summary>
-    public int RecentlyAddedDays { get; set; }
+    public bool EnableMyList { get; set; }
 
     /// <summary>
-    /// Gets or sets the number of months for long not watched items.
+    /// Gets or sets a value indicating whether "Recently Added" row is enabled.
     /// </summary>
-    public int LongNotWatchedMonths { get; set; }
+    public bool EnableRecentlyAdded { get; set; }
 
     /// <summary>
-    /// Gets or sets the enabled genres.
+    /// Gets or sets a value indicating whether "Random Picks" row is enabled.
+    /// </summary>
+    public bool EnableRandomPicks { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether "Long Not Watched" row is enabled.
+    /// </summary>
+    public bool EnableLongNotWatched { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of enabled genres.
     /// </summary>
     public List<string> EnabledGenres { get; set; }
 
     /// <summary>
-    /// Gets or sets the blacklisted genres.
+    /// Gets or sets the list of blacklisted genres.
     /// </summary>
     public List<string> BlacklistedGenres { get; set; }
 
     /// <summary>
-    /// Gets or sets the enabled row types.
+    /// Gets or sets custom display names for genres.
     /// </summary>
-    public Dictionary<string, bool> EnabledRowTypes { get; set; }
+    public Dictionary<string, string> GenreDisplayNames { get; set; }
 
     /// <summary>
-    /// Gets or sets the limit for my list items.
+    /// Gets or sets the number of days for "Recently Added" definition.
+    /// </summary>
+    public int RecentlyAddedDays { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of months for "Long Not Watched" definition.
+    /// </summary>
+    public int LongNotWatchedMonths { get; set; }
+
+    /// <summary>
+    /// Gets or sets the minimum number of items a genre must have to be displayed.
+    /// </summary>
+    public int MinGenreItems { get; set; }
+
+    /// <summary>
+    /// Gets or sets the maximum number of items in "My List".
     /// </summary>
     public int MyListLimit { get; set; }
 
     /// <summary>
-    /// Gets or sets the minimum items required to show a genre row.
+    /// Gets or sets a value indicating whether row order should be randomized.
     /// </summary>
-    public int MinGenreItems { get; set; }
+    public bool RandomRowOrder { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether rows should be lazy loaded.
+    /// </summary>
+    public bool LazyLoadRows { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether heart buttons should be replaced with plus icons.
+    /// </summary>
+    public bool ReplaceHeartWithPlus { get; set; }
 }
