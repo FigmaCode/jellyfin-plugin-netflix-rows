@@ -369,6 +369,36 @@ public class NetflixRowsController : ControllerBase
     }
 
     /// <summary>
+    /// Serves the Netflix Rows JavaScript file.
+    /// </summary>
+    /// <returns>JavaScript content.</returns>
+    [HttpGet("Script")]
+    [AllowAnonymous]
+    public ActionResult GetScript()
+    {
+        try
+        {
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            var resourceName = "Jellyfin.Plugin.NetflixRows.Web.netflixRows.js";
+            
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream != null)
+            {
+                using var reader = new StreamReader(stream);
+                var content = reader.ReadToEnd();
+                return Content(content, "application/javascript");
+            }
+            
+            return NotFound("Script not found");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error serving Netflix Rows script");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+        }
+    }
+
+    /// <summary>
     /// Updates plugin configuration.
     /// </summary>
     /// <param name="config">New configuration.</param>
