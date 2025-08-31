@@ -38,7 +38,7 @@ public static class JsTransformation
 
     private static string GetNetflixRowsJs()
     {
-        return @"
+        return """
 // Netflix Rows Plugin - Injected JavaScript
 (function() {
     'use strict';
@@ -67,7 +67,7 @@ public static class JsTransformation
                 mutation.addedNodes.forEach((node) => {
                     if (node.nodeType === Node.ELEMENT_NODE) {
                         // Find heart icons and replace with plus
-                        const heartIcons = node.querySelectorAll?.('.material-icons:contains(\"favorite\")') || [];
+                        const heartIcons = node.querySelectorAll?.('.material-icons') || [];
                         heartIcons.forEach((icon) => {
                             if (icon.textContent === 'favorite') {
                                 icon.textContent = 'add';
@@ -90,7 +90,7 @@ public static class JsTransformation
 
     // Create Netflix-style rows
     function createNetflixRows() {
-        const homeView = document.querySelector('.homeView, .view[data-type=\"home\"]');
+        const homeView = document.querySelector('.homeView, .view[data-type="home"]');
         if (!homeView) return;
 
         const rowsContainer = document.createElement('div');
@@ -206,7 +206,7 @@ public static class JsTransformation
             
         } catch (error) {
             console.error('Netflix Rows: Error loading rows:', error);
-            rowsContainer.innerHTML = '<p class=\"error\">Fehler beim Laden der Netflix Rows</p>';
+            rowsContainer.innerHTML = '<p class="error">Fehler beim Laden der Netflix Rows</p>';
         }
     }
     
@@ -256,7 +256,7 @@ public static class JsTransformation
             const data = await response.json();
             
             if (!data.Items || data.Items.length === 0) {
-                scrollerElement.innerHTML = '<p class=\"no-items\">Keine Inhalte gefunden</p>';
+                scrollerElement.innerHTML = '<p class="no-items">Keine Inhalte gefunden</p>';
                 return;
             }
             
@@ -273,7 +273,7 @@ public static class JsTransformation
             
         } catch (error) {
             console.error('Netflix Rows: Error loading row content:', error);
-            scrollerElement.innerHTML = '<p class=\"error\">Fehler beim Laden</p>';
+            scrollerElement.innerHTML = '<p class="error">Fehler beim Laden</p>';
         }
     }
     
@@ -329,8 +329,6 @@ public static class JsTransformation
     function addRowScrollFunctionality(rowElement) {
         const scroller = rowElement.querySelector('.netflix-row-items');
         if (!scroller) return;
-        
-        let isScrolling = false;
         
         scroller.addEventListener('wheel', (e) => {
             if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
@@ -420,7 +418,7 @@ public static class JsTransformation
             });
             
             // Initial check for home view
-            if (document.querySelector('.homeView, .view[data-type=\"home\"]')) {
+            if (document.querySelector('.homeView, .view[data-type="home"]')) {
                 setTimeout(createNetflixRows, 100);
             }
         });
@@ -428,7 +426,24 @@ public static class JsTransformation
     
     init();
 })();
-";
+""";
+    }
+
+    /// <summary>
+    /// Transform data structure.
+    /// </summary>
+    public class TransformData
+    {
+        /// <summary>
+        /// Gets or sets the file contents.
+        /// </summary>
+        public string? Contents { get; set; }
+    }
+}}
+    
+    init();
+})();
+""";
     }
 
     /// <summary>
