@@ -12,7 +12,7 @@
         "changelog": "Complete Netflix-style frontend integration with File Transformation support",
         "targetAbi": "10.10.0.0",
         "sourceUrl": "https://github.com/FigmaCode/jellyfin-plugin-netflix-rows/releases/download/v2.0.4/jellyfin-plugin-netflix-rows-v2.0.4.zip",
-        "checksum": "f803ff73ec1229dba261430881fb02b3",
+        "checksum": "f304ae905a08bc9bd9a47200ca547d26",
         "timestamp": "2024-08-29T00:00:00.0000000Z"
       }
     ]
