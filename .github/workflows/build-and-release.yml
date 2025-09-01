@@ -42,21 +42,27 @@ jobs:
         cd Jellyfin.Plugin.NetflixRows/bin/Release/net8.0
         zip -r ../../../../artifacts/jellyfin-plugin-netflix-rows-${{ github.ref_name || 'dev' }}.zip .
     
-    - name: Generate manifest and repository files
+    - name: Calculate checksum
       run: |
-        # Generate timestamp
-        TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S.%fZ)
+        cd artifacts
+        CHECKSUM=$(sha256sum jellyfin-plugin-netflix-rows-*.zip | cut -d' ' -f1)
+        echo "CALCULATED_CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
+        echo "Calculated checksum: $CHECKSUM"
+    
+    - name: Create repository.json
+      run: |
         # Extract version number without 'v' prefix
         RAW_VERSION="${{ github.ref_name || '1.0.0' }}"
-        VERSION="${RAW_VERSION#v}"  # Remove 'v' prefix if present
+        VERSION="${RAW_VERSION#v}"
         TAG_NAME="${{ github.ref_name || 'v1.0.0' }}"
+        TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S.%fZ)
         
-        echo "Raw version: $RAW_VERSION"
-        echo "Clean version: $VERSION" 
-        echo "Tag name: $TAG_NAME"
+        echo "Creating repository.json with:"
+        echo "Version: $VERSION"
+        echo "Tag: $TAG_NAME" 
+        echo "Checksum: $CALCULATED_CHECKSUM"
         
-        # Create manifest.json
-        cat > artifacts/manifest.json << EOF
+        cat > artifacts/repository.json << EOF
         [
           {
             "name": "Netflix Rows",
@@ -68,10 +74,10 @@ jobs:
             "versions": [
               {
                 "version": "$VERSION",
-                "changelog": "Netflix-style rows, genre filtering, and watchlist functionality. See GitHub releases for detailed changelog.",
+                "changelog": "Netflix-style rows with dynamic content organization. Full changelog: https://github.com/${{ github.repository }}/releases/tag/$TAG_NAME",
                 "targetAbi": "10.10.7.0",
                 "sourceUrl": "https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/jellyfin-plugin-netflix-rows-$RAW_VERSION.zip",
-                "checksum": "PLACEHOLDER_CHECKSUM",
+                "checksum": "$CALCULATED_CHECKSUM",
                 "timestamp": "$TIMESTAMP"
               }
             ]
@@ -79,54 +85,16 @@ jobs:
         ]
         EOF
         
-        # Create repository.json (copy from root or create new)
-        if [ -f "repository.json" ]; then
-          # Update existing repository.json
-          cp repository.json artifacts/repository.json
-          # Update the version info in the existing repository.json
-          jq --arg version "$VERSION" \
-             --arg checksum "PLACEHOLDER_CHECKSUM" \
-             --arg sourceUrl "https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/jellyfin-plugin-netflix-rows-$RAW_VERSION.zip" \
-             --arg timestamp "$TIMESTAMP" \
-             --arg changelog "Netflix-style rows, genre filtering, and watchlist functionality. Full changelog: https://github.com/${{ github.repository }}/releases/tag/$TAG_NAME" \
-             '.[0].versions = [{"version": $version, "changelog": $changelog, "targetAbi": "10.10.7.0", "sourceUrl": $sourceUrl, "checksum": $checksum, "timestamp": $timestamp}] + (.[0].versions // [])' \
-             artifacts/repository.json > artifacts/repository_temp.json && mv artifacts/repository_temp.json artifacts/repository.json
-        else
-          # Create new repository.json if it doesn't exist
-          cp artifacts/manifest.json artifacts/repository.json
-        fi
+        # Create manifest.json (same content)
+        cp artifacts/repository.json artifacts/manifest.json
         
         # Copy meta.json if it exists
         if [ -f "meta.json" ]; then
           cp meta.json artifacts/
         fi
-    
-    - name: Calculate and update checksums
-      run: |
-        # Calculate checksum of the zip file
-        CHECKSUM=$(sha256sum artifacts/jellyfin-plugin-netflix-rows-*.zip | cut -d' ' -f1)
-        echo "Calculated checksum: $CHECKSUM"
         
-        # Update checksum in manifest.json
-        sed -i "s/PLACEHOLDER_CHECKSUM/$CHECKSUM/g" artifacts/manifest.json
-        
-        # Update checksum in repository.json
-        sed -i "s/PLACEHOLDER_CHECKSUM/$CHECKSUM/g" artifacts/repository.json
-        
-        # Verify the files contain the checksum
-        echo "=== Manifest.json ==="
-        cat artifacts/manifest.json
-        echo "=== Repository.json ==="
+        echo "=== Final repository.json ==="
         cat artifacts/repository.json
-    
-    - name: Create version-specific repository file
-      if: startsWith(github.ref, 'refs/tags/')
-      run: |
-        # Create a version-specific repository file for this release
-        cp artifacts/repository.json artifacts/repository-${{ github.ref_name }}.json
-        
-        # Also update the main repository.json in the repo root (this will be committed later)
-        cp artifacts/repository.json ./repository.json
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -144,9 +112,7 @@ jobs:
       with:
         files: |
           artifacts/*.zip
-          artifacts/manifest.json
           artifacts/repository.json
-          artifacts/repository-${{ github.ref_name }}.json
           artifacts/meta.json
         body: |
           ## Netflix Rows Plugin ${{ github.ref_name }}
