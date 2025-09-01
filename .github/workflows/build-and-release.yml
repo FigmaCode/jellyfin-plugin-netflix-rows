@@ -46,7 +46,14 @@ jobs:
       run: |
         # Generate timestamp
         TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S.%fZ)
-        VERSION="${{ github.ref_name || '1.0.0.0' }}"
+        # Extract version number without 'v' prefix
+        RAW_VERSION="${{ github.ref_name || '1.0.0' }}"
+        VERSION="${RAW_VERSION#v}"  # Remove 'v' prefix if present
+        TAG_NAME="${{ github.ref_name || 'v1.0.0' }}"
+        
+        echo "Raw version: $RAW_VERSION"
+        echo "Clean version: $VERSION" 
+        echo "Tag name: $TAG_NAME"
         
         # Create manifest.json
         cat > artifacts/manifest.json << EOF
@@ -63,7 +70,7 @@ jobs:
                 "version": "$VERSION",
                 "changelog": "Netflix-style rows, genre filtering, and watchlist functionality. See GitHub releases for detailed changelog.",
                 "targetAbi": "10.10.7.0",
-                "sourceUrl": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name || 'v1.0.0' }}/jellyfin-plugin-netflix-rows-${{ github.ref_name || 'dev' }}.zip",
+                "sourceUrl": "https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/jellyfin-plugin-netflix-rows-$RAW_VERSION.zip",
                 "checksum": "PLACEHOLDER_CHECKSUM",
                 "timestamp": "$TIMESTAMP"
               }
@@ -79,9 +86,10 @@ jobs:
           # Update the version info in the existing repository.json
           jq --arg version "$VERSION" \
              --arg checksum "PLACEHOLDER_CHECKSUM" \
-             --arg sourceUrl "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name || 'v1.0.0' }}/jellyfin-plugin-netflix-rows-${{ github.ref_name || 'dev' }}.zip" \
+             --arg sourceUrl "https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/jellyfin-plugin-netflix-rows-$RAW_VERSION.zip" \
              --arg timestamp "$TIMESTAMP" \
-             '.[0].versions = [{"version": $version, "changelog": "Netflix-style rows, genre filtering, and watchlist functionality. Full changelog: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name || 'v1.0.0' }}", "targetAbi": "10.10.7.0", "sourceUrl": $sourceUrl, "checksum": $checksum, "timestamp": $timestamp}] + .[0].versions[1:]' \
+             --arg changelog "Netflix-style rows, genre filtering, and watchlist functionality. Full changelog: https://github.com/${{ github.repository }}/releases/tag/$TAG_NAME" \
+             '.[0].versions = [{"version": $version, "changelog": $changelog, "targetAbi": "10.10.7.0", "sourceUrl": $sourceUrl, "checksum": $checksum, "timestamp": $timestamp}] + (.[0].versions // [])' \
              artifacts/repository.json > artifacts/repository_temp.json && mv artifacts/repository_temp.json artifacts/repository.json
         else
           # Create new repository.json if it doesn't exist
