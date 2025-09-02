@@ -10,6 +10,7 @@ using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.NetflixRows;
 
@@ -18,6 +19,8 @@ namespace Jellyfin.Plugin.NetflixRows;
 /// </summary>
 public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
+    private readonly ILogger<Plugin> _logger;
+
     /// <summary>
     /// Gets the current plugin instance.
     /// </summary>
@@ -28,19 +31,19 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// </summary>
     /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
     /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
-    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer)
+    /// <param name="logger">Instance of the <see cref="ILogger{Plugin}"/> interface.</param>
+    public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ILogger<Plugin> logger)
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
+        _logger = logger;
+        
+        _logger.LogInformation("Netflix Rows Plugin initializing...");
         
         // Register transformations for web client modifications
         RegisterWebTransformations();
         
-        // Register custom home sections
-        RegisterHomeSections();
-        
-        // Register configuration page
-        RegisterConfigurationPage();
+        _logger.LogInformation("Netflix Rows Plugin initialized successfully");
     }
 
     /// <inheritdoc />
@@ -55,11 +58,12 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
+        _logger.LogInformation("Getting plugin configuration pages");
         return new[]
         {
             new PluginPageInfo
             {
-                Name = this.Name,
+                Name = "Netflix Rows Configuration",
                 EmbeddedResourcePath = GetType().Namespace + ".Configuration.configPage.html"
             }
         };
@@ -69,15 +73,29 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         try
         {
+            _logger.LogInformation("Attempting to register web transformations");
+            
             var assembly = AssemblyLoadContext.All
                 .SelectMany(x => x.Assemblies)
-                .FirstOrDefault(x => x.FullName?.Contains(".FileTransformation") ?? false);
+                .FirstOrDefault(x => x.FullName?.Contains(".FileTransformation", StringComparison.OrdinalIgnoreCase) ?? false);
 
             if (assembly != null)
             {
+                _logger.LogInformation("File Transformation plugin found, registering transformations");
+                
                 var pluginInterfaceType = assembly.GetType("Jellyfin.Plugin.FileTransformation.PluginInterface");
                 if (pluginInterfaceType != null)
                 {
+                    // Register JavaScript transformation
+                    var jsPayload = new
+                    {
+                        id = Guid.NewGuid().ToString(),
+                        fileNamePattern = @".*main.*\.js$",
+                        callbackAssembly = GetType().Assembly.FullName,
+                        callbackClass = "Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation",
+                        callbackMethod = "TransformJs"
+                    };
+
                     // Register CSS transformation
                     var cssPayload = new
                     {
@@ -88,109 +106,24 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                         callbackMethod = "TransformCss"
                     };
 
-                    // Register JS transformation  
-                    var jsPayload = new
-                    {
-                        id = Guid.NewGuid().ToString(),
-                        fileNamePattern = @".*main.*\.js$",
-                        callbackAssembly = GetType().Assembly.FullName,
-                        callbackClass = "Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation",
-                        callbackMethod = "TransformJs"
-                    };
-
-                    pluginInterfaceType.GetMethod("RegisterTransformation")?.Invoke(null, new object[] { JsonSerializer.Serialize(cssPayload) });
                     pluginInterfaceType.GetMethod("RegisterTransformation")?.Invoke(null, new object[] { JsonSerializer.Serialize(jsPayload) });
+                    pluginInterfaceType.GetMethod("RegisterTransformation")?.Invoke(null, new object[] { JsonSerializer.Serialize(cssPayload) });
+                    
+                    _logger.LogInformation("Web transformations registered successfully");
+                }
+                else
+                {
+                    _logger.LogWarning("File Transformation PluginInterface type not found");
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            // Log error if transformation registration fails
-            System.Diagnostics.Debug.WriteLine($"Failed to register transformations: {ex.Message}");
-        }
-    }
-
-    private void RegisterHomeSections()
-    {
-        try
-        {
-            var assembly = AssemblyLoadContext.All
-                .SelectMany(x => x.Assemblies)
-                .FirstOrDefault(x => x.FullName?.Contains(".HomeScreen") ?? false);
-
-            if (assembly != null)
+            else
             {
-                // Register with Home Screen Sections plugin
-                var config = Configuration;
-                
-                if (config.EnableMyList)
-                {
-                    RegisterSection("netflix-my-list", "Meine Liste", "/NetflixRows/MyList");
-                }
-                
-                if (config.EnableRecentlyAdded)
-                {
-                    RegisterSection("netflix-recently-added", "Kürzlich hinzugefügt", "/NetflixRows/RecentlyAdded");
-                }
-                
-                if (config.EnableRandomPicks)
-                {
-                    RegisterSection("netflix-random", "Zufallsauswahl", "/NetflixRows/RandomPicks");
-                }
-                
-                if (config.EnableLongNotWatched)
-                {
-                    RegisterSection("netflix-long-not-watched", "Lange nicht gesehen", "/NetflixRows/LongNotWatched");
-                }
-                
-                // Register genre sections
-                foreach (var genre in config.EnabledGenres)
-                {
-                    var displayName = config.GenreDisplayNames.ContainsKey(genre) 
-                        ? config.GenreDisplayNames[genre] 
-                        : genre;
-                    RegisterSection($"netflix-genre-{genre.ToLowerInvariant()}", displayName, $"/NetflixRows/Genre/{genre}");
-                }
+                _logger.LogWarning("File Transformation plugin not found. Netflix Rows will work with limited functionality.");
             }
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to register home sections: {ex.Message}");
-        }
-    }
-
-    private void RegisterSection(string id, string displayText, string endpoint)
-    {
-        // This would integrate with the Home Sections plugin
-        // Implementation depends on the exact API of that plugin
-    }
-
-    private void RegisterConfigurationPage()
-    {
-        try
-        {
-            var assembly = AssemblyLoadContext.All
-                .SelectMany(x => x.Assemblies)
-                .FirstOrDefault(x => x.FullName?.Contains(".PluginPages") ?? false);
-
-            if (assembly != null)
-            {
-                // Register configuration page with Plugin Pages
-                var pageData = new
-                {
-                    name = "Netflix Rows Settings",
-                    route = "netflixrows-settings",
-                    menuText = "Netflix Rows",
-                    iconClass = "material-icons view_module",
-                    htmlPath = "Configuration/configPage.html"
-                };
-                
-                // Register with Plugin Pages if available
-            }
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Failed to register configuration page: {ex.Message}");
+            _logger.LogError(ex, "Failed to register web transformations");
         }
     }
 }
