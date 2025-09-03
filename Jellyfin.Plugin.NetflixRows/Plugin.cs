@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text.Json;
 using Jellyfin.Plugin.NetflixRows.Configuration;
+using Jellyfin.Plugin.NetflixRows.Controllers;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -54,6 +55,16 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     /// <inheritdoc />
     public override string Description => "Transform your Jellyfin home screen into a Netflix-like experience with dynamic rows, genres, and a custom watchlist.";
+
+    /// <summary>
+    /// Register services for dependency injection.
+    /// </summary>
+    /// <param name="serviceCollection">Service collection.</param>
+    public static void RegisterServices(IServiceCollection serviceCollection)
+    {
+        // Register the controller explicitly if needed
+        serviceCollection.AddSingleton<NetflixRowsController>();
+    }
 
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
