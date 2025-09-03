@@ -7,7 +7,7 @@
     "category": "General",
     "guid": "12345678-1234-5678-9abc-123456789012",
     "imageUrl": "https://raw.githubusercontent.com/jellyfin/jellyfin-web/master/src/assets/img/banner-dark.png",
-    "repositoryUrl": "https://github.com/[YOUR-USERNAME]/jellyfin-plugin-netflix-rows",
+    "repositoryUrl": "https://github.com/FigmaCode/jellyfin-plugin-netflix-rows",
     "versions": [
       {
         "version": "1.0.0.0",

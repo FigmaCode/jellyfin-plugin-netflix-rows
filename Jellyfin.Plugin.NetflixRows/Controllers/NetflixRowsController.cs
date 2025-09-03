@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Jellyfin.Data.Entities;
 
 namespace Jellyfin.Plugin.NetflixRows.Controllers;
 
@@ -28,7 +28,7 @@ namespace Jellyfin.Plugin.NetflixRows.Controllers;
 public class NetflixRowsController : ControllerBase
 {
     private readonly ILibraryManager _libraryManager;
-    private readonly IUserManager _userManager;
+    private readonly Jellyfin.Data.IUserManager _userManager;
     private readonly IDtoService _dtoService;
     private readonly ILogger<NetflixRowsController> _logger;
 
@@ -36,12 +36,12 @@ public class NetflixRowsController : ControllerBase
     /// Initializes a new instance of the <see cref="NetflixRowsController"/> class.
     /// </summary>
     /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
-    /// <param name="userManager">Instance of the <see cref="IUserManager"/> interface.</param>
+    /// <param name="userManager">Instance of the <see cref="Jellyfin.Data.IUserManager"/> interface.</param>
     /// <param name="dtoService">Instance of the <see cref="IDtoService"/> interface.</param>
     /// <param name="logger">Instance of the <see cref="ILogger{NetflixRowsController}"/> interface.</param>
     public NetflixRowsController(
         ILibraryManager libraryManager,
-        IUserManager userManager,
+        Jellyfin.Data.IUserManager userManager,
         IDtoService dtoService,
         ILogger<NetflixRowsController> logger)
     {
@@ -52,6 +52,18 @@ public class NetflixRowsController : ControllerBase
     }
 
     /// <summary>
+    /// Test endpoint to verify controller is working.
+    /// </summary>
+    /// <returns>Test message.</returns>
+    [HttpGet("Test")]
+    [AllowAnonymous]
+    public ActionResult<string> Test()
+    {
+        _logger.LogInformation("Netflix Rows Test endpoint called");
+        return "Netflix Rows Controller is working!";
+    }
+
+    /// <summary>
     /// Gets "My List" items for the current user.
     /// </summary>
     /// <param name="userId">User ID.</param>
@@ -59,15 +71,16 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with favorite items.</returns>
     [HttpGet("MyList")]
     [Authorize]
-    public ActionResult<QueryResult<BaseItemDto>> GetMyList(
+    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetMyList(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
-            var user = _userManager.GetUserById(userId);
+            var user = await _userManager.GetUserByIdAsync(userId);
             if (user == null)
             {
+                _logger.LogWarning("Invalid user ID: {UserId}", userId);
                 return BadRequest("Invalid user ID");
             }
 
@@ -86,6 +99,8 @@ public class NetflixRowsController : ControllerBase
             var items = _libraryManager.GetItemsResult(query);
             var dtoOptions = new DtoOptions(true);
             var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
+
+            _logger.LogDebug("Retrieved {Count} items for My List for user {UserId}", dtos.Length, userId);
 
             return new QueryResult<BaseItemDto>
             {
@@ -108,13 +123,13 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with recently added items.</returns>
     [HttpGet("RecentlyAdded")]
     [Authorize]
-    public ActionResult<QueryResult<BaseItemDto>> GetRecentlyAdded(
+    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetRecentlyAdded(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
-            var user = _userManager.GetUserById(userId);
+            var user = await _userManager.GetUserByIdAsync(userId);
             if (user == null)
             {
                 return BadRequest("Invalid user ID");
@@ -135,6 +150,8 @@ public class NetflixRowsController : ControllerBase
             var items = _libraryManager.GetItemsResult(query);
             var dtoOptions = new DtoOptions(true);
             var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
+
+            _logger.LogDebug("Retrieved {Count} recently added items for user {UserId}", dtos.Length, userId);
 
             return new QueryResult<BaseItemDto>
             {
@@ -157,13 +174,13 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with random items.</returns>
     [HttpGet("RandomPicks")]
     [Authorize]
-    public ActionResult<QueryResult<BaseItemDto>> GetRandomPicks(
+    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetRandomPicks(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
-            var user = _userManager.GetUserById(userId);
+            var user = await _userManager.GetUserByIdAsync(userId);
             if (user == null)
             {
                 return BadRequest("Invalid user ID");
@@ -182,6 +199,8 @@ public class NetflixRowsController : ControllerBase
             var items = _libraryManager.GetItemsResult(query);
             var dtoOptions = new DtoOptions(true);
             var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
+
+            _logger.LogDebug("Retrieved {Count} random picks for user {UserId}", dtos.Length, userId);
 
             return new QueryResult<BaseItemDto>
             {
@@ -204,13 +223,13 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with long not watched items.</returns>
     [HttpGet("LongNotWatched")]
     [Authorize]
-    public ActionResult<QueryResult<BaseItemDto>> GetLongNotWatched(
+    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetLongNotWatched(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
-            var user = _userManager.GetUserById(userId);
+            var user = await _userManager.GetUserByIdAsync(userId);
             if (user == null)
             {
                 return BadRequest("Invalid user ID");
@@ -219,8 +238,7 @@ public class NetflixRowsController : ControllerBase
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
             var cutoffDate = DateTime.UtcNow.AddMonths(-config.LongNotWatchedMonths);
 
-            // Get all items first and then filter by date
-            var allItemsQuery = new InternalItemsQuery(user)
+            var query = new InternalItemsQuery(user)
             {
                 IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
                 IsVirtualItem = false,
@@ -228,10 +246,9 @@ public class NetflixRowsController : ControllerBase
                 Recursive = true
             };
 
-            var allItems = _libraryManager.GetItemsResult(allItemsQuery);
+            var items = _libraryManager.GetItemsResult(query);
             
-            // Filter by date created (since MaxDateCreated doesn't exist)
-            var filteredItems = allItems.Items
+            var filteredItems = items.Items
                 .Where(item => item.DateCreated <= cutoffDate)
                 .OrderBy(item => item.DateCreated)
                 .Take(Math.Min(limit, config.MaxItemsPerRow))
@@ -239,6 +256,8 @@ public class NetflixRowsController : ControllerBase
 
             var dtoOptions = new DtoOptions(true);
             var dtos = filteredItems.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
+
+            _logger.LogDebug("Retrieved {Count} long not watched items for user {UserId}", dtos.Length, userId);
 
             return new QueryResult<BaseItemDto>
             {
@@ -262,14 +281,14 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with items of the specified genre.</returns>
     [HttpGet("Genre/{genre}")]
     [Authorize]
-    public ActionResult<QueryResult<BaseItemDto>> GetGenre(
+    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetGenre(
         string genre,
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
-            var user = _userManager.GetUserById(userId);
+            var user = await _userManager.GetUserByIdAsync(userId);
             if (user == null)
             {
                 return BadRequest("Invalid user ID");
@@ -277,7 +296,6 @@ public class NetflixRowsController : ControllerBase
 
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
             
-            // Check if genre is blacklisted
             if (config.BlacklistedGenres.Contains(genre, StringComparer.OrdinalIgnoreCase))
             {
                 return BadRequest("Genre is blacklisted");
@@ -294,7 +312,6 @@ public class NetflixRowsController : ControllerBase
 
             var items = _libraryManager.GetItemsResult(query);
             
-            // Check if genre has minimum required items
             if (items.TotalRecordCount < config.MinGenreItems)
             {
                 return Ok(new QueryResult<BaseItemDto>
@@ -306,6 +323,8 @@ public class NetflixRowsController : ControllerBase
 
             var dtoOptions = new DtoOptions(true);
             var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
+
+            _logger.LogDebug("Retrieved {Count} items for genre {Genre} for user {UserId}", dtos.Length, genre, userId);
 
             return new QueryResult<BaseItemDto>
             {
@@ -327,11 +346,11 @@ public class NetflixRowsController : ControllerBase
     /// <returns>List of available genres.</returns>
     [HttpGet("Genres")]
     [Authorize]
-    public ActionResult<IEnumerable<string>> GetGenres([FromQuery] Guid userId)
+    public async Task<ActionResult<IEnumerable<string>>> GetGenres([FromQuery] Guid userId)
     {
         try
         {
-            var user = _userManager.GetUserById(userId);
+            var user = await _userManager.GetUserByIdAsync(userId);
             if (user == null)
             {
                 return BadRequest("Invalid user ID");
@@ -356,6 +375,7 @@ public class NetflixRowsController : ControllerBase
                 .OrderBy(genre => genre)
                 .ToList();
 
+            _logger.LogDebug("Retrieved {Count} genres for user {UserId}", genres.Count, userId);
             return Ok(genres);
         }
         catch (Exception ex)
@@ -370,10 +390,50 @@ public class NetflixRowsController : ControllerBase
     /// </summary>
     /// <returns>Plugin configuration.</returns>
     [HttpGet("Config")]
-    [Authorize]
+    [AllowAnonymous]  // Allow anonymous access for testing
     public ActionResult<PluginConfiguration> GetConfig()
     {
-        return Plugin.Instance?.Configuration ?? new PluginConfiguration();
+        try
+        {
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            _logger.LogDebug("Configuration requested, returning config with {Count} enabled genres", 
+                config.EnabledGenres?.Count ?? 0);
+            return config;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting configuration");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Updates plugin configuration.
+    /// </summary>
+    /// <param name="config">New configuration.</param>
+    /// <returns>Action result.</returns>
+    [HttpPost("Config")]
+    [Authorize]
+    public ActionResult UpdateConfig([FromBody] PluginConfiguration config)
+    {
+        try
+        {
+            if (Plugin.Instance != null && config != null)
+            {
+                _logger.LogInformation("Updating Netflix Rows configuration");
+                Plugin.Instance.UpdateConfiguration(config);
+                Plugin.Instance.SaveConfiguration();
+                _logger.LogInformation("Configuration updated successfully");
+                return Ok();
+            }
+            
+            return BadRequest("Plugin instance not available or invalid config");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating configuration");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+        }
     }
 
     /// <summary>
@@ -394,41 +454,16 @@ public class NetflixRowsController : ControllerBase
             {
                 using var reader = new StreamReader(stream);
                 var content = reader.ReadToEnd();
+                _logger.LogDebug("Serving Netflix Rows script, size: {Size} bytes", content.Length);
                 return Content(content, "application/javascript");
             }
             
+            _logger.LogWarning("Netflix Rows script resource not found");
             return NotFound("Script not found");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error serving Netflix Rows script");
-            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
-        }
-    }
-
-    /// <summary>
-    /// Updates plugin configuration.
-    /// </summary>
-    /// <param name="config">New configuration.</param>
-    /// <returns>Action result.</returns>
-    [HttpPost("Config")]
-    [Authorize]
-    public ActionResult UpdateConfig([FromBody] PluginConfiguration config)
-    {
-        try
-        {
-            if (Plugin.Instance != null)
-            {
-                Plugin.Instance.UpdateConfiguration(config);
-                Plugin.Instance.SaveConfiguration();
-                return Ok();
-            }
-            
-            return BadRequest("Plugin instance not available");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating configuration");
             return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
         }
     }

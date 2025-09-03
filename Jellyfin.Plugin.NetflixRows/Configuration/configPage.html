@@ -1,140 +1,389 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
     <title>Netflix Rows - Konfiguration</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--theme-body-background, #181818);
+            color: var(--theme-text-color, #ffffff);
+            line-height: 1.6;
+        }
+        
         .netflix-config-container {
             padding: 2rem;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
+            min-height: 100vh;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--theme-primary-color, #e50914);
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin: 0 0 1rem 0;
+            color: var(--theme-primary-color, #e50914);
+            font-weight: 700;
+        }
+        
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0;
         }
         
         .config-section {
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            border-radius: 8px;
-            background: rgba(40, 40, 40, 1);
+            margin-bottom: 2.5rem;
+            padding: 2rem;
+            border-radius: 12px;
+            background: var(--theme-card-background, rgba(40, 40, 40, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
         
         .config-section h3 {
-            margin-top: 0;
-            color: #ffffff;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 0.5rem;
+            margin: 0 0 1.5rem 0;
+            color: var(--theme-text-color, #ffffff);
+            font-size: 1.4rem;
+            font-weight: 600;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--theme-primary-color, #e50914);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.8;
         }
         
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.75rem;
+        }
+        
+        .form-group:last-child {
+            margin-bottom: 0;
         }
         
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #ffffff;
+            font-weight: 600;
+            color: var(--theme-text-color, #ffffff);
+            font-size: 1rem;
         }
         
         .form-control {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            background: rgba(60, 60, 60, 1);
-            color: #ffffff;
+            padding: 0.875rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: var(--theme-input-background, rgba(60, 60, 60, 0.8));
+            color: var(--theme-text-color, #ffffff);
             font-size: 1rem;
+            transition: all 0.3s ease;
         }
         
         .form-control:focus {
             outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
+            border-color: var(--theme-primary-color, #e50914);
+            box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.2);
+            background: var(--theme-input-background, rgba(60, 60, 60, 1));
         }
         
         .form-check {
             display: flex;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: background-color 0.2s ease;
+        }
+        
+        .form-check:hover {
+            background: rgba(255, 255, 255, 0.08);
         }
         
         .form-check input[type="checkbox"] {
-            margin-right: 0.75rem;
-            width: 1.2rem;
-            height: 1.2rem;
-            accent-color: #007bff;
+            margin-right: 1rem;
+            width: 1.3rem;
+            height: 1.3rem;
+            accent-color: var(--theme-primary-color, #e50914);
+            cursor: pointer;
         }
         
         .form-check label {
             margin: 0;
             cursor: pointer;
-        }
-        
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
+            flex: 1;
             font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary {
-            background: #007bff;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: rgba(0, 123, 255, 0.9);
-        }
-        
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-        }
-        
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .alert {
-            padding: 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-        }
-        
-        .alert-success {
-            background: rgba(40, 167, 69, 0.2);
-            border: 1px solid rgba(40, 167, 69, 0.5);
-            color: #28a745;
-        }
-        
-        .alert-error {
-            background: rgba(220, 53, 69, 0.2);
-            border: 1px solid rgba(220, 53, 69, 0.5);
-            color: #dc3545;
         }
         
         .help-text {
             font-size: 0.875rem;
             color: rgba(255, 255, 255, 0.7);
-            margin-top: 0.25rem;
+            margin-top: 0.5rem;
+            font-style: italic;
+            line-height: 1.4;
+        }
+        
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
         }
         
         .range-display {
+            font-weight: 700;
+            color: var(--theme-primary-color, #e50914);
+            font-size: 1.1rem;
+            min-width: 3rem;
+            text-align: center;
+            padding: 0.25rem 0.75rem;
+            background: rgba(229, 9, 20, 0.1);
+            border-radius: 6px;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--theme-primary-color, #e50914), #b8070f);
+            color: white;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #b8070f, var(--theme-primary-color, #e50914));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(229, 9, 20, 0.6);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--theme-text-color, #ffffff);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn-test {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-test:hover {
+            background: linear-gradient(135deg, #20c997, #28a745);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(40, 167, 69, 0.6);
+        }
+        
+        .alert {
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid;
             font-weight: 500;
-            color: #007bff;
-            margin-left: 0.5rem;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .alert-success {
+            background: rgba(40, 167, 69, 0.15);
+            border-color: rgba(40, 167, 69, 0.5);
+            color: #28a745;
+        }
+        
+        .alert-error {
+            background: rgba(220, 53, 69, 0.15);
+            border-color: rgba(220, 53, 69, 0.5);
+            color: #dc3545;
+        }
+        
+        .alert-info {
+            background: rgba(23, 162, 184, 0.15);
+            border-color: rgba(23, 162, 184, 0.5);
+            color: #17a2b8;
         }
         
         .actions {
             display: flex;
+            gap: 1.5rem;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border-top: 3px solid var(--theme-primary-color, #e50914);
+        }
+        
+        .actions-left {
+            display: flex;
             gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .actions-right {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .status-indicator {
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 150px;
+        }
+        
+        .status-loading {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.5);
+        }
+        
+        .status-success {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.5);
+        }
+        
+        .status-error {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--theme-primary-color, #e50914);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .genre-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .debug-section {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 4px solid #ffc107;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+        
+        .debug-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .debug-info h4 {
+            margin: 0 0 0.75rem 0;
+            color: #ffc107;
+            font-size: 1rem;
+        }
+        
+        .debug-info pre {
+            margin: 0;
+            overflow-x: auto;
+            color: rgba(255, 255, 255, 0.8);
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .netflix-config-container {
+                padding: 1rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .config-section {
+                padding: 1.5rem;
+            }
+            
+            .actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .actions-left, .actions-right {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .genre-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -142,31 +391,44 @@
     <div class="netflix-config-container">
         <div id="alertContainer"></div>
         
-        <h1>Netflix Rows - Konfiguration</h1>
-        <p>Konfigurieren Sie Ihr Netflix-ähnliches Startseiten-Erlebnis für Jellyfin.</p>
+        <div class="page-header">
+            <h1>Netflix Rows</h1>
+            <p>Verwandeln Sie Ihre Jellyfin-Startseite in ein Netflix-ähnliches Erlebnis</p>
+        </div>
 
         <form id="configForm">
             <!-- Allgemeine Einstellungen -->
             <div class="config-section">
-                <h3>Allgemeine Einstellungen</h3>
+                <h3>
+                    <span class="section-icon">⚙️</span>
+                    Allgemeine Einstellungen
+                </h3>
                 
                 <div class="form-group">
                     <label for="maxRows">Maximale Anzahl Rows</label>
-                    <input type="range" id="maxRows" name="maxRows" min="1" max="20" value="8" class="form-control">
-                    <span class="range-display" id="maxRowsDisplay">8</span>
+                    <div class="range-container">
+                        <input type="range" id="maxRows" name="maxRows" min="1" max="20" value="8" class="form-control">
+                        <span class="range-display" id="maxRowsDisplay">8</span>
+                    </div>
                     <div class="help-text">Bestimmt, wie viele Zeilen maximal auf der Startseite angezeigt werden.</div>
                 </div>
                 
                 <div class="form-group">
                     <label for="minItemsPerRow">Minimale Items pro Row</label>
-                    <input type="range" id="minItemsPerRow" name="minItemsPerRow" min="1" max="50" value="10" class="form-control">
-                    <span class="range-display" id="minItemsPerRowDisplay">10</span>
+                    <div class="range-container">
+                        <input type="range" id="minItemsPerRow" name="minItemsPerRow" min="1" max="50" value="10" class="form-control">
+                        <span class="range-display" id="minItemsPerRowDisplay">10</span>
+                    </div>
+                    <div class="help-text">Mindestanzahl der Elemente, die in einer Row angezeigt werden müssen.</div>
                 </div>
                 
                 <div class="form-group">
                     <label for="maxItemsPerRow">Maximale Items pro Row</label>
-                    <input type="range" id="maxItemsPerRow" name="maxItemsPerRow" min="1" max="100" value="25" class="form-control">
-                    <span class="range-display" id="maxItemsPerRowDisplay">25</span>
+                    <div class="range-container">
+                        <input type="range" id="maxItemsPerRow" name="maxItemsPerRow" min="1" max="100" value="25" class="form-control">
+                        <span class="range-display" id="maxItemsPerRowDisplay">25</span>
+                    </div>
+                    <div class="help-text">Maximale Anzahl der Elemente pro Row.</div>
                 </div>
                 
                 <div class="form-group">
@@ -196,14 +458,17 @@
 
             <!-- Row-Typen -->
             <div class="config-section">
-                <h3>Row-Typen</h3>
+                <h3>
+                    <span class="section-icon">📺</span>
+                    Row-Typen
+                </h3>
                 
                 <div class="form-group">
                     <div class="form-check">
                         <input type="checkbox" id="enableMyList" name="enableMyList" checked>
                         <label for="enableMyList">Meine Liste</label>
                     </div>
-                    <div class="help-text">Zeigt Favoriten des Benutzers an.</div>
+                    <div class="help-text">Zeigt die Favoriten des Benutzers in einer eigenen Row an.</div>
                 </div>
                 
                 <div class="form-group">
@@ -211,6 +476,7 @@
                         <input type="checkbox" id="enableRecentlyAdded" name="enableRecentlyAdded" checked>
                         <label for="enableRecentlyAdded">Kürzlich hinzugefügt</label>
                     </div>
+                    <div class="help-text">Zeigt kürzlich zur Mediathek hinzugefügte Inhalte an.</div>
                 </div>
                 
                 <div class="form-group">
@@ -218,7 +484,7 @@
                         <input type="checkbox" id="enableRandomPicks" name="enableRandomPicks" checked>
                         <label for="enableRandomPicks">Zufallsauswahl</label>
                     </div>
-                    <div class="help-text">Zeigt zufällige Inhalte zur Entdeckung an.</div>
+                    <div class="help-text">Zeigt zufällige Inhalte zur Entdeckung neuer Medien an.</div>
                 </div>
                 
                 <div class="form-group">
@@ -226,16 +492,21 @@
                         <input type="checkbox" id="enableLongNotWatched" name="enableLongNotWatched" checked>
                         <label for="enableLongNotWatched">Lange nicht gesehen</label>
                     </div>
+                    <div class="help-text">Zeigt Inhalte an, die schon lange nicht mehr angeschaut wurden.</div>
                 </div>
             </div>
 
-            <!-- Basis-Genres -->
+            <!-- Genre-Konfiguration -->
             <div class="config-section">
-                <h3>Basis-Genres</h3>
+                <h3>
+                    <span class="section-icon">🎭</span>
+                    Genre-Konfiguration
+                </h3>
                 
                 <div class="form-group">
                     <label>Aktivierte Genres</label>
-                    <div id="basicGenres">
+                    <div id="genreCheckboxes" class="genre-grid">
+                        <!-- Standard-Genres -->
                         <div class="form-check">
                             <input type="checkbox" id="genreAction" name="enabledGenres" value="Action" checked>
                             <label for="genreAction">Action</label>
@@ -243,6 +514,10 @@
                         <div class="form-check">
                             <input type="checkbox" id="genreComedy" name="enabledGenres" value="Comedy" checked>
                             <label for="genreComedy">Comedy</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" id="genreAnime" name="enabledGenres" value="Anime" checked>
+                            <label for="genreAnime">Anime</label>
                         </div>
                         <div class="form-check">
                             <input type="checkbox" id="genreDrama" name="enabledGenres" value="Drama">
@@ -256,210 +531,519 @@
                             <input type="checkbox" id="genreSciFi" name="enabledGenres" value="Sci-Fi">
                             <label for="genreSciFi">Science Fiction</label>
                         </div>
-                        <div class="form-check">
-                            <input type="checkbox" id="genreAnime" name="enabledGenres" value="Anime" checked>
-                            <label for="genreAnime">Anime</label>
-                        </div>
                     </div>
+                    <div class="help-text">Wählen Sie die Genres aus, für die separate Rows erstellt werden sollen.</div>
                 </div>
             </div>
 
-            <div class="actions">
-                <button type="button" id="resetBtn" class="btn btn-secondary">Zurücksetzen</button>
-                <button type="submit" class="btn btn-primary">Speichern</button>
+            <!-- Debug-Sektion -->
+            <div class="config-section debug-section">
+                <h3>
+                    <span class="section-icon">🔧</span>
+                    Debug & Test
+                </h3>
+                
+                <div class="form-group">
+                    <button type="button" id="testApiBtn" class="btn btn-test">
+                        <span id="testSpinner" class="loading-spinner" style="display: none;"></span>
+                        API-Verbindung testen
+                    </button>
+                    <div class="help-text">Testet die Verbindung zu den Plugin-APIs und überprüft die Funktionsfähigkeit.</div>
+                </div>
+                
+                <div id="debugInfo" class="debug-info" style="display: none;">
+                    <h4>Debug-Informationen:</h4>
+                    <div id="debugContent">
+                        <pre id="debugOutput">Keine Debug-Daten verfügbar...</pre>
+                    </div>
+                </div>
             </div>
         </form>
+
+        <div class="actions">
+            <div class="actions-left">
+                <div id="statusIndicator" class="status-indicator" style="display: none;">
+                    <span id="statusText">Bereit</span>
+                </div>
+            </div>
+            <div class="actions-right">
+                <button type="button" id="resetBtn" class="btn btn-secondary">
+                    Zurücksetzen
+                </button>
+                <button type="button" id="saveBtn" class="btn btn-primary">
+                    <span id="saveSpinner" class="loading-spinner" style="display: none;"></span>
+                    Konfiguration Speichern
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
-        let currentConfig = {};
+        (function() {
+            'use strict';
+            
+            let currentConfig = {};
+            let isLoading = false;
+            
+            console.log('Netflix Rows Config Page loaded');
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Config page loaded');
-            loadConfiguration();
-            setupEventListeners();
-        });
+            // Initialize page
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOM Content Loaded - initializing config page');
+                setupEventListeners();
+                loadConfiguration();
+                updateStatus('Seite geladen', 'success');
+            });
 
-        function setupEventListeners() {
-            // Range input displays
-            document.querySelectorAll('input[type="range"]').forEach(function(input) {
-                const display = document.getElementById(input.id + 'Display');
-                if (display) {
-                    input.addEventListener('input', function() {
-                        display.textContent = input.value;
+            function setupEventListeners() {
+                console.log('Setting up event listeners');
+                
+                // Range input displays
+                document.querySelectorAll('input[type="range"]').forEach(function(input) {
+                    const display = document.getElementById(input.id + 'Display');
+                    if (display) {
+                        input.addEventListener('input', function() {
+                            display.textContent = input.value;
+                        });
+                    }
+                });
+
+                // Save button
+                const saveBtn = document.getElementById('saveBtn');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        saveConfiguration();
                     });
                 }
-            });
 
-            // Form submission
-            document.getElementById('configForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                saveConfiguration();
-            });
-
-            // Reset button
-            document.getElementById('resetBtn').addEventListener('click', function() {
-                if (confirm('Möchten Sie wirklich alle Einstellungen zurücksetzen?')) {
-                    resetConfiguration();
+                // Reset button
+                const resetBtn = document.getElementById('resetBtn');
+                if (resetBtn) {
+                    resetBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (confirm('Möchten Sie wirklich alle Einstellungen zurücksetzen?')) {
+                            resetConfiguration();
+                        }
+                    });
                 }
-            });
-        }
 
-        function loadConfiguration() {
-            fetch('/NetflixRows/Config')
-                .then(function(response) {
-                    if (response.ok) {
-                        return response.json();
+                // Test API button
+                const testBtn = document.getElementById('testApiBtn');
+                if (testBtn) {
+                    testBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        testApiConnection();
+                    });
+                }
+                
+                console.log('Event listeners set up successfully');
+            }
+
+            function updateStatus(message, type, timeout) {
+                const indicator = document.getElementById('statusIndicator');
+                const text = document.getElementById('statusText');
+                
+                if (indicator && text) {
+                    indicator.style.display = 'block';
+                    text.textContent = message;
+                    
+                    // Remove all status classes
+                    indicator.className = 'status-indicator';
+                    
+                    // Add new status class
+                    if (type) {
+                        indicator.classList.add('status-' + type);
                     }
-                    throw new Error('Failed to load configuration');
-                })
-                .then(function(config) {
-                    console.log('Configuration loaded:', config);
-                    currentConfig = config;
-                    populateForm(config);
-                })
-                .catch(function(error) {
-                    console.error('Error loading configuration:', error);
-                    showAlert('Fehler beim Laden der Konfiguration', 'error');
-                });
-        }
-
-        function populateForm(config) {
-            // Basic settings
-            if (config.maxRows !== undefined) {
-                document.getElementById('maxRows').value = config.maxRows;
-                document.getElementById('maxRowsDisplay').textContent = config.maxRows;
+                    
+                    if (timeout) {
+                        setTimeout(function() {
+                            if (indicator) {
+                                indicator.style.display = 'none';
+                            }
+                        }, timeout);
+                    }
+                }
+                
+                console.log('Status updated:', message, type);
             }
-            
-            if (config.minItemsPerRow !== undefined) {
-                document.getElementById('minItemsPerRow').value = config.minItemsPerRow;
-                document.getElementById('minItemsPerRowDisplay').textContent = config.minItemsPerRow;
+
+            function showSpinner(buttonId, show) {
+                const button = document.getElementById(buttonId);
+                const spinner = button ? button.querySelector('.loading-spinner') : null;
+                
+                if (spinner) {
+                    spinner.style.display = show ? 'inline-block' : 'none';
+                }
+                
+                if (button) {
+                    button.disabled = show;
+                }
             }
-            
-            if (config.maxItemsPerRow !== undefined) {
-                document.getElementById('maxItemsPerRow').value = config.maxItemsPerRow;
-                document.getElementById('maxItemsPerRowDisplay').textContent = config.maxItemsPerRow;
-            }
-            
-            document.getElementById('randomRowOrder').checked = config.randomRowOrder || false;
-            document.getElementById('lazyLoadRows').checked = config.lazyLoadRows !== false;
-            document.getElementById('replaceHeartWithPlus').checked = config.replaceHeartWithPlus !== false;
 
-            // Row types
-            document.getElementById('enableMyList').checked = config.enableMyList !== false;
-            document.getElementById('enableRecentlyAdded').checked = config.enableRecentlyAdded !== false;
-            document.getElementById('enableRandomPicks').checked = config.enableRandomPicks !== false;
-            document.getElementById('enableLongNotWatched').checked = config.enableLongNotWatched !== false;
-
-            // Genres
-            if (config.enabledGenres && Array.isArray(config.enabledGenres)) {
-                document.querySelectorAll('input[name="enabledGenres"]').forEach(function(checkbox) {
-                    checkbox.checked = config.enabledGenres.indexOf(checkbox.value) !== -1;
-                });
-            }
-        }
-
-        function saveConfiguration() {
-            try {
-                const formData = new FormData(document.getElementById('configForm'));
-                const config = {};
-
-                // Basic settings
-                config.maxRows = parseInt(document.getElementById('maxRows').value) || 8;
-                config.minItemsPerRow = parseInt(document.getElementById('minItemsPerRow').value) || 10;
-                config.maxItemsPerRow = parseInt(document.getElementById('maxItemsPerRow').value) || 25;
-                config.randomRowOrder = document.getElementById('randomRowOrder').checked;
-                config.lazyLoadRows = document.getElementById('lazyLoadRows').checked;
-                config.replaceHeartWithPlus = document.getElementById('replaceHeartWithPlus').checked;
-
-                // Row types
-                config.enableMyList = document.getElementById('enableMyList').checked;
-                config.enableRecentlyAdded = document.getElementById('enableRecentlyAdded').checked;
-                config.enableRandomPicks = document.getElementById('enableRandomPicks').checked;
-                config.enableLongNotWatched = document.getElementById('enableLongNotWatched').checked;
-
-                // Genres
-                config.enabledGenres = [];
-                document.querySelectorAll('input[name="enabledGenres"]:checked').forEach(function(checkbox) {
-                    config.enabledGenres.push(checkbox.value);
-                });
-
-                // Set defaults for other required properties
-                config.blacklistedGenres = currentConfig.blacklistedGenres || [];
-                config.genreDisplayNames = currentConfig.genreDisplayNames || {};
-                config.recentlyAddedDays = currentConfig.recentlyAddedDays || 30;
-                config.longNotWatchedMonths = currentConfig.longNotWatchedMonths || 6;
-                config.minGenreItems = currentConfig.minGenreItems || 5;
-                config.myListLimit = currentConfig.myListLimit || 50;
-
-                console.log('Saving config:', config);
-
-                fetch('/NetflixRows/Config', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(config)
-                })
-                .then(function(response) {
-                    if (response.ok) {
-                        showAlert('Konfiguration erfolgreich gespeichert!', 'success');
+            function loadConfiguration() {
+                console.log('Loading configuration...');
+                updateStatus('Konfiguration laden...', 'loading');
+                
+                fetch('/NetflixRows/Config')
+                    .then(function(response) {
+                        console.log('Config response status:', response.status);
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                    })
+                    .then(function(config) {
+                        console.log('Configuration loaded successfully:', config);
                         currentConfig = config;
-                    } else {
-                        throw new Error('Failed to save configuration');
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error saving configuration:', error);
-                    showAlert('Fehler beim Speichern der Konfiguration', 'error');
-                });
-
-            } catch (error) {
-                console.error('Error in saveConfiguration:', error);
-                showAlert('Fehler beim Speichern der Konfiguration', 'error');
+                        populateForm(config);
+                        updateStatus('Konfiguration geladen', 'success', 3000);
+                        updateDebugInfo({
+                            configLoaded: true,
+                            config: config,
+                            timestamp: new Date().toISOString()
+                        });
+                    })
+                    .catch(function(error) {
+                        console.error('Error loading configuration:', error);
+                        showAlert('Fehler beim Laden der Konfiguration: ' + error.message, 'error');
+                        updateStatus('Ladefehler', 'error');
+                        updateDebugInfo({
+                            configLoaded: false,
+                            error: error.message,
+                            timestamp: new Date().toISOString()
+                        });
+                    });
             }
-        }
 
-        function resetConfiguration() {
-            const defaultConfig = {
-                maxRows: 8,
-                minItemsPerRow: 10,
-                maxItemsPerRow: 25,
-                enableMyList: true,
-                enableRecentlyAdded: true,
-                enableRandomPicks: true,
-                enableLongNotWatched: true,
-                enabledGenres: ['Action', 'Anime', 'Comedy'],
-                blacklistedGenres: [],
-                genreDisplayNames: {},
-                recentlyAddedDays: 30,
-                longNotWatchedMonths: 6,
-                minGenreItems: 5,
-                myListLimit: 50,
-                randomRowOrder: false,
-                lazyLoadRows: true,
-                replaceHeartWithPlus: true
-            };
+            function populateForm(config) {
+                console.log('Populating form with config:', config);
+                
+                try {
+                    // Basic settings
+                    if (config.maxRows !== undefined) {
+                        const maxRowsInput = document.getElementById('maxRows');
+                        const maxRowsDisplay = document.getElementById('maxRowsDisplay');
+                        if (maxRowsInput && maxRowsDisplay) {
+                            maxRowsInput.value = config.maxRows;
+                            maxRowsDisplay.textContent = config.maxRows;
+                        }
+                    }
+                    
+                    if (config.minItemsPerRow !== undefined) {
+                        const minItemsInput = document.getElementById('minItemsPerRow');
+                        const minItemsDisplay = document.getElementById('minItemsPerRowDisplay');
+                        if (minItemsInput && minItemsDisplay) {
+                            minItemsInput.value = config.minItemsPerRow;
+                            minItemsDisplay.textContent = config.minItemsPerRow;
+                        }
+                    }
+                    
+                    if (config.maxItemsPerRow !== undefined) {
+                        const maxItemsInput = document.getElementById('maxItemsPerRow');
+                        const maxItemsDisplay = document.getElementById('maxItemsPerRowDisplay');
+                        if (maxItemsInput && maxItemsDisplay) {
+                            maxItemsInput.value = config.maxItemsPerRow;
+                            maxItemsDisplay.textContent = config.maxItemsPerRow;
+                        }
+                    }
+                    
+                    // Checkboxes
+                    const checkboxes = {
+                        'randomRowOrder': config.randomRowOrder,
+                        'lazyLoadRows': config.lazyLoadRows,
+                        'replaceHeartWithPlus': config.replaceHeartWithPlus,
+                        'enableMyList': config.enableMyList,
+                        'enableRecentlyAdded': config.enableRecentlyAdded,
+                        'enableRandomPicks': config.enableRandomPicks,
+                        'enableLongNotWatched': config.enableLongNotWatched
+                    };
+                    
+                    Object.keys(checkboxes).forEach(function(id) {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.checked = checkboxes[id] !== false;
+                        }
+                    });
 
-            currentConfig = defaultConfig;
-            populateForm(defaultConfig);
-        }
-
-        function showAlert(message, type) {
-            const alertContainer = document.getElementById('alertContainer');
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-' + type;
-            alert.textContent = message;
-
-            alertContainer.appendChild(alert);
-
-            setTimeout(function() {
-                if (alert.parentNode) {
-                    alert.remove();
+                    // Genres
+                    if (config.enabledGenres && Array.isArray(config.enabledGenres)) {
+                        document.querySelectorAll('input[name="enabledGenres"]').forEach(function(checkbox) {
+                            checkbox.checked = config.enabledGenres.indexOf(checkbox.value) !== -1;
+                        });
+                    }
+                    
+                    console.log('Form populated successfully');
+                } catch (error) {
+                    console.error('Error populating form:', error);
+                    showAlert('Fehler beim Füllen des Formulars: ' + error.message, 'error');
                 }
-            }, 5000);
-        }
+            }
+
+            function saveConfiguration() {
+                if (isLoading) return;
+                
+                console.log('Saving configuration...');
+                isLoading = true;
+                showSpinner('saveBtn', true);
+                updateStatus('Speichere Konfiguration...', 'loading');
+
+                try {
+                    const config = {
+                        // Basic settings
+                        maxRows: parseInt(document.getElementById('maxRows').value) || 8,
+                        minItemsPerRow: parseInt(document.getElementById('minItemsPerRow').value) || 10,
+                        maxItemsPerRow: parseInt(document.getElementById('maxItemsPerRow').value) || 25,
+                        randomRowOrder: document.getElementById('randomRowOrder').checked,
+                        lazyLoadRows: document.getElementById('lazyLoadRows').checked,
+                        replaceHeartWithPlus: document.getElementById('replaceHeartWithPlus').checked,
+
+                        // Row types
+                        enableMyList: document.getElementById('enableMyList').checked,
+                        enableRecentlyAdded: document.getElementById('enableRecentlyAdded').checked,
+                        enableRandomPicks: document.getElementById('enableRandomPicks').checked,
+                        enableLongNotWatched: document.getElementById('enableLongNotWatched').checked,
+
+                        // Genres
+                        enabledGenres: [],
+
+                        // Set defaults for other required properties
+                        blacklistedGenres: currentConfig.blacklistedGenres || [],
+                        genreDisplayNames: currentConfig.genreDisplayNames || {
+                            'Action': 'Adrenalinkick',
+                            'Comedy': 'Zum Lachen',
+                            'Drama': 'Gefühlvoll'
+                        },
+                        recentlyAddedDays: currentConfig.recentlyAddedDays || 30,
+                        longNotWatchedMonths: currentConfig.longNotWatchedMonths || 6,
+                        minGenreItems: currentConfig.minGenreItems || 5,
+                        myListLimit: currentConfig.myListLimit || 50
+                    };
+
+                    // Collect enabled genres
+                    document.querySelectorAll('input[name="enabledGenres"]:checked').forEach(function(checkbox) {
+                        config.enabledGenres.push(checkbox.value);
+                    });
+
+                    console.log('Saving config:', config);
+
+                    fetch('/NetflixRows/Config', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(config)
+                    })
+                    .then(function(response) {
+                        console.log('Save response status:', response.status);
+                        if (response.ok) {
+                            showAlert('Konfiguration erfolgreich gespeichert!', 'success');
+                            currentConfig = config;
+                            updateStatus('Konfiguration gespeichert', 'success', 3000);
+                            updateDebugInfo({
+                                configSaved: true,
+                                config: config,
+                                timestamp: new Date().toISOString()
+                            });
+                        } else {
+                            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error saving configuration:', error);
+                        showAlert('Fehler beim Speichern der Konfiguration: ' + error.message, 'error');
+                        updateStatus('Speicherfehler', 'error');
+                        updateDebugInfo({
+                            configSaved: false,
+                            error: error.message,
+                            timestamp: new Date().toISOString()
+                        });
+                    })
+                    .finally(function() {
+                        isLoading = false;
+                        showSpinner('saveBtn', false);
+                    });
+
+                } catch (error) {
+                    console.error('Error in saveConfiguration:', error);
+                    showAlert('Fehler beim Speichern der Konfiguration: ' + error.message, 'error');
+                    updateStatus('Speicherfehler', 'error');
+                    isLoading = false;
+                    showSpinner('saveBtn', false);
+                }
+            }
+
+            function resetConfiguration() {
+                console.log('Resetting configuration to defaults');
+                
+                const defaultConfig = {
+                    maxRows: 8,
+                    minItemsPerRow: 10,
+                    maxItemsPerRow: 25,
+                    enableMyList: true,
+                    enableRecentlyAdded: true,
+                    enableRandomPicks: true,
+                    enableLongNotWatched: true,
+                    enabledGenres: ['Action', 'Anime', 'Comedy'],
+                    blacklistedGenres: [],
+                    genreDisplayNames: {
+                        'Action': 'Adrenalinkick',
+                        'Comedy': 'Zum Lachen',
+                        'Drama': 'Gefühlvoll'
+                    },
+                    recentlyAddedDays: 30,
+                    longNotWatchedMonths: 6,
+                    minGenreItems: 5,
+                    myListLimit: 50,
+                    randomRowOrder: false,
+                    lazyLoadRows: true,
+                    replaceHeartWithPlus: true
+                };
+
+                currentConfig = defaultConfig;
+                populateForm(defaultConfig);
+                showAlert('Konfiguration zurückgesetzt', 'info');
+                updateStatus('Auf Standardwerte zurückgesetzt', 'success', 3000);
+            }
+
+            function testApiConnection() {
+                console.log('Testing API connection...');
+                showSpinner('testApiBtn', true);
+                updateStatus('Teste API-Verbindung...', 'loading');
+                
+                const debugOutput = document.getElementById('debugOutput');
+                const debugInfo = document.getElementById('debugInfo');
+                
+                if (debugInfo) {
+                    debugInfo.style.display = 'block';
+                }
+                
+                if (debugOutput) {
+                    debugOutput.textContent = 'API-Test läuft...\n';
+                }
+
+                const testResults = {
+                    timestamp: new Date().toISOString(),
+                    tests: [],
+                    apiBase: window.location.origin,
+                    userAgent: navigator.userAgent
+                };
+
+                // Test Config endpoint
+                fetch('/NetflixRows/Config')
+                    .then(function(response) {
+                        const result = {
+                            endpoint: 'GET /NetflixRows/Config',
+                            status: response.status,
+                            success: response.ok,
+                            timestamp: new Date().toISOString()
+                        };
+                        
+                        testResults.tests.push(result);
+                        
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('Config endpoint failed: ' + response.status);
+                    })
+                    .then(function(config) {
+                        testResults.configData = config;
+                        
+                        // Test another endpoint
+                        return fetch('/NetflixRows/Test');
+                    })
+                    .then(function(response) {
+                        const result = {
+                            endpoint: 'GET /NetflixRows/Test',
+                            status: response.status,
+                            success: response.ok,
+                            timestamp: new Date().toISOString()
+                        };
+                        
+                        testResults.tests.push(result);
+                        
+                        if (response.ok) {
+                            return response.text();
+                        }
+                        throw new Error('Test endpoint failed: ' + response.status);
+                    })
+                    .then(function(testMessage) {
+                        testResults.testMessage = testMessage;
+                        testResults.overallSuccess = true;
+                        
+                        console.log('API tests completed successfully:', testResults);
+                        showAlert('API-Verbindung erfolgreich getestet!', 'success');
+                        updateStatus('API-Test erfolgreich', 'success', 3000);
+                        
+                        if (debugOutput) {
+                            debugOutput.textContent = JSON.stringify(testResults, null, 2);
+                        }
+                    })
+                    .catch(function(error) {
+                        testResults.overallSuccess = false;
+                        testResults.error = error.message;
+                        
+                        console.error('API test failed:', error, testResults);
+                        showAlert('API-Test fehlgeschlagen: ' + error.message, 'error');
+                        updateStatus('API-Test fehlgeschlagen', 'error');
+                        
+                        if (debugOutput) {
+                            debugOutput.textContent = JSON.stringify(testResults, null, 2);
+                        }
+                    })
+                    .finally(function() {
+                        showSpinner('testApiBtn', false);
+                    });
+            }
+
+            function updateDebugInfo(data) {
+                const debugOutput = document.getElementById('debugOutput');
+                if (debugOutput) {
+                    const currentData = debugOutput.textContent;
+                    const newData = JSON.stringify(data, null, 2);
+                    debugOutput.textContent = currentData + '\n\n--- Debug Update ---\n' + newData;
+                }
+            }
+
+            function showAlert(message, type) {
+                console.log('Showing alert:', message, type);
+                
+                const alertContainer = document.getElementById('alertContainer');
+                if (!alertContainer) {
+                    console.warn('Alert container not found');
+                    return;
+                }
+                
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-' + (type || 'info');
+                alert.textContent = message;
+
+                // Add close button
+                const closeBtn = document.createElement('span');
+                closeBtn.innerHTML = '&times;';
+                closeBtn.style.cssText = 'float: right; cursor: pointer; font-size: 1.2em; margin-left: 1rem;';
+                closeBtn.onclick = function() {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                };
+                
+                alert.insertBefore(closeBtn, alert.firstChild);
+                alertContainer.appendChild(alert);
+
+                // Auto-remove after 5 seconds
+                setTimeout(function() {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 5000);
+            }
+
+            // Initialize status
+            updateStatus('Bereit', 'success');
+            
+            console.log('Netflix Rows Config Page script loaded successfully');
+        })();
     </script>
 </body>
 </html>

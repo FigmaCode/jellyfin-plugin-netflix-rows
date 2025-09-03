@@ -5,12 +5,10 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text.Json;
 using Jellyfin.Plugin.NetflixRows.Configuration;
-using Jellyfin.Plugin.NetflixRows.Controllers;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.NetflixRows;
@@ -39,7 +37,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         Instance = this;
         _logger = logger;
         
-        _logger.LogInformation("Netflix Rows Plugin initializing...");
+        _logger.LogInformation("Netflix Rows Plugin v{Version} initializing...", GetType().Assembly.GetName().Version);
+        
+        // Log configuration path for debugging
+        var configPath = ConfigurationFilePath;
+        _logger.LogInformation("Netflix Rows config file path: {ConfigPath}", configPath);
         
         // Register transformations for web client modifications
         RegisterWebTransformations();
@@ -55,16 +57,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
     /// <inheritdoc />
     public override string Description => "Transform your Jellyfin home screen into a Netflix-like experience with dynamic rows, genres, and a custom watchlist.";
-
-    /// <summary>
-    /// Register services for dependency injection.
-    /// </summary>
-    /// <param name="serviceCollection">Service collection.</param>
-    public static void RegisterServices(IServiceCollection serviceCollection)
-    {
-        // Register the controller explicitly if needed
-        serviceCollection.AddSingleton<NetflixRowsController>();
-    }
 
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
@@ -92,11 +84,13 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 
             if (assembly != null)
             {
-                _logger.LogInformation("File Transformation plugin found, registering transformations");
+                _logger.LogInformation("File Transformation plugin found: {AssemblyName}", assembly.FullName);
                 
                 var pluginInterfaceType = assembly.GetType("Jellyfin.Plugin.FileTransformation.PluginInterface");
                 if (pluginInterfaceType != null)
                 {
+                    _logger.LogInformation("PluginInterface type found, registering transformations");
+
                     // Register JavaScript transformation
                     var jsPayload = new
                     {
@@ -117,10 +111,17 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                         callbackMethod = "TransformCss"
                     };
 
-                    pluginInterfaceType.GetMethod("RegisterTransformation")?.Invoke(null, new object[] { JsonSerializer.Serialize(jsPayload) });
-                    pluginInterfaceType.GetMethod("RegisterTransformation")?.Invoke(null, new object[] { JsonSerializer.Serialize(cssPayload) });
-                    
-                    _logger.LogInformation("Web transformations registered successfully");
+                    var registerMethod = pluginInterfaceType.GetMethod("RegisterTransformation");
+                    if (registerMethod != null)
+                    {
+                        registerMethod.Invoke(null, new object[] { JsonSerializer.Serialize(jsPayload) });
+                        registerMethod.Invoke(null, new object[] { JsonSerializer.Serialize(cssPayload) });
+                        _logger.LogInformation("Web transformations registered successfully");
+                    }
+                    else
+                    {
+                        _logger.LogWarning("RegisterTransformation method not found on PluginInterface");
+                    }
                 }
                 else
                 {
@@ -130,11 +131,22 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             else
             {
                 _logger.LogWarning("File Transformation plugin not found. Netflix Rows will work with limited functionality.");
+                _logger.LogInformation("Available assemblies: {Assemblies}", 
+                    string.Join(", ", AssemblyLoadContext.All.SelectMany(x => x.Assemblies).Select(a => a.GetName().Name)));
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to register web transformations");
         }
+    }
+
+    /// <summary>
+    /// Called when the server is starting up.
+    /// </summary>
+    public void OnServerStartup()
+    {
+        _logger.LogInformation("Netflix Rows Plugin server startup complete");
+        _logger.LogInformation("Current configuration: {Config}", JsonSerializer.Serialize(Configuration));
     }
 }
