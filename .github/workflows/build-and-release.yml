@@ -25,15 +25,15 @@ jobs:
         dotnet-version: '8.0.x'
     
     - name: Restore dependencies
-      working-directory: ./
+      working-directory: ./Jellyfin.Plugin.NetflixRows
       run: dotnet restore --disable-parallel
     
     - name: Build
-      working-directory: ./
+      working-directory: ./Jellyfin.Plugin.NetflixRows
       run: dotnet build --no-restore --configuration Release --verbosity normal
     
     - name: Test
-      working-directory: ./
+      working-directory: ./Jellyfin.Plugin.NetflixRows
       run: dotnet test --no-build --verbosity normal --configuration Release || echo "No tests found, continuing..."
     
     - name: Create plugin archive
@@ -236,13 +236,13 @@ jobs:
         dotnet-version: '8.0.x'
     
     - name: Restore dependencies
-      working-directory: ./
+      working-directory: ./Jellyfin.Plugin.NetflixRows
       run: dotnet restore
     
     - name: Run tests
-      working-directory: ./
+      working-directory: ./Jellyfin.Plugin.NetflixRows
       run: dotnet test --verbosity normal || echo "No tests found, continuing..."
     
     - name: Build
-      working-directory: ./
+      working-directory: ./Jellyfin.Plugin.NetflixRows
       run: dotnet build --configuration Release
