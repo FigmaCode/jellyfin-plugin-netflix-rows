@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.NetflixRows.Configuration;
 using MediaBrowser.Controller.Dto;
@@ -15,7 +14,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Jellyfin.Data.Entities;
 
 namespace Jellyfin.Plugin.NetflixRows.Controllers;
 
@@ -28,7 +26,7 @@ namespace Jellyfin.Plugin.NetflixRows.Controllers;
 public class NetflixRowsController : ControllerBase
 {
     private readonly ILibraryManager _libraryManager;
-    private readonly Jellyfin.Data.IUserManager _userManager;
+    private readonly IUserManager _userManager;
     private readonly IDtoService _dtoService;
     private readonly ILogger<NetflixRowsController> _logger;
 
@@ -36,12 +34,12 @@ public class NetflixRowsController : ControllerBase
     /// Initializes a new instance of the <see cref="NetflixRowsController"/> class.
     /// </summary>
     /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
-    /// <param name="userManager">Instance of the <see cref="Jellyfin.Data.IUserManager"/> interface.</param>
+    /// <param name="userManager">Instance of the <see cref="IUserManager"/> interface.</param>
     /// <param name="dtoService">Instance of the <see cref="IDtoService"/> interface.</param>
     /// <param name="logger">Instance of the <see cref="ILogger{NetflixRowsController}"/> interface.</param>
     public NetflixRowsController(
         ILibraryManager libraryManager,
-        Jellyfin.Data.IUserManager userManager,
+        IUserManager userManager,
         IDtoService dtoService,
         ILogger<NetflixRowsController> logger)
     {
@@ -71,13 +69,13 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with favorite items.</returns>
     [HttpGet("MyList")]
     [Authorize]
-    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetMyList(
+    public ActionResult<QueryResult<BaseItemDto>> GetMyList(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
-            var user = await _userManager.GetUserByIdAsync(userId);
+            var user = _userManager.GetUserById(userId);
             if (user == null)
             {
                 _logger.LogWarning("Invalid user ID: {UserId}", userId);
@@ -123,13 +121,13 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with recently added items.</returns>
     [HttpGet("RecentlyAdded")]
     [Authorize]
-    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetRecentlyAdded(
+    public ActionResult<QueryResult<BaseItemDto>> GetRecentlyAdded(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
-            var user = await _userManager.GetUserByIdAsync(userId);
+            var user = _userManager.GetUserById(userId);
             if (user == null)
             {
                 return BadRequest("Invalid user ID");
@@ -174,13 +172,13 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with random items.</returns>
     [HttpGet("RandomPicks")]
     [Authorize]
-    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetRandomPicks(
+    public ActionResult<QueryResult<BaseItemDto>> GetRandomPicks(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
-            var user = await _userManager.GetUserByIdAsync(userId);
+            var user = _userManager.GetUserById(userId);
             if (user == null)
             {
                 return BadRequest("Invalid user ID");
@@ -223,13 +221,13 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with long not watched items.</returns>
     [HttpGet("LongNotWatched")]
     [Authorize]
-    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetLongNotWatched(
+    public ActionResult<QueryResult<BaseItemDto>> GetLongNotWatched(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
-            var user = await _userManager.GetUserByIdAsync(userId);
+            var user = _userManager.GetUserById(userId);
             if (user == null)
             {
                 return BadRequest("Invalid user ID");
@@ -281,14 +279,14 @@ public class NetflixRowsController : ControllerBase
     /// <returns>Query result with items of the specified genre.</returns>
     [HttpGet("Genre/{genre}")]
     [Authorize]
-    public async Task<ActionResult<QueryResult<BaseItemDto>>> GetGenre(
+    public ActionResult<QueryResult<BaseItemDto>> GetGenre(
         string genre,
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
-            var user = await _userManager.GetUserByIdAsync(userId);
+            var user = _userManager.GetUserById(userId);
             if (user == null)
             {
                 return BadRequest("Invalid user ID");
@@ -346,11 +344,11 @@ public class NetflixRowsController : ControllerBase
     /// <returns>List of available genres.</returns>
     [HttpGet("Genres")]
     [Authorize]
-    public async Task<ActionResult<IEnumerable<string>>> GetGenres([FromQuery] Guid userId)
+    public ActionResult<IEnumerable<string>> GetGenres([FromQuery] Guid userId)
     {
         try
         {
-            var user = await _userManager.GetUserByIdAsync(userId);
+            var user = _userManager.GetUserById(userId);
             if (user == null)
             {
                 return BadRequest("Invalid user ID");
