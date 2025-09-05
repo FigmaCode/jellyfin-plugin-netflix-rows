@@ -39,28 +39,15 @@ jobs:
     - name: Create plugin archive
       run: |
         mkdir -p artifacts
-        cd bin/Release/net8.0
-        zip -r ../../../artifacts/jellyfin-plugin-netflix-rows-${{ github.ref_name || 'dev' }}.zip .
+        cd Jellyfin.Plugin.NetflixRows/bin/Release/net8.0
+        zip -r ../../../../artifacts/jellyfin-plugin-netflix-rows-${{ github.ref_name || 'dev' }}.zip .
     
-    - name: Calculate checksums
+    - name: Calculate checksum
       run: |
         cd artifacts
-        
-        # Calculate SHA256
-        SHA256_CHECKSUM=$(sha256sum jellyfin-plugin-netflix-rows-*.zip | cut -d' ' -f1)
-        echo "SHA256_CHECKSUM=$SHA256_CHECKSUM" >> $GITHUB_ENV
-        
-        # Calculate MD5 (for legacy compatibility)
-        MD5_CHECKSUM=$(md5sum jellyfin-plugin-netflix-rows-*.zip | cut -d' ' -f1)
-        echo "MD5_CHECKSUM=$MD5_CHECKSUM" >> $GITHUB_ENV
-        
-        # Save checksums to files
-        echo "$SHA256_CHECKSUM" > netflix-rows-${{ github.ref_name || 'dev' }}.sha256
-        echo "$MD5_CHECKSUM" > netflix-rows-${{ github.ref_name || 'dev' }}.md5
-        
-        echo "Calculated checksums:"
-        echo "SHA256: $SHA256_CHECKSUM"
-        echo "MD5: $MD5_CHECKSUM"
+        CHECKSUM=$(sha256sum jellyfin-plugin-netflix-rows-*.zip | cut -d' ' -f1)
+        echo "CALCULATED_CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
+        echo "Calculated checksum: $CHECKSUM"
     
     - name: Create repository.json
       run: |
@@ -73,8 +60,7 @@ jobs:
         echo "Creating repository.json with:"
         echo "Version: $VERSION"
         echo "Tag: $TAG_NAME" 
-        echo "SHA256 Checksum: $SHA256_CHECKSUM"
-        echo "MD5 Checksum: $MD5_CHECKSUM"
+        echo "Checksum: $CALCULATED_CHECKSUM"
         
         cat > artifacts/repository.json << EOF
         [
@@ -91,7 +77,7 @@ jobs:
                 "changelog": "Netflix-style rows with dynamic content organization. Full changelog: https://github.com/${{ github.repository }}/releases/tag/$TAG_NAME",
                 "targetAbi": "10.10.7.0",
                 "sourceUrl": "https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/jellyfin-plugin-netflix-rows-$RAW_VERSION.zip",
-                "checksum": "$SHA256_CHECKSUM",
+                "checksum": "$CALCULATED_CHECKSUM",
                 "timestamp": "$TIMESTAMP"
               }
             ]
@@ -119,8 +105,6 @@ jobs:
           artifacts/manifest.json
           artifacts/repository.json
           artifacts/meta.json
-          artifacts/*.sha256
-          artifacts/*.md5
     
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
@@ -130,25 +114,10 @@ jobs:
           artifacts/*.zip
           artifacts/repository.json
           artifacts/meta.json
-          artifacts/*.sha256
-          artifacts/*.md5
         body: |
           ## Netflix Rows Plugin ${{ github.ref_name }}
           
-          ### 📦 Download & Checksums
-          
-          **Main Download:**
-          - `jellyfin-plugin-netflix-rows-${{ github.ref_name }}.zip`
-          
-          **Checksums:**
-          - **SHA256:** `${{ env.SHA256_CHECKSUM }}`
-          - **MD5:** `${{ env.MD5_CHECKSUM }}`
-          
-          > **Note:** Always verify the checksum after download to ensure file integrity.
-          
-          ---
-          
-          ### ✨ Features
+          ### Features
           - 🎬 Netflix-style home screen with dynamic rows
           - 📚 Genre-based content organization
           - ⭐ Custom "My List" functionality using favorites
@@ -159,69 +128,30 @@ jobs:
           - 📱 Responsive mobile support
           - ⚡ Lazy loading for optimal performance
           
-          ### 🚀 Installation
-          
-          #### Method 1: Plugin Repository (Recommended)
+          ### Installation
           1. Add `https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/repository.json` as a plugin repository in Jellyfin
           2. Install "Netflix Rows" from the plugin catalog
           3. Restart Jellyfin
           4. Configure the plugin in the admin dashboard
           
-          #### Method 2: Manual Installation
-          1. Download `jellyfin-plugin-netflix-rows-${{ github.ref_name }}.zip`
-          2. **Verify checksum:** `sha256sum jellyfin-plugin-netflix-rows-${{ github.ref_name }}.zip`
-          3. Expected: `${{ env.SHA256_CHECKSUM }}`
-          4. Extract to your Jellyfin plugins directory
-          5. Restart Jellyfin
+          ### Requirements
+          - Jellyfin 10.10.7 or later
+          - File Transformation Plugin
+          - Home Screen Sections Plugin (optional)
+          - Plugin Pages Plugin (optional)
           
-          ### 📋 Requirements
-          - **Jellyfin:** 10.10.7 or later
-          - **File Transformation Plugin:** Required for UI modifications
-          - **Home Screen Sections Plugin:** Optional, enhances functionality
-          - **Plugin Pages Plugin:** Optional, for advanced features
+          ### Compatibility
+          - Compatible with all Jellyfin themes
+          - Supports dark/light theme switching
+          - Mobile and desktop responsive
+          - High contrast mode support
+          - Reduced motion preferences
           
-          ### 🔧 Configuration
-          After installation, navigate to:
-          **Admin Dashboard → Plugins → Netflix Rows → Configuration**
-          
-          ### ✅ Compatibility
-          - ✅ Compatible with all Jellyfin themes
-          - ✅ Supports dark/light theme switching
-          - ✅ Mobile and desktop responsive
-          - ✅ High contrast mode support
-          - ✅ Reduced motion preferences
-          - ✅ Multiple language support
-          
-          ### 🐛 Troubleshooting
-          
-          #### Plugin not working?
-          1. Ensure File Transformation plugin is installed and enabled
-          2. Check Jellyfin logs for errors: `Admin → Dashboard → Logs`
-          3. Clear browser cache and hard refresh (Ctrl+Shift+R)
-          4. Test API endpoints: `http://your-server:8096/NetflixRows/Test`
-          
-          #### Configuration not loading?
-          1. Check API endpoint: `http://your-server:8096/NetflixRows/Config`
-          2. Verify plugin permissions in Jellyfin admin
-          3. Restart Jellyfin server
-          
-          ### 📚 Documentation
-          Full documentation available in the [repository README](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/README.md).
-          
-          ### 🆘 Support
-          - 🐛 **Bug Reports:** [GitHub Issues](https://github.com/${{ github.repository }}/issues)
-          - 💡 **Feature Requests:** [GitHub Discussions](https://github.com/${{ github.repository }}/discussions)
-          - 📖 **Documentation:** [Repository Wiki](https://github.com/${{ github.repository }}/wiki)
-          
-          ---
-          
-          **Made with ❤️ for the Jellyfin Community**
+          Full documentation available in the repository README.
         draft: false
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        MD5_CHECKSUM: ${{ env.MD5_CHECKSUM }}
-        SHA256_CHECKSUM: ${{ env.SHA256_CHECKSUM }}
 
   test:
     runs-on: ubuntu-latest
