@@ -11,7 +11,6 @@
                     <div class="sectionTitleContainer flex align-items-center">
                         <h2 class="sectionTitle">Netflix Rows Plugin</h2>
                     </div>
-                    <p class="description">Transform your Jellyfin home screen into a Netflix-like experience with dynamic rows and a custom watchlist.</p>
                     
                     <div class="verticalSection">
                         <div class="sectionTitleContainer flex align-items-center">
@@ -21,43 +20,43 @@
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="maxRows">Maximum Rows</label>
                             <input type="number" id="maxRows" name="maxRows" value="8" min="1" max="20" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">Maximum number of rows to display on the home page</div>
+                            <div class="fieldDescription">📺 How many rows to show on homepage (8 = Netflix-like)</div>
                         </div>
                         
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="maxItemsPerRow">Items per Row</label>
                             <input type="number" id="maxItemsPerRow" name="maxItemsPerRow" value="25" min="5" max="50" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">Number of items to show in each row</div>
+                            <div class="fieldDescription">🎬 Items per row (25 = smooth scrolling, fewer = faster loading)</div>
                         </div>
                         
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="minItemsPerRow">Minimum Items per Row</label>
                             <input type="number" id="minItemsPerRow" name="minItemsPerRow" value="10" min="1" max="25" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">Minimum items required to show a row</div>
+                            <div class="fieldDescription">⚡ Hide rows with fewer items (prevents empty-looking rows)</div>
                         </div>
                         
                         <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="recentlyAddedDays">Recently Added Period (Days)</label>
+                            <label class="inputLabel inputLabelUnfocused" for="recentlyAddedDays">Recently Added Period</label>
                             <input type="number" id="recentlyAddedDays" name="recentlyAddedDays" value="30" min="1" max="365" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">How many days back to consider for "Recently Added"</div>
+                            <div class="fieldDescription">📅 Days (30 = last month, 7 = last week)</div>
                         </div>
                         
                         <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="longNotWatchedMonths">Long Not Watched Period (Months)</label>
+                            <label class="inputLabel inputLabelUnfocused" for="longNotWatchedMonths">Long Not Watched Period</label>
                             <input type="number" id="longNotWatchedMonths" name="longNotWatchedMonths" value="6" min="1" max="24" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">Months to consider content as "long not watched"</div>
+                            <div class="fieldDescription">🕒 Months (6 = half year, 12 = full year)</div>
                         </div>
                         
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="minGenreItems">Minimum Genre Items</label>
                             <input type="number" id="minGenreItems" name="minGenreItems" value="5" min="1" max="20" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">Minimum items required to create a genre row</div>
+                            <div class="fieldDescription">🎭 Skip genres with too few items (5 = good balance)</div>
                         </div>
                         
                         <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="myListLimit">My List Limit</label>
                             <input type="number" id="myListLimit" name="myListLimit" value="50" min="10" max="200" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">Maximum items to show in My List row</div>
+                            <div class="fieldDescription">❤️ Max favorites shown (50 = good performance)</div>
                         </div>
                     </div>
                     
@@ -71,7 +70,7 @@
                                 <input type="checkbox" id="enableMyList" name="enableMyList" checked is="emby-checkbox">
                                 <span>My List</span>
                             </label>
-                            <div class="fieldDescription checkboxFieldDescription">Show user favorites in a dedicated row (❤️ button)</div>
+                            <div class="fieldDescription checkboxFieldDescription">❤️ Your favorites (click heart on any item)</div>
                         </div>
                         
                         <div class="checkboxContainer checkboxContainer-withDescription">
@@ -79,7 +78,7 @@
                                 <input type="checkbox" id="enableRecentlyAdded" name="enableRecentlyAdded" checked is="emby-checkbox">
                                 <span>Recently Added</span>
                             </label>
-                            <div class="fieldDescription checkboxFieldDescription">Show recently added content</div>
+                            <div class="fieldDescription checkboxFieldDescription">🆕 Latest content added to your library</div>
                         </div>
                         
                         <div class="checkboxContainer checkboxContainer-withDescription">
@@ -87,7 +86,7 @@
                                 <input type="checkbox" id="enableRandomPicks" name="enableRandomPicks" checked is="emby-checkbox">
                                 <span>Random Picks</span>
                             </label>
-                            <div class="fieldDescription checkboxFieldDescription">Show random content suggestions</div>
+                            <div class="fieldDescription checkboxFieldDescription">🎲 Discover something new</div>
                         </div>
                         
                         <div class="checkboxContainer checkboxContainer-withDescription">
@@ -95,7 +94,7 @@
                                 <input type="checkbox" id="enableLongNotWatched" name="enableLongNotWatched" is="emby-checkbox">
                                 <span>Long Not Watched</span>
                             </label>
-                            <div class="fieldDescription checkboxFieldDescription">Show content that hasn't been watched for a long time</div>
+                            <div class="fieldDescription checkboxFieldDescription">⏳ Rediscover forgotten content</div>
                         </div>
                     </div>
                     
@@ -113,7 +112,7 @@
                                     <input type="checkbox" id="randomRowOrder" name="randomRowOrder" is="emby-checkbox">
                                     <span>Random Row Order</span>
                                 </label>
-                                <div class="fieldDescription checkboxFieldDescription">Randomize the order of rows on each page load</div>
+                                <div class="fieldDescription checkboxFieldDescription">🔀 Fresh layout every time</div>
                             </div>
                             
                             <div class="checkboxContainer checkboxContainer-withDescription">
@@ -121,7 +120,7 @@
                                     <input type="checkbox" id="lazyLoadRows" name="lazyLoadRows" checked is="emby-checkbox">
                                     <span>Lazy Load Rows</span>
                                 </label>
-                                <div class="fieldDescription checkboxFieldDescription">Load row content as needed (recommended for performance)</div>
+                                <div class="fieldDescription checkboxFieldDescription">⚡ Faster page loading (recommended)</div>
                             </div>
                             
                             <div class="checkboxContainer checkboxContainer-withDescription">
@@ -129,7 +128,7 @@
                                     <input type="checkbox" id="replaceHeartWithPlus" name="replaceHeartWithPlus" checked is="emby-checkbox">
                                     <span>Replace Heart with Plus</span>
                                 </label>
-                                <div class="fieldDescription checkboxFieldDescription">Replace ❤️ button with ➕ button for My List</div>
+                                <div class="fieldDescription checkboxFieldDescription">➕ Use plus icon instead of heart</div>
                             </div>
                         </div>
                     </div>
