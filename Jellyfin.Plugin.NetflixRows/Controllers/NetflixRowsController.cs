@@ -245,23 +245,32 @@ public class NetflixRowsController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("[NetflixRows] MyListSection endpoint called");
+            
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
             if (!config.EnableMyList)
             {
+                _logger.LogWarning("[NetflixRows] My List section is disabled in config");
                 return NotFound("My List section is disabled");
             }
 
             var items = GetNetflixItems(config.MyListCount, _ => true); // Simplified for now
+            var itemsList = items.ToList();
+            
+            _logger.LogInformation("[NetflixRows] MyListSection returning {Count} items", itemsList.Count);
 
-            return Ok(new
+            var result = new
             {
                 displayName = "My List",
-                items = items.Select(FormatItemForSection).ToList()
-            });
+                items = itemsList.Select(FormatItemForSection).ToList()
+            };
+            
+            _logger.LogInformation("[NetflixRows] MyListSection result: {Result}", System.Text.Json.JsonSerializer.Serialize(result));
+            return Ok(result);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting My List section");
+            _logger.LogError(ex, "[NetflixRows] Error getting My List section");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -275,25 +284,33 @@ public class NetflixRowsController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("[NetflixRows] RecentlyAddedSection endpoint called");
+            
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
             if (!config.EnableRecentlyAdded)
             {
+                _logger.LogWarning("[NetflixRows] Recently Added section is disabled in config");
                 return NotFound("Recently Added section is disabled");
             }
 
             var items = GetNetflixItems(config.RecentlyAddedCount, item => true)
                 .OrderByDescending(x => x.DateCreated)
-                .Take(config.RecentlyAddedCount);
+                .Take(config.RecentlyAddedCount)
+                .ToList();
+                
+            _logger.LogInformation("[NetflixRows] RecentlyAddedSection returning {Count} items", items.Count);
 
-            return Ok(new
+            var result = new
             {
                 displayName = "Recently Added",
                 items = items.Select(FormatItemForSection).ToList()
-            });
+            };
+            
+            return Ok(result);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting Recently Added section");
+            _logger.LogError(ex, "[NetflixRows] Error getting Recently Added section");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -366,6 +383,8 @@ public class NetflixRowsController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("[NetflixRows] GetNetflixItems called with count: {Count}", count);
+            
             var query = new InternalItemsQuery
             {
                 IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
@@ -374,11 +393,16 @@ public class NetflixRowsController : ControllerBase
             };
 
             var result = _libraryManager.GetItemsResult(query);
-            return result.Items.Where(filter).Take(count);
+            _logger.LogInformation("[NetflixRows] Library query returned {Total} total items", result.TotalRecordCount);
+            
+            var filteredItems = result.Items.Where(filter).Take(count).ToList();
+            _logger.LogInformation("[NetflixRows] After filtering: {Count} items", filteredItems.Count);
+            
+            return filteredItems;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting Netflix items");
+            _logger.LogError(ex, "[NetflixRows] Error getting Netflix items");
             return Enumerable.Empty<BaseItem>();
         }
     }
