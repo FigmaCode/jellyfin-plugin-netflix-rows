@@ -128,13 +128,31 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         try
         {
-            // Wait a moment for server to be fully ready
-            await Task.Delay(5000);
+            // Wait longer for server and plugins to be fully ready
+            await Task.Delay(10000);
             
             _logger.LogInformation("[NetflixRows] Registering Netflix sections with Home Screen Sections plugin...");
             
             var config = Configuration;
             var baseUrl = "http://localhost:8096"; // Local server URL
+            
+            // First check if Home Screen Sections plugin is available
+            using var testClient = new HttpClient();
+            try
+            {
+                var testResponse = await testClient.GetAsync($"{baseUrl}/HomeScreen/");
+                if (!testResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("[NetflixRows] Home Screen Sections plugin not available (Status: {StatusCode}). Please ensure it's installed and enabled.", testResponse.StatusCode);
+                    return;
+                }
+                _logger.LogInformation("[NetflixRows] Home Screen Sections plugin detected and available.");
+            }
+            catch (Exception testEx)
+            {
+                _logger.LogError(testEx, "[NetflixRows] Cannot connect to Home Screen Sections plugin. Please ensure it's installed and enabled.");
+                return;
+            }
             
             var sections = new List<object>();
             
@@ -206,6 +224,9 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             }
 
             // Register each section
+            using var httpClient = new HttpClient();
+            var registeredCount = 0;
+            
             foreach (var section in sections)
             {
                 try
@@ -213,15 +234,20 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                     var json = JsonSerializer.Serialize(section);
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
                     
-                    var response = await HttpClient.PostAsync($"{baseUrl}/HomeScreen/RegisterSection", content);
+                    _logger.LogInformation("[NetflixRows] Attempting to register section: {SectionData}", json);
+                    
+                    var response = await httpClient.PostAsync($"{baseUrl}/HomeScreen/RegisterSection", content);
                     
                     if (response.IsSuccessStatusCode)
                     {
                         _logger.LogInformation("[NetflixRows] Successfully registered section");
+                        registeredCount++;
                     }
                     else
                     {
-                        _logger.LogWarning("[NetflixRows] Failed to register section: {StatusCode}", response.StatusCode);
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        _logger.LogWarning("[NetflixRows] Failed to register section: {StatusCode} - {Response}", 
+                            response.StatusCode, responseContent);
                     }
                 }
                 catch (Exception ex)
@@ -230,7 +256,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 }
             }
             
-            _logger.LogInformation("[NetflixRows] Finished registering {Count} Netflix sections", sections.Count);
+            _logger.LogInformation("[NetflixRows] Successfully registered {Registered}/{Total} Netflix sections", 
+                registeredCount, sections.Count);
         }
         catch (Exception ex)
         {
