@@ -4,121 +4,143 @@
     <title>Netflix Rows Configuration</title>
 </head>
 <body>
-    <div data-role="page" class="page" id="netflixRowsConfigPage">
+    <div data-role="page" class="page type-interior pluginConfigurationPage" id="netflixRowsConfigPage">
         <div data-role="content">
             <div class="content-primary">
-                <h1>Netflix Rows Configuration</h1>
-                
                 <form id="netflixRowsConfigForm">
-                    <h2>General Settings</h2>
+                    <div class="sectionTitleContainer flex align-items-center">
+                        <h2 class="sectionTitle">Netflix Rows Plugin</h2>
+                    </div>
+                    <p class="description">Transform your Jellyfin home screen into a Netflix-like experience with dynamic rows and a custom watchlist.</p>
                     
-                    <div class="fieldContainer">
-                        <label for="maxRows">Maximum Rows:</label>
-                        <input type="number" id="maxRows" name="maxRows" value="8" min="1" max="20" class="emby-input">
-                        <div class="fieldDescription">Maximum number of rows to display on the home page.</div>
+                    <div class="verticalSection">
+                        <div class="sectionTitleContainer flex align-items-center">
+                            <h3 class="sectionTitle">General Settings</h3>
+                        </div>
+                        
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="maxRows">Maximum Rows</label>
+                            <input type="number" id="maxRows" name="maxRows" value="8" min="1" max="20" is="emby-input" class="emby-input">
+                            <div class="fieldDescription">Maximum number of rows to display on the home page</div>
+                        </div>
+                        
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="maxItemsPerRow">Items per Row</label>
+                            <input type="number" id="maxItemsPerRow" name="maxItemsPerRow" value="25" min="5" max="50" is="emby-input" class="emby-input">
+                            <div class="fieldDescription">Number of items to show in each row</div>
+                        </div>
                     </div>
                     
-                    <div class="fieldContainer">
-                        <label for="maxItemsPerRow">Items per Row:</label>
-                        <input type="number" id="maxItemsPerRow" name="maxItemsPerRow" value="25" min="5" max="50" class="emby-input">
-                        <div class="fieldDescription">Number of items to show in each row.</div>
+                    <div class="verticalSection">
+                        <div class="sectionTitleContainer flex align-items-center">
+                            <h3 class="sectionTitle">Row Types</h3>
+                        </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="enableMyList" name="enableMyList" checked is="emby-checkbox">
+                                <span>My List</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Show user favorites in a dedicated row (❤️ button)</div>
+                        </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="enableRecentlyAdded" name="enableRecentlyAdded" checked is="emby-checkbox">
+                                <span>Recently Added</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Show recently added content</div>
+                        </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="enableRandomPicks" name="enableRandomPicks" checked is="emby-checkbox">
+                                <span>Random Picks</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Show random content suggestions</div>
+                        </div>
                     </div>
                     
-                    <h2>Row Types</h2>
-                    
-                    <div class="fieldContainer">
-                        <label class="emby-checkbox-label">
-                            <input type="checkbox" id="enableMyList" name="enableMyList" checked class="emby-checkbox">
-                            <span>Enable My List</span>
-                        </label>
-                        <div class="fieldDescription">Show user favorites in a dedicated row.</div>
+                    <div class="verticalSection">
+                        <div class="sectionTitleContainer flex align-items-center">
+                            <h3 class="sectionTitle">Genre Rows</h3>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreAction" name="enabledGenres" value="Action" checked is="emby-checkbox">
+                                <span>Action</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreComedy" name="enabledGenres" value="Comedy" checked is="emby-checkbox">
+                                <span>Comedy</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreAnime" name="enabledGenres" value="Anime" checked is="emby-checkbox">
+                                <span>Anime</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreDrama" name="enabledGenres" value="Drama" is="emby-checkbox">
+                                <span>Drama</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreHorror" name="enabledGenres" value="Horror" is="emby-checkbox">
+                                <span>Horror</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreSciFi" name="enabledGenres" value="Sci-Fi" is="emby-checkbox">
+                                <span>Science Fiction</span>
+                            </label>
+                        </div>
                     </div>
                     
-                    <div class="fieldContainer">
-                        <label class="emby-checkbox-label">
-                            <input type="checkbox" id="enableRecentlyAdded" name="enableRecentlyAdded" checked class="emby-checkbox">
-                            <span>Enable Recently Added</span>
-                        </label>
-                        <div class="fieldDescription">Show recently added content.</div>
+                    <div class="verticalSection">
+                        <button type="button" id="saveBtn" is="emby-button" class="raised button-submit emby-button">
+                            <span>Save</span>
+                        </button>
                     </div>
-                    
-                    <div class="fieldContainer">
-                        <label class="emby-checkbox-label">
-                            <input type="checkbox" id="enableRandomPicks" name="enableRandomPicks" checked class="emby-checkbox">
-                            <span>Enable Random Picks</span>
-                        </label>
-                        <div class="fieldDescription">Show random content suggestions.</div>
-                    </div>
-                    
-                    <h2>Genres</h2>
-                    
-                    <div class="fieldContainer">
-                        <label class="emby-checkbox-label">
-                            <input type="checkbox" id="genreAction" name="enabledGenres" value="Action" checked class="emby-checkbox">
-                            <span>Action</span>
-                        </label>
-                    </div>
-                    
-                    <div class="fieldContainer">
-                        <label class="emby-checkbox-label">
-                            <input type="checkbox" id="genreComedy" name="enabledGenres" value="Comedy" checked class="emby-checkbox">
-                            <span>Comedy</span>
-                        </label>
-                    </div>
-                    
-                    <div class="fieldContainer">
-                        <label class="emby-checkbox-label">
-                            <input type="checkbox" id="genreAnime" name="enabledGenres" value="Anime" checked class="emby-checkbox">
-                            <span>Anime</span>
-                        </label>
-                    </div>
-                    
-                    <div class="fieldContainer">
-                        <label class="emby-checkbox-label">
-                            <input type="checkbox" id="genreDrama" name="enabledGenres" value="Drama" class="emby-checkbox">
-                            <span>Drama</span>
-                        </label>
-                    </div>
-                    
-                    <br>
-                    
-                    <button type="button" id="saveBtn" class="raised emby-button">
-                        <span>Save Configuration</span>
-                    </button>
-                    
-                    <button type="button" id="testBtn" class="emby-button" style="margin-left: 10px;">
-                        <span>Test Connection</span>
-                    </button>
                 </form>
                 
-                <div id="status" style="margin-top: 20px; padding: 10px; display: none;"></div>
+                <div id="status" style="margin-top: 1em; display: none;"></div>
             </div>
         </div>
     </div>
 
     <script type="text/javascript">
-        (function () {
+        (function() {
             'use strict';
 
-            function NetflixRowsConfigPage() {
-                var self = this;
-                var currentConfig = {};
+            var NetflixRowsConfigPage = {
+                currentConfig: {},
 
-                self.loadConfig = function() {
-                    console.log('Loading Netflix Rows configuration...');
-                    
-                    ApiClient.getJSON(ApiClient.getUrl('NetflixRows/Config')).then(function (config) {
-                        console.log('Configuration loaded:', config);
-                        currentConfig = config;
+                loadConfig: function() {
+                    var self = this;
+                    ApiClient.getJSON(ApiClient.getUrl('NetflixRows/Config')).then(function(config) {
+                        self.currentConfig = config;
                         self.populateForm(config);
-                        self.showStatus('Configuration loaded successfully', 'success');
-                    }).catch(function (error) {
+                        self.showStatus('Configuration loaded', 'success');
+                    }).catch(function(error) {
                         console.error('Error loading configuration:', error);
-                        self.showStatus('Error loading configuration: ' + error.message, 'error');
+                        self.showStatus('Error loading configuration', 'error');
                     });
-                };
+                },
 
-                self.populateForm = function(config) {
+                populateForm: function(config) {
                     // Basic settings
                     var maxRows = document.getElementById('maxRows');
                     if (maxRows && config.maxRows !== undefined) {
@@ -131,20 +153,9 @@
                     }
                     
                     // Row types
-                    var enableMyList = document.getElementById('enableMyList');
-                    if (enableMyList) {
-                        enableMyList.checked = config.enableMyList !== false;
-                    }
-                    
-                    var enableRecentlyAdded = document.getElementById('enableRecentlyAdded');
-                    if (enableRecentlyAdded) {
-                        enableRecentlyAdded.checked = config.enableRecentlyAdded !== false;
-                    }
-                    
-                    var enableRandomPicks = document.getElementById('enableRandomPicks');
-                    if (enableRandomPicks) {
-                        enableRandomPicks.checked = config.enableRandomPicks !== false;
-                    }
+                    this.setCheckbox('enableMyList', config.enableMyList !== false);
+                    this.setCheckbox('enableRecentlyAdded', config.enableRecentlyAdded !== false);
+                    this.setCheckbox('enableRandomPicks', config.enableRandomPicks !== false);
                     
                     // Genres
                     if (config.enabledGenres && Array.isArray(config.enabledGenres)) {
@@ -153,11 +164,17 @@
                             checkbox.checked = config.enabledGenres.indexOf(checkbox.value) !== -1;
                         });
                     }
-                };
+                },
 
-                self.saveConfig = function() {
-                    console.log('Saving Netflix Rows configuration...');
-                    
+                setCheckbox: function(id, checked) {
+                    var element = document.getElementById(id);
+                    if (element) {
+                        element.checked = checked;
+                    }
+                },
+
+                saveConfig: function() {
+                    var self = this;
                     var config = {
                         maxRows: parseInt(document.getElementById('maxRows').value) || 8,
                         maxItemsPerRow: parseInt(document.getElementById('maxItemsPerRow').value) || 25,
@@ -165,19 +182,19 @@
                         enableMyList: document.getElementById('enableMyList').checked,
                         enableRecentlyAdded: document.getElementById('enableRecentlyAdded').checked,
                         enableRandomPicks: document.getElementById('enableRandomPicks').checked,
-                        enableLongNotWatched: currentConfig.enableLongNotWatched || false,
+                        enableLongNotWatched: this.currentConfig.enableLongNotWatched || false,
                         enabledGenres: [],
-                        blacklistedGenres: currentConfig.blacklistedGenres || [],
-                        recentlyAddedDays: currentConfig.recentlyAddedDays || 30,
-                        longNotWatchedMonths: currentConfig.longNotWatchedMonths || 6,
-                        minGenreItems: currentConfig.minGenreItems || 5,
-                        myListLimit: currentConfig.myListLimit || 50,
-                        randomRowOrder: currentConfig.randomRowOrder || false,
-                        lazyLoadRows: currentConfig.lazyLoadRows !== false,
-                        replaceHeartWithPlus: currentConfig.replaceHeartWithPlus !== false,
-                        myListCount: currentConfig.myListCount || 20,
-                        recentlyAddedCount: currentConfig.recentlyAddedCount || 20,
-                        randomPicksCount: currentConfig.randomPicksCount || 20
+                        blacklistedGenres: this.currentConfig.blacklistedGenres || [],
+                        recentlyAddedDays: this.currentConfig.recentlyAddedDays || 30,
+                        longNotWatchedMonths: this.currentConfig.longNotWatchedMonths || 6,
+                        minGenreItems: this.currentConfig.minGenreItems || 5,
+                        myListLimit: this.currentConfig.myListLimit || 50,
+                        randomRowOrder: this.currentConfig.randomRowOrder || false,
+                        lazyLoadRows: this.currentConfig.lazyLoadRows !== false,
+                        replaceHeartWithPlus: this.currentConfig.replaceHeartWithPlus !== false,
+                        myListCount: this.currentConfig.myListCount || 20,
+                        recentlyAddedCount: this.currentConfig.recentlyAddedCount || 20,
+                        randomPicksCount: this.currentConfig.randomPicksCount || 20
                     };
 
                     // Collect enabled genres
@@ -186,137 +203,95 @@
                         config.enabledGenres.push(checkbox.value);
                     });
 
-                    console.log('Saving config:', config);
+                    self.showStatus('Saving...', 'info');
 
                     ApiClient.ajax({
                         type: 'POST',
                         url: ApiClient.getUrl('NetflixRows/Config'),
                         data: JSON.stringify(config),
                         contentType: 'application/json'
-                    }).then(function () {
-                        console.log('Configuration saved successfully');
-                        currentConfig = config;
+                    }).then(function() {
+                        self.currentConfig = config;
                         self.showStatus('Configuration saved successfully!', 'success');
-                    }).catch(function (error) {
+                    }).catch(function(error) {
                         console.error('Error saving configuration:', error);
-                        self.showStatus('Error saving configuration: ' + error.message, 'error');
+                        self.showStatus('Error saving configuration', 'error');
                     });
-                };
+                },
 
-                self.testConnection = function() {
-                    console.log('Testing Netflix Rows API connection...');
-                    self.showStatus('Testing API connection...', 'info');
-                    
-                    ApiClient.getJSON(ApiClient.getUrl('NetflixRows/Test')).then(function (response) {
-                        console.log('API test successful:', response);
-                        self.showStatus('API connection test successful!', 'success');
-                    }).catch(function (error) {
-                        console.error('API test failed:', error);
-                        self.showStatus('API test failed: ' + error.message, 'error');
-                    });
-                };
-
-                self.showStatus = function(message, type) {
+                showStatus: function(message, type) {
                     var statusDiv = document.getElementById('status');
                     if (statusDiv) {
                         statusDiv.textContent = message;
                         statusDiv.style.display = 'block';
-                        statusDiv.className = 'status-' + type;
+                        statusDiv.className = 'fieldDescription status-' + type;
                         
-                        // Auto-hide after 5 seconds for success messages
                         if (type === 'success') {
                             setTimeout(function() {
                                 statusDiv.style.display = 'none';
-                            }, 5000);
+                            }, 3000);
                         }
                     }
-                    console.log('Status:', message, type);
-                };
+                },
 
-                self.init = function() {
-                    console.log('Initializing Netflix Rows configuration page...');
-                    
+                init: function() {
+                    var self = this;
                     var saveBtn = document.getElementById('saveBtn');
                     if (saveBtn) {
-                        saveBtn.addEventListener('click', self.saveConfig);
-                    }
-                    
-                    var testBtn = document.getElementById('testBtn');
-                    if (testBtn) {
-                        testBtn.addEventListener('click', self.testConnection);
+                        saveBtn.addEventListener('click', function() {
+                            self.saveConfig();
+                        });
                     }
                     
                     // Load configuration on page load
-                    self.loadConfig();
-                };
+                    this.loadConfig();
+                }
+            };
 
-                return self;
-            }
-
-            // Initialize when page loads
-            if (typeof define === 'function' && define.amd) {
-                define([], function() {
-                    return NetflixRowsConfigPage;
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    NetflixRowsConfigPage.init();
                 });
             } else {
-                window.NetflixRowsConfigPage = NetflixRowsConfigPage;
-                
-                // Auto-initialize if DOM is ready
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function() {
-                        var page = new NetflixRowsConfigPage();
-                        page.init();
-                    });
-                } else {
-                    var page = new NetflixRowsConfigPage();
-                    page.init();
-                }
+                NetflixRowsConfigPage.init();
             }
         })();
     </script>
     
     <style>
-        .fieldContainer {
-            margin-bottom: 1.5em;
-        }
-        
-        .fieldDescription {
-            color: #999;
-            font-size: 0.9em;
-            margin-top: 0.25em;
-        }
-        
         .status-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            border-radius: 4px;
+            color: #00a652;
         }
         
         .status-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            border-radius: 4px;
+            color: #cc3333;
         }
         
         .status-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-            border-radius: 4px;
+            color: #00a4dc;
         }
         
-        h1 {
-            color: #e50914;
-            margin-bottom: 2rem;
+        .description {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2em;
         }
         
-        h2 {
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #e50914;
-            padding-bottom: 0.5rem;
+        .verticalSection {
+            margin-bottom: 2em;
+        }
+        
+        .sectionTitle {
+            color: #00a4dc;
+        }
+        
+        .checkboxContainer-withDescription {
+            margin-bottom: 1.5em;
+        }
+        
+        .checkboxFieldDescription {
+            margin-left: 1.8em;
+            margin-top: 0.3em;
         }
     </style>
 </body>
