@@ -43,10 +43,12 @@ jobs:
         zip -r ../../../../artifacts/jellyfin-plugin-netflix-rows-${{ github.ref_name || 'dev' }}.zip .
     
     - name: Calculate checksum
+      id: checksum
       run: |
         cd artifacts
         CHECKSUM=$(sha256sum jellyfin-plugin-netflix-rows-*.zip | cut -d' ' -f1)
         echo "CALCULATED_CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
+        echo "checksum=$CHECKSUM" >> $GITHUB_OUTPUT
         echo "Calculated checksum: $CHECKSUM"
     
     - name: Create repository.json
@@ -139,6 +141,11 @@ jobs:
           - File Transformation Plugin
           - Home Screen Sections Plugin (optional)
           - Plugin Pages Plugin (optional)
+          
+          ### File Information
+          **Plugin Archive:** `jellyfin-plugin-netflix-rows-${{ github.ref_name }}.zip`  
+          **SHA256 Checksum:** `${{ steps.checksum.outputs.checksum }}`  
+          **Target ABI:** `10.10.7.0`
           
           ### Compatibility
           - Compatible with all Jellyfin themes
