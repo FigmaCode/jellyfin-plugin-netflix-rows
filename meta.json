@@ -1,7 +1,7 @@
 {
   "name": "Netflix Rows",
   "guid": "12345678-1234-5678-9abc-123456789012",
-  "version": "1.0.2.0",
+  "version": "1.0.0.7",
   "description": "Transform your Jellyfin home screen into a Netflix-like experience with dynamic rows, genres, and a custom watchlist.",
   "overview": "Netflix Rows Plugin für Jellyfin - Erstellt eine Netflix-ähnliche Startseite mit dynamischen Rows, Genres und einer benutzerdefinierten Watchlist. Bietet konfigurierbare Genre-Filter, \"Meine Liste\" Funktionalität über Favoriten, und vollständige Theme-Integration.",
   "owner": "jellyfin-netflix-rows",
