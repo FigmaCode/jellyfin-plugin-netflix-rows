@@ -189,7 +189,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                     id = "netflix-my-list",
                     displayText = "My List",
                     limit = 1,
-                    additionalData = "",
+                    route = (string?)null,
+                    additionalData = "MyList",
                     resultsEndpoint = "/NetflixRows/MyListSection"
                 });
             }
@@ -202,7 +203,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                     id = "netflix-recently-added",
                     displayText = "Recently Added",
                     limit = 1,
-                    additionalData = "",
+                    route = (string?)null,
+                    additionalData = "RecentlyAdded",
                     resultsEndpoint = "/NetflixRows/RecentlyAddedSection"
                 });
             }
@@ -215,7 +217,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                     id = "netflix-random-picks",
                     displayText = "Random Picks",
                     limit = 1,
-                    additionalData = "",
+                    route = (string?)null,
+                    additionalData = "RandomPicks",
                     resultsEndpoint = "/NetflixRows/RandomPicksSection"
                 });
             }
@@ -242,8 +245,9 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                         id = $"netflix-genre-{genre.ToLowerInvariant()}",
                         displayText = displayName,
                         limit = 1,
+                        route = (string?)null,
                         additionalData = genre,
-                        resultsEndpoint = $"/NetflixRows/GenreSection/{genre}"
+                        resultsEndpoint = "/NetflixRows/GenreSection"
                     });
                 }
             }

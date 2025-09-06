@@ -22,6 +22,22 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.NetflixRows.Controllers;
 
 /// <summary>
+/// Payload for Home Screen Section requests.
+/// </summary>
+public class HomeScreenSectionPayload
+{
+    /// <summary>
+    /// Gets or sets the user ID.
+    /// </summary>
+    public Guid UserId { get; set; }
+
+    /// <summary>
+    /// Gets or sets additional data for the section.
+    /// </summary>
+    public string? AdditionalData { get; set; }
+}
+
+/// <summary>
 /// Netflix Rows API Controller.
 /// </summary>
 [ApiController]
@@ -240,33 +256,22 @@ public class NetflixRowsController : ControllerBase
     /// Gets the My List section for Home Screen Sections.
     /// </summary>
     /// <returns>Section data for My List.</returns>
-    [HttpGet("MyListSection")]
-    public ActionResult<object> GetMyListSection()
+    [HttpPost("MyListSection")]
+    public ActionResult<QueryResult<BaseItemDto>> GetMyListSection([FromBody] HomeScreenSectionPayload payload)
     {
         try
         {
-            _logger.LogInformation("[NetflixRows] MyListSection endpoint called");
+            _logger.LogInformation("[NetflixRows] MyListSection POST endpoint called with UserId: {UserId}, AdditionalData: {AdditionalData}", 
+                payload?.UserId, payload?.AdditionalData);
             
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
             if (!config.EnableMyList)
             {
                 _logger.LogWarning("[NetflixRows] My List section is disabled in config");
-                return NotFound("My List section is disabled");
+                return Ok(new QueryResult<BaseItemDto>(new BaseItemDto[0]));
             }
 
-            var items = GetNetflixItems(config.MyListCount, _ => true); // Simplified for now
-            var itemsList = items.ToList();
-            
-            _logger.LogInformation("[NetflixRows] MyListSection returning {Count} items", itemsList.Count);
-
-            var result = new
-            {
-                displayName = "My List",
-                items = itemsList.Select(FormatItemForSection).ToList()
-            };
-            
-            _logger.LogInformation("[NetflixRows] MyListSection result: {Result}", System.Text.Json.JsonSerializer.Serialize(result));
-            return Ok(result);
+            return GetMyList(25);
         }
         catch (Exception ex)
         {
@@ -279,34 +284,22 @@ public class NetflixRowsController : ControllerBase
     /// Gets the Recently Added section for Home Screen Sections.
     /// </summary>
     /// <returns>Section data for Recently Added.</returns>
-    [HttpGet("RecentlyAddedSection")]
-    public ActionResult<object> GetRecentlyAddedSection()
+    [HttpPost("RecentlyAddedSection")]
+    public ActionResult<QueryResult<BaseItemDto>> GetRecentlyAddedSection([FromBody] HomeScreenSectionPayload payload)
     {
         try
         {
-            _logger.LogInformation("[NetflixRows] RecentlyAddedSection endpoint called");
+            _logger.LogInformation("[NetflixRows] RecentlyAddedSection POST endpoint called with UserId: {UserId}, AdditionalData: {AdditionalData}", 
+                payload?.UserId, payload?.AdditionalData);
             
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
             if (!config.EnableRecentlyAdded)
             {
                 _logger.LogWarning("[NetflixRows] Recently Added section is disabled in config");
-                return NotFound("Recently Added section is disabled");
+                return Ok(new QueryResult<BaseItemDto>(new BaseItemDto[0]));
             }
 
-            var items = GetNetflixItems(config.RecentlyAddedCount, item => true)
-                .OrderByDescending(x => x.DateCreated)
-                .Take(config.RecentlyAddedCount)
-                .ToList();
-                
-            _logger.LogInformation("[NetflixRows] RecentlyAddedSection returning {Count} items", items.Count);
-
-            var result = new
-            {
-                displayName = "Recently Added",
-                items = items.Select(FormatItemForSection).ToList()
-            };
-            
-            return Ok(result);
+            return GetRecentlyAdded(25);
         }
         catch (Exception ex)
         {
@@ -350,31 +343,29 @@ public class NetflixRowsController : ControllerBase
     /// <summary>
     /// Gets a genre section for Home Screen Sections.
     /// </summary>
-    /// <param name="genre">The genre name.</param>
-    /// <returns>Section data for the specified genre.</returns>
-    [HttpGet("GenreSection/{genre}")]
-    public ActionResult<object> GetGenreSection([FromRoute] string genre)
+    /// <returns>Section data for the specified genre from additionalData.</returns>
+    [HttpPost("GenreSection")]
+    public ActionResult<QueryResult<BaseItemDto>> GetGenreSection([FromBody] HomeScreenSectionPayload payload)
     {
         try
         {
+            _logger.LogInformation("[NetflixRows] GenreSection POST endpoint called with UserId: {UserId}, AdditionalData: {AdditionalData}", 
+                payload?.UserId, payload?.AdditionalData);
+                
+            var genre = payload?.AdditionalData ?? "Action";
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            
             if (config.EnabledGenres?.Contains(genre) != true)
             {
-                return NotFound($"Genre section '{genre}' is disabled");
+                _logger.LogWarning("[NetflixRows] Genre section '{Genre}' is disabled", genre);
+                return Ok(new QueryResult<BaseItemDto>(new BaseItemDto[0]));
             }
 
-            var items = GetNetflixItems(20, // Default count
-                item => item.Genres.Any(g => g.Equals(genre, StringComparison.OrdinalIgnoreCase)));
-
-            return Ok(new
-            {
-                displayName = genre, // Use genre name directly
-                items = items.Select(FormatItemForSection).ToList()
-            });
+            return GetGenre(genre, 25);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error getting genre section for '{genre}'");
+            _logger.LogError(ex, "[NetflixRows] Error getting genre section");
             return StatusCode(500, "Internal server error");
         }
     }
