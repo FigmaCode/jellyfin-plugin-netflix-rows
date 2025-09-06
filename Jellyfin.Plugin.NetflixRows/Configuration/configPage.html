@@ -102,155 +102,165 @@
                     <div class="verticalSection">
                         <div class="sectionTitleContainer flex align-items-center">
                             <h3 class="sectionTitle">Advanced Options</h3>
+                            <button type="button" class="collapsible-toggle" data-target="advancedSection" style="margin-left: auto;">
+                                <i class="md-icon">keyboard_arrow_down</i>
+                            </button>
                         </div>
                         
-                        <div class="checkboxContainer checkboxContainer-withDescription">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="randomRowOrder" name="randomRowOrder" is="emby-checkbox">
-                                <span>Random Row Order</span>
-                            </label>
-                            <div class="fieldDescription checkboxFieldDescription">Randomize the order of rows on each page load</div>
-                        </div>
-                        
-                        <div class="checkboxContainer checkboxContainer-withDescription">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="lazyLoadRows" name="lazyLoadRows" checked is="emby-checkbox">
-                                <span>Lazy Load Rows</span>
-                            </label>
-                            <div class="fieldDescription checkboxFieldDescription">Load row content as needed (recommended for performance)</div>
-                        </div>
-                        
-                        <div class="checkboxContainer checkboxContainer-withDescription">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="replaceHeartWithPlus" name="replaceHeartWithPlus" checked is="emby-checkbox">
-                                <span>Replace Heart with Plus</span>
-                            </label>
-                            <div class="fieldDescription checkboxFieldDescription">Replace ❤️ button with ➕ button for My List</div>
+                        <div id="advancedSection" class="collapsible-content" style="display: none;">
+                            <div class="checkboxContainer checkboxContainer-withDescription">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="randomRowOrder" name="randomRowOrder" is="emby-checkbox">
+                                    <span>Random Row Order</span>
+                                </label>
+                                <div class="fieldDescription checkboxFieldDescription">Randomize the order of rows on each page load</div>
+                            </div>
+                            
+                            <div class="checkboxContainer checkboxContainer-withDescription">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="lazyLoadRows" name="lazyLoadRows" checked is="emby-checkbox">
+                                    <span>Lazy Load Rows</span>
+                                </label>
+                                <div class="fieldDescription checkboxFieldDescription">Load row content as needed (recommended for performance)</div>
+                            </div>
+                            
+                            <div class="checkboxContainer checkboxContainer-withDescription">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="replaceHeartWithPlus" name="replaceHeartWithPlus" checked is="emby-checkbox">
+                                    <span>Replace Heart with Plus</span>
+                                </label>
+                                <div class="fieldDescription checkboxFieldDescription">Replace ❤️ button with ➕ button for My List</div>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="verticalSection">
                         <div class="sectionTitleContainer flex align-items-center">
                             <h3 class="sectionTitle">Genre Rows</h3>
+                            <button type="button" class="collapsible-toggle" data-target="genreSection" style="margin-left: auto;">
+                                <i class="md-icon">keyboard_arrow_down</i>
+                            </button>
                         </div>
                         
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreAction" name="enabledGenres" value="Action" checked is="emby-checkbox">
-                                <span>Action (Adrenalinkick)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreComedy" name="enabledGenres" value="Comedy" checked is="emby-checkbox">
-                                <span>Comedy (Zum Lachen)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreAnime" name="enabledGenres" value="Anime" checked is="emby-checkbox">
-                                <span>Anime</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreDrama" name="enabledGenres" value="Drama" is="emby-checkbox">
-                                <span>Drama (Gefühlvoll)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreHorror" name="enabledGenres" value="Horror" is="emby-checkbox">
-                                <span>Horror (Gruselig)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreSciFi" name="enabledGenres" value="Sci-Fi" is="emby-checkbox">
-                                <span>Science Fiction</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreRomance" name="enabledGenres" value="Romance" is="emby-checkbox">
-                                <span>Romance (Romantisch)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreThriller" name="enabledGenres" value="Thriller" is="emby-checkbox">
-                                <span>Thriller (Spannend)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreFantasy" name="enabledGenres" value="Fantasy" is="emby-checkbox">
-                                <span>Fantasy (Fantasie)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreCrime" name="enabledGenres" value="Crime" is="emby-checkbox">
-                                <span>Crime (Krimi)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreDocumentary" name="enabledGenres" value="Documentary" is="emby-checkbox">
-                                <span>Documentary (Dokumentation)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreAdventure" name="enabledGenres" value="Adventure" is="emby-checkbox">
-                                <span>Adventure (Abenteuer)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreAnimation" name="enabledGenres" value="Animation" is="emby-checkbox">
-                                <span>Animation</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreFamily" name="enabledGenres" value="Family" is="emby-checkbox">
-                                <span>Family (Familie)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreHistory" name="enabledGenres" value="History" is="emby-checkbox">
-                                <span>History (Geschichte)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreMusic" name="enabledGenres" value="Music" is="emby-checkbox">
-                                <span>Music (Musik)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="checkboxContainer">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="genreWestern" name="enabledGenres" value="Western" is="emby-checkbox">
-                                <span>Western</span>
-                            </label>
+                        <div id="genreSection" class="collapsible-content" style="display: none;">
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreAction" name="enabledGenres" value="Action" checked is="emby-checkbox">
+                                    <span>Action</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreComedy" name="enabledGenres" value="Comedy" checked is="emby-checkbox">
+                                    <span>Comedy</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreAnime" name="enabledGenres" value="Anime" checked is="emby-checkbox">
+                                    <span>Anime</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreDrama" name="enabledGenres" value="Drama" is="emby-checkbox">
+                                    <span>Drama</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreHorror" name="enabledGenres" value="Horror" is="emby-checkbox">
+                                    <span>Horror</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreSciFi" name="enabledGenres" value="Sci-Fi" is="emby-checkbox">
+                                    <span>Science Fiction</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreRomance" name="enabledGenres" value="Romance" is="emby-checkbox">
+                                    <span>Romance</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreThriller" name="enabledGenres" value="Thriller" is="emby-checkbox">
+                                    <span>Thriller</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreFantasy" name="enabledGenres" value="Fantasy" is="emby-checkbox">
+                                    <span>Fantasy</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreCrime" name="enabledGenres" value="Crime" is="emby-checkbox">
+                                    <span>Crime</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreDocumentary" name="enabledGenres" value="Documentary" is="emby-checkbox">
+                                    <span>Documentary</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreAdventure" name="enabledGenres" value="Adventure" is="emby-checkbox">
+                                    <span>Adventure</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreAnimation" name="enabledGenres" value="Animation" is="emby-checkbox">
+                                    <span>Animation</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreFamily" name="enabledGenres" value="Family" is="emby-checkbox">
+                                    <span>Family</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreHistory" name="enabledGenres" value="History" is="emby-checkbox">
+                                    <span>History</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreMusic" name="enabledGenres" value="Music" is="emby-checkbox">
+                                    <span>Music</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="genreWestern" name="enabledGenres" value="Western" is="emby-checkbox">
+                                    <span>Western</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                     
@@ -441,8 +451,34 @@
                         });
                     }
                     
+                    // Initialize collapsible sections
+                    this.initCollapsibleSections();
+                    
                     // Load configuration on page load
                     this.loadConfig();
+                },
+                
+                initCollapsibleSections: function() {
+                    var toggleButtons = document.querySelectorAll('.collapsible-toggle');
+                    toggleButtons.forEach(function(button) {
+                        button.addEventListener('click', function() {
+                            var targetId = this.getAttribute('data-target');
+                            var targetElement = document.getElementById(targetId);
+                            var icon = this.querySelector('.md-icon');
+                            
+                            if (targetElement) {
+                                var isVisible = targetElement.style.display !== 'none';
+                                
+                                if (isVisible) {
+                                    targetElement.style.display = 'none';
+                                    icon.textContent = 'keyboard_arrow_down';
+                                } else {
+                                    targetElement.style.display = 'block';
+                                    icon.textContent = 'keyboard_arrow_up';
+                                }
+                            }
+                        });
+                    });
                 }
             };
 
@@ -490,6 +526,42 @@
         .checkboxFieldDescription {
             margin-left: 1.8em;
             margin-top: 0.3em;
+        }
+        
+        /* Collapsible sections */
+        .collapsible-toggle {
+            background: none;
+            border: none;
+            color: #00a4dc;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .collapsible-toggle:hover {
+            background-color: rgba(0, 164, 220, 0.1);
+        }
+        
+        .collapsible-toggle .md-icon {
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .collapsible-content {
+            padding-top: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .sectionTitleContainer {
+            cursor: pointer;
+            padding: 0.5em 0;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .sectionTitleContainer:hover {
+            background-color: rgba(255, 255, 255, 0.02);
         }
     </style>
 </body>
