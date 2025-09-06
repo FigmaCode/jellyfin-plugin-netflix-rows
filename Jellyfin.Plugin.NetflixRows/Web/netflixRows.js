@@ -472,29 +472,36 @@
     // Get current user ID
     function getCurrentUserId() {
         // Try multiple methods to get user ID
-        if (window.ApiClient && typeof window.ApiClient.getCurrentUserId === 'function') {
-            return window.ApiClient.getCurrentUserId();
+        try {
+            if (window.ApiClient && typeof window.ApiClient.getCurrentUserId === 'function') {
+                const id = window.ApiClient.getCurrentUserId();
+                if (id) return id;
+            }
+            if (window.Dashboard && typeof window.Dashboard.getCurrentUserId === 'function') {
+                const id = window.Dashboard.getCurrentUserId();
+                if (id) return id;
+            }
+            if (window.ApiClient && window.ApiClient.getCurrentUser) {
+                const user = window.ApiClient.getCurrentUser();
+                if (user && user.Id) return user.Id;
+            }
+            // Fallback to localStorage
+            const userId = localStorage.getItem('userId');
+            if (userId) return userId;
+            // Try to extract from current page URL or context
+            const pathMatch = window.location.hash.match(/userId=([^&]+)/);
+            if (pathMatch) return pathMatch[1];
+            // Try to get from cookies
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith('userId=')) {
+                    return cookie.substring('userId='.length);
+                }
+            }
+        } catch (err) {
+            console.warn('Netflix Rows: Error getting user ID', err);
         }
-        if (window.Dashboard && typeof window.Dashboard.getCurrentUserId === 'function') {
-            return window.Dashboard.getCurrentUserId();
-        }
-        if (window.ApiClient && window.ApiClient.getCurrentUser) {
-            const user = window.ApiClient.getCurrentUser();
-            return user ? user.Id : null;
-        }
-        
-        // Fallback to localStorage
-        const userId = localStorage.getItem('userId');
-        if (userId) {
-            return userId;
-        }
-        
-        // Try to extract from current page URL or context
-        const pathMatch = window.location.hash.match(/userId=([^&]+)/);
-        if (pathMatch) {
-            return pathMatch[1];
-        }
-        
         console.warn('Netflix Rows: Could not determine user ID');
         return null;
     }

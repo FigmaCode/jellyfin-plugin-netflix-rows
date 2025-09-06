@@ -76,68 +76,76 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         try
         {
-            _logger.LogInformation("Attempting to register web transformations");
-            
-            var assembly = AssemblyLoadContext.All
-                .SelectMany(x => x.Assemblies)
-                .FirstOrDefault(x => x.FullName?.Contains(".FileTransformation", StringComparison.OrdinalIgnoreCase) ?? false);
+            _logger.LogInformation("[NetflixRows] Attempting to register web transformations");
+            var assemblies = AssemblyLoadContext.All.SelectMany(x => x.Assemblies).ToList();
+            var assembly = assemblies.FirstOrDefault(x => x.FullName?.Contains(".FileTransformation", StringComparison.OrdinalIgnoreCase) ?? false);
 
-            if (assembly != null)
+            if (assembly == null)
             {
-                _logger.LogInformation("File Transformation plugin found: {AssemblyName}", assembly.FullName);
-                
-                var pluginInterfaceType = assembly.GetType("Jellyfin.Plugin.FileTransformation.PluginInterface");
-                if (pluginInterfaceType != null)
-                {
-                    _logger.LogInformation("PluginInterface type found, registering transformations");
-
-                    // Register JavaScript transformation
-                    var jsPayload = new
-                    {
-                        id = Guid.NewGuid().ToString(),
-                        fileNamePattern = @".*main.*\.js$",
-                        callbackAssembly = GetType().Assembly.FullName,
-                        callbackClass = "Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation",
-                        callbackMethod = "TransformJs"
-                    };
-
-                    // Register CSS transformation
-                    var cssPayload = new
-                    {
-                        id = Guid.NewGuid().ToString(),
-                        fileNamePattern = @".*\.css$",
-                        callbackAssembly = GetType().Assembly.FullName,
-                        callbackClass = "Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation",
-                        callbackMethod = "TransformCss"
-                    };
-
-                    var registerMethod = pluginInterfaceType.GetMethod("RegisterTransformation");
-                    if (registerMethod != null)
-                    {
-                        registerMethod.Invoke(null, new object[] { JsonSerializer.Serialize(jsPayload) });
-                        registerMethod.Invoke(null, new object[] { JsonSerializer.Serialize(cssPayload) });
-                        _logger.LogInformation("Web transformations registered successfully");
-                    }
-                    else
-                    {
-                        _logger.LogWarning("RegisterTransformation method not found on PluginInterface");
-                    }
-                }
-                else
-                {
-                    _logger.LogWarning("File Transformation PluginInterface type not found");
-                }
+                _logger.LogWarning("[NetflixRows] File Transformation plugin not found. Netflix Rows will work with limited functionality.");
+                _logger.LogInformation("[NetflixRows] Available assemblies: {Assemblies}", string.Join(", ", assemblies.Select(a => a.GetName().Name)));
+                return;
             }
-            else
+
+            _logger.LogInformation("[NetflixRows] File Transformation plugin found: {AssemblyName}", assembly.FullName);
+            var pluginInterfaceType = assembly.GetType("Jellyfin.Plugin.FileTransformation.PluginInterface");
+            if (pluginInterfaceType == null)
             {
-                _logger.LogWarning("File Transformation plugin not found. Netflix Rows will work with limited functionality.");
-                _logger.LogInformation("Available assemblies: {Assemblies}", 
-                    string.Join(", ", AssemblyLoadContext.All.SelectMany(x => x.Assemblies).Select(a => a.GetName().Name)));
+                _logger.LogWarning("[NetflixRows] File Transformation PluginInterface type not found");
+                return;
             }
+
+            _logger.LogInformation("[NetflixRows] PluginInterface type found, registering transformations");
+            var registerMethod = pluginInterfaceType.GetMethod("RegisterTransformation");
+            if (registerMethod == null)
+            {
+                _logger.LogWarning("[NetflixRows] RegisterTransformation method not found on PluginInterface");
+                return;
+            }
+
+            // Register JavaScript transformation
+            var jsPayload = new
+            {
+                id = Guid.NewGuid().ToString(),
+                fileNamePattern = @".*main.*\.js$",
+                callbackAssembly = GetType().Assembly.FullName,
+                callbackClass = "Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation",
+                callbackMethod = "TransformJs"
+            };
+
+            // Register CSS transformation
+            var cssPayload = new
+            {
+                id = Guid.NewGuid().ToString(),
+                fileNamePattern = @".*\.css$",
+                callbackAssembly = GetType().Assembly.FullName,
+                callbackClass = "Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation",
+                callbackMethod = "TransformCss"
+            };
+
+            try
+            {
+                registerMethod.Invoke(null, new object[] { JsonSerializer.Serialize(jsPayload) });
+                _logger.LogInformation("[NetflixRows] JS transformation registered: {Payload}", JsonSerializer.Serialize(jsPayload));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[NetflixRows] Failed to register JS transformation");
+            }
+            try
+            {
+                registerMethod.Invoke(null, new object[] { JsonSerializer.Serialize(cssPayload) });
+                _logger.LogInformation("[NetflixRows] CSS transformation registered: {Payload}", JsonSerializer.Serialize(cssPayload));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[NetflixRows] Failed to register CSS transformation");
+            }
+            _logger.LogInformation("[NetflixRows] Web transformations registration process finished");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to register web transformations");
+            _logger.LogError(ex, "[NetflixRows] Failed to register web transformations");
         }
     }
 
