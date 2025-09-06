@@ -553,4 +553,171 @@ console.log('[NetflixRows] Script loaded successfully');
             return StatusCode(500, "Internal server error");
         }
     }
+
+    /// <summary>
+    /// Gets the My List section for Home Screen Sections.
+    /// </summary>
+    /// <returns>Section data for My List.</returns>
+    [HttpGet("MyListSection")]
+    public ActionResult<object> GetMyListSection()
+    {
+        try
+        {
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            if (!config.EnableMyList)
+            {
+                return NotFound("My List section is disabled");
+            }
+
+            var items = GetNetflixItems(config.MyListCount, item => 
+                item.UserData?.IsFavorite == true);
+
+            return Ok(new
+            {
+                displayName = "My List",
+                items = items.Select(FormatItemForSection).ToList()
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting My List section");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Gets the Recently Added section for Home Screen Sections.
+    /// </summary>
+    /// <returns>Section data for Recently Added.</returns>
+    [HttpGet("RecentlyAddedSection")]
+    public ActionResult<object> GetRecentlyAddedSection()
+    {
+        try
+        {
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            if (!config.EnableRecentlyAdded)
+            {
+                return NotFound("Recently Added section is disabled");
+            }
+
+            var items = GetNetflixItems(config.RecentlyAddedCount, item => true)
+                .OrderByDescending(x => x.DateCreated)
+                .Take(config.RecentlyAddedCount);
+
+            return Ok(new
+            {
+                displayName = "Recently Added",
+                items = items.Select(FormatItemForSection).ToList()
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting Recently Added section");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Gets the Random Picks section for Home Screen Sections.
+    /// </summary>
+    /// <returns>Section data for Random Picks.</returns>
+    [HttpGet("RandomPicksSection")]
+    public ActionResult<object> GetRandomPicksSection()
+    {
+        try
+        {
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            if (!config.EnableRandomPicks)
+            {
+                return NotFound("Random Picks section is disabled");
+            }
+
+            var items = GetNetflixItems(config.RandomPicksCount * 3, item => true)
+                .OrderBy(x => Guid.NewGuid())
+                .Take(config.RandomPicksCount);
+
+            return Ok(new
+            {
+                displayName = "Random Picks",
+                items = items.Select(FormatItemForSection).ToList()
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting Random Picks section");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Gets a genre section for Home Screen Sections.
+    /// </summary>
+    /// <param name="genre">The genre name.</param>
+    /// <returns>Section data for the specified genre.</returns>
+    [HttpGet("GenreSection/{genre}")]
+    public ActionResult<object> GetGenreSection([FromRoute] string genre)
+    {
+        try
+        {
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            if (config.EnabledGenres?.Contains(genre) != true)
+            {
+                return NotFound($"Genre section '{genre}' is disabled");
+            }
+
+            var items = GetNetflixItems(config.GenreRowCounts?.GetValueOrDefault(genre, 20) ?? 20, 
+                item => item.Genres.Any(g => g.Equals(genre, StringComparison.OrdinalIgnoreCase)));
+
+            var displayName = config.GenreDisplayNames?.GetValueOrDefault(genre, genre) ?? genre;
+
+            return Ok(new
+            {
+                displayName = displayName,
+                items = items.Select(FormatItemForSection).ToList()
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error getting genre section for '{genre}'");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    private IEnumerable<BaseItem> GetNetflixItems(int count, Func<BaseItem, bool> filter)
+    {
+        try
+        {
+            var query = new InternalItemsQuery
+            {
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+                IsVirtualItem = false,
+                Limit = count * 2 // Get more to filter from
+            };
+
+            var result = _libraryManager.GetItemsResult(query);
+            return result.Items.Where(filter).Take(count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting Netflix items");
+            return Enumerable.Empty<BaseItem>();
+        }
+    }
+
+    private object FormatItemForSection(BaseItem item)
+    {
+        return new
+        {
+            id = item.Id.ToString(),
+            name = item.Name,
+            overview = item.Overview,
+            type = item.GetType().Name,
+            backdropImageUrl = $"/Items/{item.Id}/Images/Backdrop",
+            primaryImageUrl = $"/Items/{item.Id}/Images/Primary",
+            year = item.ProductionYear,
+            rating = item.CommunityRating,
+            runtime = item.RunTimeTicks.HasValue ? TimeSpan.FromTicks(item.RunTimeTicks.Value).TotalMinutes : null,
+            genres = item.Genres.ToList()
+        };
+    }
 }

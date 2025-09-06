@@ -1,0 +1,109 @@
+/* Netflix Rows Plugin Styles */
+.homeScreenSection .netflixRow {
+    margin: 40px 0;
+    padding: 0;
+}
+
+.homeScreenSection .netflixRow .sectionTitle {
+    color: #fff;
+    font-size: 1.4em;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding: 0 4%;
+}
+
+.homeScreenSection .netflixRow .itemsContainer {
+    display: flex;
+    gap: 8px;
+    padding: 0 4%;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.homeScreenSection .netflixRow .itemsContainer::-webkit-scrollbar {
+    display: none;
+}
+
+.homeScreenSection .netflixRow .card {
+    flex: 0 0 auto;
+    width: 200px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.homeScreenSection .netflixRow .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+}
+
+.homeScreenSection .netflixRow .cardImageContainer {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: #333;
+}
+
+.homeScreenSection .netflixRow .cardImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.homeScreenSection .netflixRow .cardContent {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: #fff;
+    padding: 20px 10px 10px;
+}
+
+.homeScreenSection .netflixRow .cardTitle {
+    font-size: 0.9em;
+    font-weight: 600;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.homeScreenSection .netflixRow .cardMeta {
+    font-size: 0.8em;
+    opacity: 0.8;
+    margin: 5px 0 0;
+}
+
+/* Dark theme compatibility */
+body.dark .homeScreenSection .netflixRow {
+    background: transparent;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .homeScreenSection .netflixRow .card {
+        width: 160px;
+    }
+    
+    .homeScreenSection .netflixRow .sectionTitle {
+        font-size: 1.2em;
+        padding: 0 20px;
+    }
+    
+    .homeScreenSection .netflixRow .itemsContainer {
+        padding: 0 20px;
+        gap: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .homeScreenSection .netflixRow .card {
+        width: 140px;
+    }
+}
