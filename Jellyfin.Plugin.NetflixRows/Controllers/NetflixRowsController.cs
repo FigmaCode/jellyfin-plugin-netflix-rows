@@ -346,20 +346,12 @@ public class NetflixRowsController : ControllerBase
                 return NotFound($"Genre section '{genre}' is disabled");
             }
 
-            var itemCount = config.GenreRowCounts != null && config.GenreRowCounts.ContainsKey(genre)
-                ? config.GenreRowCounts[genre]
-                : 20;
-            
-            var items = GetNetflixItems(itemCount, 
+            var items = GetNetflixItems(20, // Default count
                 item => item.Genres.Any(g => g.Equals(genre, StringComparison.OrdinalIgnoreCase)));
-
-            var displayName = config.GenreDisplayNames != null && config.GenreDisplayNames.ContainsKey(genre) 
-                ? config.GenreDisplayNames[genre] 
-                : genre;
 
             return Ok(new
             {
-                displayName = displayName,
+                displayName = genre, // Use genre name directly
                 items = items.Select(FormatItemForSection).ToList()
             });
         }

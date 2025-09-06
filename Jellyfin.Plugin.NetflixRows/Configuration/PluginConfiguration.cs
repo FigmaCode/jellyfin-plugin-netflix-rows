@@ -26,20 +26,6 @@ public class PluginConfiguration : BasePluginConfiguration
         EnabledGenres = new List<string> { "Action", "Anime", "Comedy" };
         BlacklistedGenres = new List<string>();
         
-        GenreDisplayNames = new Dictionary<string, string>
-        {
-            { "Action", "Adrenalinkick" },
-            { "Comedy", "Zum Lachen" },
-            { "Drama", "Gefühlvoll" },
-            { "Horror", "Gruselig" },
-            { "Romance", "Romantisch" },
-            { "Thriller", "Spannend" },
-            { "Sci-Fi", "Science Fiction" },
-            { "Fantasy", "Fantasie" },
-            { "Crime", "Krimi" },
-            { "Documentary", "Dokumentation" }
-        };
-        
         RecentlyAddedDays = 30;
         LongNotWatchedMonths = 6;
         MinGenreItems = 5;
@@ -96,11 +82,6 @@ public class PluginConfiguration : BasePluginConfiguration
     public List<string> BlacklistedGenres { get; set; }
 
     /// <summary>
-    /// Gets or sets custom display names for genres.
-    /// </summary>
-    public Dictionary<string, string> GenreDisplayNames { get; set; }
-
-    /// <summary>
     /// Gets or sets the number of days for "Recently Added" definition.
     /// </summary>
     public int RecentlyAddedDays { get; set; }
@@ -149,9 +130,4 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets the number of items in Random Picks row.
     /// </summary>
     public int RandomPicksCount { get; set; } = 20;
-
-    /// <summary>
-    /// Gets or sets the genre row counts dictionary.
-    /// </summary>
-    public Dictionary<string, int> GenreRowCounts { get; set; } = new Dictionary<string, int>();
 }
