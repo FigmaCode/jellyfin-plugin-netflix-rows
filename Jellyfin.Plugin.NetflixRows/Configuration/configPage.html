@@ -29,6 +29,36 @@
                             <input type="number" id="maxItemsPerRow" name="maxItemsPerRow" value="25" min="5" max="50" is="emby-input" class="emby-input">
                             <div class="fieldDescription">Number of items to show in each row</div>
                         </div>
+                        
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="minItemsPerRow">Minimum Items per Row</label>
+                            <input type="number" id="minItemsPerRow" name="minItemsPerRow" value="10" min="1" max="25" is="emby-input" class="emby-input">
+                            <div class="fieldDescription">Minimum items required to show a row</div>
+                        </div>
+                        
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="recentlyAddedDays">Recently Added Period (Days)</label>
+                            <input type="number" id="recentlyAddedDays" name="recentlyAddedDays" value="30" min="1" max="365" is="emby-input" class="emby-input">
+                            <div class="fieldDescription">How many days back to consider for "Recently Added"</div>
+                        </div>
+                        
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="longNotWatchedMonths">Long Not Watched Period (Months)</label>
+                            <input type="number" id="longNotWatchedMonths" name="longNotWatchedMonths" value="6" min="1" max="24" is="emby-input" class="emby-input">
+                            <div class="fieldDescription">Months to consider content as "long not watched"</div>
+                        </div>
+                        
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="minGenreItems">Minimum Genre Items</label>
+                            <input type="number" id="minGenreItems" name="minGenreItems" value="5" min="1" max="20" is="emby-input" class="emby-input">
+                            <div class="fieldDescription">Minimum items required to create a genre row</div>
+                        </div>
+                        
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="myListLimit">My List Limit</label>
+                            <input type="number" id="myListLimit" name="myListLimit" value="50" min="10" max="200" is="emby-input" class="emby-input">
+                            <div class="fieldDescription">Maximum items to show in My List row</div>
+                        </div>
                     </div>
                     
                     <div class="verticalSection">
@@ -59,6 +89,44 @@
                             </label>
                             <div class="fieldDescription checkboxFieldDescription">Show random content suggestions</div>
                         </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="enableLongNotWatched" name="enableLongNotWatched" is="emby-checkbox">
+                                <span>Long Not Watched</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Show content that hasn't been watched for a long time</div>
+                        </div>
+                    </div>
+                    
+                    <div class="verticalSection">
+                        <div class="sectionTitleContainer flex align-items-center">
+                            <h3 class="sectionTitle">Advanced Options</h3>
+                        </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="randomRowOrder" name="randomRowOrder" is="emby-checkbox">
+                                <span>Random Row Order</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Randomize the order of rows on each page load</div>
+                        </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="lazyLoadRows" name="lazyLoadRows" checked is="emby-checkbox">
+                                <span>Lazy Load Rows</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Load row content as needed (recommended for performance)</div>
+                        </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="replaceHeartWithPlus" name="replaceHeartWithPlus" checked is="emby-checkbox">
+                                <span>Replace Heart with Plus</span>
+                            </label>
+                            <div class="fieldDescription checkboxFieldDescription">Replace ❤️ button with ➕ button for My List</div>
+                        </div>
                     </div>
                     
                     <div class="verticalSection">
@@ -69,14 +137,14 @@
                         <div class="checkboxContainer">
                             <label class="emby-checkbox-label">
                                 <input type="checkbox" id="genreAction" name="enabledGenres" value="Action" checked is="emby-checkbox">
-                                <span>Action</span>
+                                <span>Action (Adrenalinkick)</span>
                             </label>
                         </div>
                         
                         <div class="checkboxContainer">
                             <label class="emby-checkbox-label">
                                 <input type="checkbox" id="genreComedy" name="enabledGenres" value="Comedy" checked is="emby-checkbox">
-                                <span>Comedy</span>
+                                <span>Comedy (Zum Lachen)</span>
                             </label>
                         </div>
                         
@@ -90,14 +158,14 @@
                         <div class="checkboxContainer">
                             <label class="emby-checkbox-label">
                                 <input type="checkbox" id="genreDrama" name="enabledGenres" value="Drama" is="emby-checkbox">
-                                <span>Drama</span>
+                                <span>Drama (Gefühlvoll)</span>
                             </label>
                         </div>
                         
                         <div class="checkboxContainer">
                             <label class="emby-checkbox-label">
                                 <input type="checkbox" id="genreHorror" name="enabledGenres" value="Horror" is="emby-checkbox">
-                                <span>Horror</span>
+                                <span>Horror (Gruselig)</span>
                             </label>
                         </div>
                         
@@ -105,6 +173,83 @@
                             <label class="emby-checkbox-label">
                                 <input type="checkbox" id="genreSciFi" name="enabledGenres" value="Sci-Fi" is="emby-checkbox">
                                 <span>Science Fiction</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreRomance" name="enabledGenres" value="Romance" is="emby-checkbox">
+                                <span>Romance (Romantisch)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreThriller" name="enabledGenres" value="Thriller" is="emby-checkbox">
+                                <span>Thriller (Spannend)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreFantasy" name="enabledGenres" value="Fantasy" is="emby-checkbox">
+                                <span>Fantasy (Fantasie)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreCrime" name="enabledGenres" value="Crime" is="emby-checkbox">
+                                <span>Crime (Krimi)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreDocumentary" name="enabledGenres" value="Documentary" is="emby-checkbox">
+                                <span>Documentary (Dokumentation)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreAdventure" name="enabledGenres" value="Adventure" is="emby-checkbox">
+                                <span>Adventure (Abenteuer)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreAnimation" name="enabledGenres" value="Animation" is="emby-checkbox">
+                                <span>Animation</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreFamily" name="enabledGenres" value="Family" is="emby-checkbox">
+                                <span>Family (Familie)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreHistory" name="enabledGenres" value="History" is="emby-checkbox">
+                                <span>History (Geschichte)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreMusic" name="enabledGenres" value="Music" is="emby-checkbox">
+                                <span>Music (Musik)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="checkboxContainer">
+                            <label class="emby-checkbox-label">
+                                <input type="checkbox" id="genreWestern" name="enabledGenres" value="Western" is="emby-checkbox">
+                                <span>Western</span>
                             </label>
                         </div>
                     </div>
@@ -152,10 +297,41 @@
                         maxItemsPerRow.value = config.maxItemsPerRow;
                     }
                     
+                    var minItemsPerRow = document.getElementById('minItemsPerRow');
+                    if (minItemsPerRow && config.minItemsPerRow !== undefined) {
+                        minItemsPerRow.value = config.minItemsPerRow;
+                    }
+                    
+                    var recentlyAddedDays = document.getElementById('recentlyAddedDays');
+                    if (recentlyAddedDays && config.recentlyAddedDays !== undefined) {
+                        recentlyAddedDays.value = config.recentlyAddedDays;
+                    }
+                    
+                    var longNotWatchedMonths = document.getElementById('longNotWatchedMonths');
+                    if (longNotWatchedMonths && config.longNotWatchedMonths !== undefined) {
+                        longNotWatchedMonths.value = config.longNotWatchedMonths;
+                    }
+                    
+                    var minGenreItems = document.getElementById('minGenreItems');
+                    if (minGenreItems && config.minGenreItems !== undefined) {
+                        minGenreItems.value = config.minGenreItems;
+                    }
+                    
+                    var myListLimit = document.getElementById('myListLimit');
+                    if (myListLimit && config.myListLimit !== undefined) {
+                        myListLimit.value = config.myListLimit;
+                    }
+                    
                     // Row types
                     this.setCheckbox('enableMyList', config.enableMyList !== false);
                     this.setCheckbox('enableRecentlyAdded', config.enableRecentlyAdded !== false);
                     this.setCheckbox('enableRandomPicks', config.enableRandomPicks !== false);
+                    this.setCheckbox('enableLongNotWatched', config.enableLongNotWatched === true);
+                    
+                    // Advanced options
+                    this.setCheckbox('randomRowOrder', config.randomRowOrder === true);
+                    this.setCheckbox('lazyLoadRows', config.lazyLoadRows !== false);
+                    this.setCheckbox('replaceHeartWithPlus', config.replaceHeartWithPlus !== false);
                     
                     // Genres
                     if (config.enabledGenres && Array.isArray(config.enabledGenres)) {
@@ -178,20 +354,42 @@
                     var config = {
                         maxRows: parseInt(document.getElementById('maxRows').value) || 8,
                         maxItemsPerRow: parseInt(document.getElementById('maxItemsPerRow').value) || 25,
-                        minItemsPerRow: 10,
+                        minItemsPerRow: parseInt(document.getElementById('minItemsPerRow').value) || 10,
+                        recentlyAddedDays: parseInt(document.getElementById('recentlyAddedDays').value) || 30,
+                        longNotWatchedMonths: parseInt(document.getElementById('longNotWatchedMonths').value) || 6,
+                        minGenreItems: parseInt(document.getElementById('minGenreItems').value) || 5,
+                        myListLimit: parseInt(document.getElementById('myListLimit').value) || 50,
                         enableMyList: document.getElementById('enableMyList').checked,
                         enableRecentlyAdded: document.getElementById('enableRecentlyAdded').checked,
                         enableRandomPicks: document.getElementById('enableRandomPicks').checked,
-                        enableLongNotWatched: this.currentConfig.enableLongNotWatched || false,
+                        enableLongNotWatched: document.getElementById('enableLongNotWatched').checked,
+                        randomRowOrder: document.getElementById('randomRowOrder').checked,
+                        lazyLoadRows: document.getElementById('lazyLoadRows').checked,
+                        replaceHeartWithPlus: document.getElementById('replaceHeartWithPlus').checked,
                         enabledGenres: [],
                         blacklistedGenres: this.currentConfig.blacklistedGenres || [],
-                        recentlyAddedDays: this.currentConfig.recentlyAddedDays || 30,
-                        longNotWatchedMonths: this.currentConfig.longNotWatchedMonths || 6,
-                        minGenreItems: this.currentConfig.minGenreItems || 5,
-                        myListLimit: this.currentConfig.myListLimit || 50,
-                        randomRowOrder: this.currentConfig.randomRowOrder || false,
-                        lazyLoadRows: this.currentConfig.lazyLoadRows !== false,
-                        replaceHeartWithPlus: this.currentConfig.replaceHeartWithPlus !== false,
+                        genreDisplayNames: this.currentConfig.genreDisplayNames || {
+                            "Action": "Adrenalinkick",
+                            "Comedy": "Zum Lachen",
+                            "Drama": "Gefühlvoll",
+                            "Horror": "Gruselig", 
+                            "Romance": "Romantisch",
+                            "Thriller": "Spannend",
+                            "Sci-Fi": "Science Fiction",
+                            "Fantasy": "Fantasie",
+                            "Crime": "Krimi",
+                            "Documentary": "Dokumentation",
+                            "Adventure": "Abenteuer",
+                            "Animation": "Animation",
+                            "Biography": "Biografie",
+                            "Family": "Familie",
+                            "History": "Geschichte",
+                            "Music": "Musik",
+                            "Mystery": "Mystery",
+                            "Sport": "Sport",
+                            "War": "Krieg",
+                            "Western": "Western"
+                        },
                         myListCount: this.currentConfig.myListCount || 20,
                         recentlyAddedCount: this.currentConfig.recentlyAddedCount || 20,
                         randomPicksCount: this.currentConfig.randomPicksCount || 20
