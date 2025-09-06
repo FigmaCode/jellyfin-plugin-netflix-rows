@@ -5,17 +5,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
-using System.T                        // Use default display names for genres
-                        var genreDisplayNames = new Dictionary<string, string>
-                        {
-                            { "Action", "Adrenalinkick" },
-                            { "Comedy", "Zum Lachen" },
-                            { "Drama", "Gefühlvoll" },
-                            { "Horror", "Gruselig" },
-                            { "Sci-Fi", "Science Fiction" },
-                            { "Anime", "Anime" }
-                        };
-                        var displayName = genreDisplayNames.GetValueOrDefault(genre, genre);xt.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.NetflixRows.Configuration;
 using MediaBrowser.Common.Configuration;
@@ -190,9 +180,20 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             // Genre sections
             if (config.EnabledGenres != null)
             {
+                // Use default display names for genres
+                var genreDisplayNames = new Dictionary<string, string>
+                {
+                    { "Action", "Adrenalinkick" },
+                    { "Comedy", "Zum Lachen" },
+                    { "Drama", "Gefühlvoll" },
+                    { "Horror", "Gruselig" },
+                    { "Sci-Fi", "Science Fiction" },
+                    { "Anime", "Anime" }
+                };
+                
                 foreach (var genre in config.EnabledGenres)
                 {
-                    var displayName = config.GenreDisplayNames?.GetValueOrDefault(genre, genre) ?? genre;
+                    var displayName = genreDisplayNames.GetValueOrDefault(genre, genre);
                     sections.Add(new
                     {
                         id = $"netflix-genre-{genre.ToLowerInvariant()}",
