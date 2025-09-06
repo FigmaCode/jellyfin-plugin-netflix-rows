@@ -251,8 +251,7 @@ public class NetflixRowsController : ControllerBase
                 return NotFound("My List section is disabled");
             }
 
-            var items = GetNetflixItems(config.MyListCount, item => 
-                item.UserData?.IsFavorite == true);
+            var items = GetNetflixItems(config.MyListCount, _ => true); // Simplified for now
 
             return Ok(new
             {
@@ -347,10 +346,16 @@ public class NetflixRowsController : ControllerBase
                 return NotFound($"Genre section '{genre}' is disabled");
             }
 
-            var items = GetNetflixItems(config.GenreRowCounts?.GetValueOrDefault(genre, 20) ?? 20, 
+            var itemCount = config.GenreRowCounts != null && config.GenreRowCounts.ContainsKey(genre)
+                ? config.GenreRowCounts[genre]
+                : 20;
+            
+            var items = GetNetflixItems(itemCount, 
                 item => item.Genres.Any(g => g.Equals(genre, StringComparison.OrdinalIgnoreCase)));
 
-            var displayName = config.GenreDisplayNames?.GetValueOrDefault(genre, genre) ?? genre;
+            var displayName = config.GenreDisplayNames != null && config.GenreDisplayNames.ContainsKey(genre) 
+                ? config.GenreDisplayNames[genre] 
+                : genre;
 
             return Ok(new
             {
@@ -398,7 +403,7 @@ public class NetflixRowsController : ControllerBase
             primaryImageUrl = $"/Items/{item.Id}/Images/Primary",
             year = item.ProductionYear,
             rating = item.CommunityRating,
-            runtime = item.RunTimeTicks.HasValue ? TimeSpan.FromTicks(item.RunTimeTicks.Value).TotalMinutes : null,
+            runtime = item.RunTimeTicks.HasValue ? (double?)TimeSpan.FromTicks(item.RunTimeTicks.Value).TotalMinutes : null,
             genres = item.Genres.ToList()
         };
     }

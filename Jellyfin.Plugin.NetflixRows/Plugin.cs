@@ -206,11 +206,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                     
                     if (response.IsSuccessStatusCode)
                     {
-                        _logger.LogInformation("[NetflixRows] Successfully registered section: {SectionId}", ((dynamic)section).id);
+                        _logger.LogInformation("[NetflixRows] Successfully registered section");
                     }
                     else
                     {
-                        _logger.LogWarning("[NetflixRows] Failed to register section {SectionId}: {StatusCode}", ((dynamic)section).id, response.StatusCode);
+                        _logger.LogWarning("[NetflixRows] Failed to register section: {StatusCode}", response.StatusCode);
                     }
                 }
                 catch (Exception ex)

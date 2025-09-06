@@ -134,4 +134,24 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets a value indicating whether heart buttons should be replaced with plus icons.
     /// </summary>
     public bool ReplaceHeartWithPlus { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of items in My List row.
+    /// </summary>
+    public int MyListCount { get; set; } = 20;
+
+    /// <summary>
+    /// Gets or sets the number of items in Recently Added row.
+    /// </summary>
+    public int RecentlyAddedCount { get; set; } = 20;
+
+    /// <summary>
+    /// Gets or sets the number of items in Random Picks row.
+    /// </summary>
+    public int RandomPicksCount { get; set; } = 20;
+
+    /// <summary>
+    /// Gets or sets the genre row counts dictionary.
+    /// </summary>
+    public Dictionary<string, int> GenreRowCounts { get; set; } = new Dictionary<string, int>();
 }
