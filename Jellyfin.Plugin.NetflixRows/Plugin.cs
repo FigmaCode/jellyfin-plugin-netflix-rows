@@ -13,6 +13,7 @@ using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace Jellyfin.Plugin.NetflixRows;
 
@@ -105,16 +106,16 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             }
 
             // Register CSS transformation for Netflix styling
-            var cssPayload = new
+            var cssPayload = new JObject
             {
-                id = Guid.NewGuid().ToString(),
-                fileNamePattern = @".*\.css$",
-                callbackAssembly = GetType().Assembly.FullName,
-                callbackClass = "Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation",
-                callbackMethod = "TransformCss"
+                ["id"] = Guid.NewGuid().ToString(),
+                ["fileNamePattern"] = @".*\.css$",
+                ["callbackAssembly"] = GetType().Assembly.FullName,
+                ["callbackClass"] = "Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation",
+                ["callbackMethod"] = "TransformCss"
             };
 
-            registerMethod.Invoke(null, new object[] { JsonSerializer.Serialize(cssPayload) });
+            registerMethod.Invoke(null, new object[] { cssPayload });
             _logger.LogInformation("[NetflixRows] CSS transformation registered successfully");
             
         }
@@ -136,22 +137,38 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             var config = Configuration;
             var baseUrl = "http://localhost:8096"; // Local server URL
             
-            // First check if Home Screen Sections plugin is available
-            using var testClient = new HttpClient();
-            try
+            // Check if Home Screen Sections plugin is available
+            var assemblies = AssemblyLoadContext.All.SelectMany(x => x.Assemblies).ToList();
+            var homeSectionsAssembly = assemblies.FirstOrDefault(x => 
+                x.FullName?.Contains("HomeScreenSections", StringComparison.OrdinalIgnoreCase) ?? false ||
+                x.FullName?.Contains("Home.Sections", StringComparison.OrdinalIgnoreCase) ?? false ||
+                x.FullName?.Contains("HomeSections", StringComparison.OrdinalIgnoreCase) ?? false);
+
+            if (homeSectionsAssembly == null)
             {
-                var testResponse = await testClient.GetAsync($"{baseUrl}/HomeScreen/");
-                if (!testResponse.IsSuccessStatusCode)
+                _logger.LogWarning("[NetflixRows] Home Screen Sections plugin assembly not found. Please ensure it's installed and enabled.");
+                
+                // Also try HTTP endpoint as fallback
+                using var testClient = new HttpClient();
+                try
                 {
-                    _logger.LogWarning("[NetflixRows] Home Screen Sections plugin not available (Status: {StatusCode}). Please ensure it's installed and enabled.", testResponse.StatusCode);
+                    var testResponse = await testClient.GetAsync($"{baseUrl}/HomeScreen/");
+                    if (!testResponse.IsSuccessStatusCode)
+                    {
+                        _logger.LogWarning("[NetflixRows] Home Screen Sections plugin not available via HTTP either (Status: {StatusCode}).", testResponse.StatusCode);
+                        return;
+                    }
+                    _logger.LogInformation("[NetflixRows] Home Screen Sections plugin detected via HTTP endpoint.");
+                }
+                catch (Exception testEx)
+                {
+                    _logger.LogError(testEx, "[NetflixRows] Cannot connect to Home Screen Sections plugin. Please ensure it's installed and enabled.");
                     return;
                 }
-                _logger.LogInformation("[NetflixRows] Home Screen Sections plugin detected and available.");
             }
-            catch (Exception testEx)
+            else
             {
-                _logger.LogError(testEx, "[NetflixRows] Cannot connect to Home Screen Sections plugin. Please ensure it's installed and enabled.");
-                return;
+                _logger.LogInformation("[NetflixRows] Home Screen Sections plugin assembly found: {AssemblyName}", homeSectionsAssembly.FullName);
             }
             
             var sections = new List<object>();
@@ -165,7 +182,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                     displayText = "My List",
                     limit = 1,
                     additionalData = "",
-                    resultsEndpoint = $"{baseUrl}/NetflixRows/MyListSection"
+                    resultsEndpoint = "/NetflixRows/MyListSection"
                 });
             }
             
@@ -178,7 +195,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                     displayText = "Recently Added",
                     limit = 1,
                     additionalData = "",
-                    resultsEndpoint = $"{baseUrl}/NetflixRows/RecentlyAddedSection"
+                    resultsEndpoint = "/NetflixRows/RecentlyAddedSection"
                 });
             }
             
@@ -191,7 +208,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                     displayText = "Random Picks",
                     limit = 1,
                     additionalData = "",
-                    resultsEndpoint = $"{baseUrl}/NetflixRows/RandomPicksSection"
+                    resultsEndpoint = "/NetflixRows/RandomPicksSection"
                 });
             }
             
@@ -218,7 +235,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                         displayText = displayName,
                         limit = 1,
                         additionalData = genre,
-                        resultsEndpoint = $"{baseUrl}/NetflixRows/GenreSection/{genre}"
+                        resultsEndpoint = $"/NetflixRows/GenreSection/{genre}"
                     });
                 }
             }
