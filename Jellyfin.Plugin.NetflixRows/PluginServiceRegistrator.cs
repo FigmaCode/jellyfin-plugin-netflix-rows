@@ -13,7 +13,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     /// <inheritdoc />
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
-        // Register the Netflix Rows controller
-        serviceCollection.AddScoped<NetflixRowsController>();
+        // Register the Netflix Rows controller explicitly
+        serviceCollection.AddSingleton<NetflixRowsController>();
     }
 }
