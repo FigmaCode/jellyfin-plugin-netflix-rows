@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.NetflixRows.Configuration;
 using MediaBrowser.Controller.Dto;
@@ -21,7 +22,7 @@ namespace Jellyfin.Plugin.NetflixRows.Controllers;
 /// Netflix Rows API Controller.
 /// </summary>
 [ApiController]
-[Route("NetflixRows")]
+[Route("NetflixRows")] // Zurück zum ursprünglichen Routing
 [Produces("application/json")]
 public class NetflixRowsController : ControllerBase
 {
@@ -30,13 +31,6 @@ public class NetflixRowsController : ControllerBase
     private readonly IDtoService _dtoService;
     private readonly ILogger<NetflixRowsController> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="NetflixRowsController"/> class.
-    /// </summary>
-    /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
-    /// <param name="userManager">Instance of the <see cref="IUserManager"/> interface.</param>
-    /// <param name="dtoService">Instance of the <see cref="IDtoService"/> interface.</param>
-    /// <param name="logger">Instance of the <see cref="ILogger{NetflixRowsController}"/> interface.</param>
     public NetflixRowsController(
         ILibraryManager libraryManager,
         IUserManager userManager,
@@ -47,38 +41,75 @@ public class NetflixRowsController : ControllerBase
         _userManager = userManager;
         _dtoService = dtoService;
         _logger = logger;
+        
+        _logger.LogInformation("[NetflixRows] Controller initialized");
     }
 
-    /// <summary>
-    /// Test endpoint to verify controller is working.
-    /// </summary>
-    /// <returns>Test message.</returns>
     [HttpGet("Test")]
     [AllowAnonymous]
     public ActionResult<string> Test()
     {
-        _logger.LogInformation("Netflix Rows Test endpoint called");
-        return "Netflix Rows Controller is working!";
+        _logger.LogInformation("[NetflixRows] Test endpoint called");
+        return Ok("Netflix Rows Controller is working! " + DateTime.Now);
     }
 
-    /// <summary>
-    /// Gets "My List" items for the current user.
-    /// </summary>
-    /// <param name="userId">User ID.</param>
-    /// <param name="limit">Number of items to return.</param>
-    /// <returns>Query result with favorite items.</returns>
+    [HttpGet("Config")]
+    [AllowAnonymous]
+    public ActionResult<PluginConfiguration> GetConfig()
+    {
+        try
+        {
+            _logger.LogInformation("[NetflixRows] Config requested");
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            _logger.LogInformation("[NetflixRows] Returning config: {Config}", System.Text.Json.JsonSerializer.Serialize(config));
+            return Ok(config);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[NetflixRows] Error getting configuration");
+            return StatusCode(500, "Internal server error: " + ex.Message);
+        }
+    }
+
+    [HttpPost("Config")]
+    [AllowAnonymous] // Temporär für Testing
+    public ActionResult UpdateConfig([FromBody] PluginConfiguration config)
+    {
+        try
+        {
+            _logger.LogInformation("[NetflixRows] Config update requested");
+            if (Plugin.Instance != null && config != null)
+            {
+                Plugin.Instance.UpdateConfiguration(config);
+                Plugin.Instance.SaveConfiguration();
+                _logger.LogInformation("[NetflixRows] Configuration updated successfully");
+                return Ok();
+            }
+            
+            _logger.LogWarning("[NetflixRows] Plugin instance or config is null");
+            return BadRequest("Plugin instance not available or invalid config");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[NetflixRows] Error updating configuration");
+            return StatusCode(500, "Internal server error: " + ex.Message);
+        }
+    }
+
     [HttpGet("MyList")]
-    [Authorize]
+    [AllowAnonymous] // Temporär für Testing
     public ActionResult<QueryResult<BaseItemDto>> GetMyList(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
+            _logger.LogInformation("[NetflixRows] MyList requested for user: {UserId}", userId);
+            
             var user = _userManager.GetUserById(userId);
             if (user == null)
             {
-                _logger.LogWarning("Invalid user ID: {UserId}", userId);
+                _logger.LogWarning("[NetflixRows] Invalid user ID: {UserId}", userId);
                 return BadRequest("Invalid user ID");
             }
 
@@ -98,35 +129,31 @@ public class NetflixRowsController : ControllerBase
             var dtoOptions = new DtoOptions(true);
             var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
 
-            _logger.LogDebug("Retrieved {Count} items for My List for user {UserId}", dtos.Length, userId);
+            _logger.LogInformation("[NetflixRows] Retrieved {Count} items for My List", dtos.Length);
 
-            return new QueryResult<BaseItemDto>
+            return Ok(new QueryResult<BaseItemDto>
             {
                 Items = dtos,
                 TotalRecordCount = items.TotalRecordCount
-            };
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting My List for user {UserId}", userId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            _logger.LogError(ex, "[NetflixRows] Error getting My List");
+            return StatusCode(500, "Internal server error: " + ex.Message);
         }
     }
 
-    /// <summary>
-    /// Gets recently added items.
-    /// </summary>
-    /// <param name="userId">User ID.</param>
-    /// <param name="limit">Number of items to return.</param>
-    /// <returns>Query result with recently added items.</returns>
     [HttpGet("RecentlyAdded")]
-    [Authorize]
+    [AllowAnonymous] // Temporär für Testing
     public ActionResult<QueryResult<BaseItemDto>> GetRecentlyAdded(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
     {
         try
         {
+            _logger.LogInformation("[NetflixRows] RecentlyAdded requested for user: {UserId}", userId);
+            
             var user = _userManager.GetUserById(userId);
             if (user == null)
             {
@@ -149,29 +176,23 @@ public class NetflixRowsController : ControllerBase
             var dtoOptions = new DtoOptions(true);
             var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
 
-            _logger.LogDebug("Retrieved {Count} recently added items for user {UserId}", dtos.Length, userId);
+            _logger.LogInformation("[NetflixRows] Retrieved {Count} recently added items", dtos.Length);
 
-            return new QueryResult<BaseItemDto>
+            return Ok(new QueryResult<BaseItemDto>
             {
                 Items = dtos,
                 TotalRecordCount = items.TotalRecordCount
-            };
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting recently added items for user {UserId}", userId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            _logger.LogError(ex, "[NetflixRows] Error getting recently added items");
+            return StatusCode(500, "Internal server error: " + ex.Message);
         }
     }
 
-    /// <summary>
-    /// Gets random picks.
-    /// </summary>
-    /// <param name="userId">User ID.</param>
-    /// <param name="limit">Number of items to return.</param>
-    /// <returns>Query result with random items.</returns>
     [HttpGet("RandomPicks")]
-    [Authorize]
+    [AllowAnonymous]
     public ActionResult<QueryResult<BaseItemDto>> GetRandomPicks(
         [FromQuery] Guid userId,
         [FromQuery] int limit = 25)
@@ -198,252 +219,26 @@ public class NetflixRowsController : ControllerBase
             var dtoOptions = new DtoOptions(true);
             var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
 
-            _logger.LogDebug("Retrieved {Count} random picks for user {UserId}", dtos.Length, userId);
-
-            return new QueryResult<BaseItemDto>
+            return Ok(new QueryResult<BaseItemDto>
             {
                 Items = dtos,
                 TotalRecordCount = items.TotalRecordCount
-            };
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting random picks for user {UserId}", userId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            _logger.LogError(ex, "[NetflixRows] Error getting random picks");
+            return StatusCode(500, "Internal server error: " + ex.Message);
         }
     }
 
-    /// <summary>
-    /// Gets items not watched for a long time.
-    /// </summary>
-    /// <param name="userId">User ID.</param>
-    /// <param name="limit">Number of items to return.</param>
-    /// <returns>Query result with long not watched items.</returns>
-    [HttpGet("LongNotWatched")]
-    [Authorize]
-    public ActionResult<QueryResult<BaseItemDto>> GetLongNotWatched(
-        [FromQuery] Guid userId,
-        [FromQuery] int limit = 25)
-    {
-        try
-        {
-            var user = _userManager.GetUserById(userId);
-            if (user == null)
-            {
-                return BadRequest("Invalid user ID");
-            }
-
-            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-            var cutoffDate = DateTime.UtcNow.AddMonths(-config.LongNotWatchedMonths);
-
-            var query = new InternalItemsQuery(user)
-            {
-                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-                IsVirtualItem = false,
-                IsPlayed = false,
-                Recursive = true
-            };
-
-            var items = _libraryManager.GetItemsResult(query);
-            
-            var filteredItems = items.Items
-                .Where(item => item.DateCreated <= cutoffDate)
-                .OrderBy(item => item.DateCreated)
-                .Take(Math.Min(limit, config.MaxItemsPerRow))
-                .ToArray();
-
-            var dtoOptions = new DtoOptions(true);
-            var dtos = filteredItems.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
-
-            _logger.LogDebug("Retrieved {Count} long not watched items for user {UserId}", dtos.Length, userId);
-
-            return new QueryResult<BaseItemDto>
-            {
-                Items = dtos,
-                TotalRecordCount = filteredItems.Length
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting long not watched items for user {UserId}", userId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
-        }
-    }
-
-    /// <summary>
-    /// Gets items by genre.
-    /// </summary>
-    /// <param name="genre">Genre name.</param>
-    /// <param name="userId">User ID.</param>
-    /// <param name="limit">Number of items to return.</param>
-    /// <returns>Query result with items of the specified genre.</returns>
-    [HttpGet("Genre/{genre}")]
-    [Authorize]
-    public ActionResult<QueryResult<BaseItemDto>> GetGenre(
-        string genre,
-        [FromQuery] Guid userId,
-        [FromQuery] int limit = 25)
-    {
-        try
-        {
-            var user = _userManager.GetUserById(userId);
-            if (user == null)
-            {
-                return BadRequest("Invalid user ID");
-            }
-
-            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-            
-            if (config.BlacklistedGenres.Contains(genre, StringComparer.OrdinalIgnoreCase))
-            {
-                return BadRequest("Genre is blacklisted");
-            }
-
-            var query = new InternalItemsQuery(user)
-            {
-                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-                IsVirtualItem = false,
-                Genres = new[] { genre },
-                OrderBy = new[] { (ItemSortBy.Random, SortOrder.Ascending) },
-                Limit = Math.Min(limit, config.MaxItemsPerRow)
-            };
-
-            var items = _libraryManager.GetItemsResult(query);
-            
-            if (items.TotalRecordCount < config.MinGenreItems)
-            {
-                return Ok(new QueryResult<BaseItemDto>
-                {
-                    Items = Array.Empty<BaseItemDto>(),
-                    TotalRecordCount = 0
-                });
-            }
-
-            var dtoOptions = new DtoOptions(true);
-            var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
-
-            _logger.LogDebug("Retrieved {Count} items for genre {Genre} for user {UserId}", dtos.Length, genre, userId);
-
-            return new QueryResult<BaseItemDto>
-            {
-                Items = dtos,
-                TotalRecordCount = items.TotalRecordCount
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting genre {Genre} items for user {UserId}", genre, userId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
-        }
-    }
-
-    /// <summary>
-    /// Gets available genres.
-    /// </summary>
-    /// <param name="userId">User ID.</param>
-    /// <returns>List of available genres.</returns>
-    [HttpGet("Genres")]
-    [Authorize]
-    public ActionResult<IEnumerable<string>> GetGenres([FromQuery] Guid userId)
-    {
-        try
-        {
-            var user = _userManager.GetUserById(userId);
-            if (user == null)
-            {
-                return BadRequest("Invalid user ID");
-            }
-
-            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-
-            var query = new InternalItemsQuery(user)
-            {
-                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-                IsVirtualItem = false,
-                Recursive = true
-            };
-
-            var items = _libraryManager.GetItemsResult(query);
-            var genres = items.Items
-                .SelectMany(item => item.Genres ?? Array.Empty<string>())
-                .Where(genre => !config.BlacklistedGenres.Contains(genre, StringComparer.OrdinalIgnoreCase))
-                .GroupBy(genre => genre, StringComparer.OrdinalIgnoreCase)
-                .Where(group => group.Count() >= config.MinGenreItems)
-                .Select(group => group.Key)
-                .OrderBy(genre => genre)
-                .ToList();
-
-            _logger.LogDebug("Retrieved {Count} genres for user {UserId}", genres.Count, userId);
-            return Ok(genres);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting genres for user {UserId}", userId);
-            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
-        }
-    }
-
-    /// <summary>
-    /// Gets plugin configuration.
-    /// </summary>
-    /// <returns>Plugin configuration.</returns>
-    [HttpGet("Config")]
-    [AllowAnonymous]  // Allow anonymous access for testing
-    public ActionResult<PluginConfiguration> GetConfig()
-    {
-        try
-        {
-            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-            _logger.LogDebug("Configuration requested, returning config with {Count} enabled genres", 
-                config.EnabledGenres?.Count ?? 0);
-            return config;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting configuration");
-            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
-        }
-    }
-
-    /// <summary>
-    /// Updates plugin configuration.
-    /// </summary>
-    /// <param name="config">New configuration.</param>
-    /// <returns>Action result.</returns>
-    [HttpPost("Config")]
-    [Authorize]
-    public ActionResult UpdateConfig([FromBody] PluginConfiguration config)
-    {
-        try
-        {
-            if (Plugin.Instance != null && config != null)
-            {
-                _logger.LogInformation("Updating Netflix Rows configuration");
-                Plugin.Instance.UpdateConfiguration(config);
-                Plugin.Instance.SaveConfiguration();
-                _logger.LogInformation("Configuration updated successfully");
-                return Ok();
-            }
-            
-            return BadRequest("Plugin instance not available or invalid config");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating configuration");
-            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
-        }
-    }
-
-    /// <summary>
-    /// Serves the Netflix Rows JavaScript file.
-    /// </summary>
-    /// <returns>JavaScript content.</returns>
     [HttpGet("Script")]
     [AllowAnonymous]
     public ActionResult GetScript()
     {
         try
         {
+            _logger.LogInformation("[NetflixRows] Script requested");
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
             var resourceName = "Jellyfin.Plugin.NetflixRows.Web.netflixRows.js";
             
@@ -452,17 +247,29 @@ public class NetflixRowsController : ControllerBase
             {
                 using var reader = new StreamReader(stream);
                 var content = reader.ReadToEnd();
-                _logger.LogDebug("Serving Netflix Rows script, size: {Size} bytes", content.Length);
+                _logger.LogInformation("[NetflixRows] Serving script, size: {Size} bytes", content.Length);
                 return Content(content, "application/javascript");
             }
             
-            _logger.LogWarning("Netflix Rows script resource not found");
-            return NotFound("Script not found");
+            // Fallback: return basic test script
+            var fallbackScript = @"
+console.log('[NetflixRows] Fallback script loaded');
+setTimeout(function() {
+    var testDiv = document.createElement('div');
+    testDiv.innerHTML = 'Netflix Rows Plugin Test - Fallback Script Active';
+    testDiv.style.cssText = 'background: red; color: white; padding: 10px; position: fixed; top: 10px; right: 10px; z-index: 9999;';
+    document.body.appendChild(testDiv);
+    setTimeout(function() { testDiv.remove(); }, 5000);
+}, 1000);
+";
+            
+            _logger.LogWarning("[NetflixRows] Script resource not found, using fallback");
+            return Content(fallbackScript, "application/javascript");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error serving Netflix Rows script");
-            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            _logger.LogError(ex, "[NetflixRows] Error serving script");
+            return StatusCode(500, "Internal server error");
         }
     }
 }
