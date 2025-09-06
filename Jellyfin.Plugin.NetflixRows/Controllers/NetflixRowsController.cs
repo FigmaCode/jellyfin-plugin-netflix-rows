@@ -18,6 +18,7 @@ using MediaBrowser.Model.Querying;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Jellyfin.Data.Entities;
 
 namespace Jellyfin.Plugin.NetflixRows.Controllers;
 
@@ -48,15 +49,18 @@ public class NetflixRowsController : ControllerBase
     private readonly ILibraryManager _libraryManager;
     private readonly IDtoService _dtoService;
     private readonly ILogger<NetflixRowsController> _logger;
+    private readonly IUserManager _userManager;
 
     public NetflixRowsController(
         ILibraryManager libraryManager,
         IDtoService dtoService,
-        ILogger<NetflixRowsController> logger)
+        ILogger<NetflixRowsController> logger,
+        IUserManager userManager)
     {
         _libraryManager = libraryManager;
         _dtoService = dtoService;
         _logger = logger;
+        _userManager = userManager;
         
         _logger.LogInformation("[NetflixRows] Controller initialized");
     }
@@ -112,7 +116,7 @@ public class NetflixRowsController : ControllerBase
 
     [HttpGet("MyList")]
     public ActionResult<QueryResult<BaseItemDto>> GetMyList(
-        [FromQuery] int limit = 25)
+        [FromQuery] int limit = 25, [FromQuery] Guid? userId = null)
     {
         try
         {
@@ -121,7 +125,10 @@ public class NetflixRowsController : ControllerBase
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
             var actualLimit = Math.Min(limit, config.MyListLimit);
 
-            var query = new InternalItemsQuery
+            // Get user context if provided
+            var user = userId.HasValue ? _userManager.GetUserById(userId.Value) : null;
+
+            var query = new InternalItemsQuery(user)
             {
                 IsFavorite = true,
                 IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
@@ -132,7 +139,7 @@ public class NetflixRowsController : ControllerBase
 
             var items = _libraryManager.GetItemsResult(query);
             var dtoOptions = new DtoOptions(true);
-            var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions)).ToArray();
+            var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
 
             _logger.LogInformation("[NetflixRows] Retrieved {Count} items for My List", dtos.Length);
 
@@ -306,7 +313,7 @@ public class NetflixRowsController : ControllerBase
                 return Ok(new QueryResult<BaseItemDto>(new BaseItemDto[0]));
             }
 
-            return GetMyList(25);
+            return GetMyList(25, payload?.UserId);
         }
         catch (Exception ex)
         {
