@@ -9,7 +9,66 @@ using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.NetflixRows.Configuration;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Entities.Movies;
+using MediaBrowse            return GetGenre(genre, 25);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[NetflixRows] Error in GenreSection POST endpoint");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet("Genre/{genre}")]
+    public ActionResult<QueryResult<BaseItemDto>> GetGenre(
+        [FromRoute] string genre,
+        [FromQuery] int limit = 25)
+    {
+        try
+        {
+            _logger.LogInformation("[NetflixRows] Genre requested: {Genre} with limit {Limit}", genre, limit);
+
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            
+            // Check if genre is enabled
+            if (config.EnabledGenres?.Contains(genre) != true)
+            {
+                _logger.LogWarning("[NetflixRows] Genre {Genre} is not enabled in configuration", genre);
+                return Ok(new QueryResult<BaseItemDto>
+                {
+                    Items = Array.Empty<BaseItemDto>(),
+                    TotalRecordCount = 0
+                });
+            }
+
+            var actualLimit = Math.Min(limit, 50); // Max 50 items
+
+            var query = new InternalItemsQuery
+            {
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+                IsVirtualItem = false,
+                Genres = new[] { genre },
+                OrderBy = new[] { (ItemSortBy.Random, SortOrder.Ascending) },
+                Limit = actualLimit
+            };
+
+            var items = _libraryManager.GetItemsResult(query);
+            var dtoOptions = new DtoOptions(true);
+            var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions)).ToArray();
+
+            _logger.LogInformation("[NetflixRows] Retrieved {Count} items for genre {Genre}", dtos.Length, genre);
+
+            return Ok(new QueryResult<BaseItemDto>
+            {
+                Items = dtos,
+                TotalRecordCount = items.TotalRecordCount
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[NetflixRows] Error getting genre {Genre}", genre);
+            return StatusCode(500, "Internal server error: " + ex.Message);
+        }
+    }ller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Dto;
