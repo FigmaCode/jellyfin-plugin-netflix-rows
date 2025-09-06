@@ -80,6 +80,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         try
         {
+            // TEMPORARILY DISABLE FILE TRANSFORMATION TO FIX UI BREAKING
+            _logger.LogWarning("[NetflixRows] File transformation temporarily disabled to prevent UI breaking");
+            return;
+            
             // Add a delay to ensure File Transformation plugin is fully loaded
             await Task.Delay(5000);
             
@@ -113,10 +117,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             }
 
             // Register CSS transformation for Netflix styling - payload must be JObject as per docs
+            // NEED TO USE SPECIFIC CSS FILE PATTERN, NOT ALL CSS FILES!
             var cssPayload = new JObject
             {
                 ["id"] = Guid.NewGuid().ToString(),
-                ["fileNamePattern"] = @".*\.css$",
+                ["fileNamePattern"] = @"home\..*\.css$", // Only target home page CSS files
                 ["callbackAssembly"] = GetType().Assembly.FullName,
                 ["callbackClass"] = "Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation",
                 ["callbackMethod"] = "TransformCss"
