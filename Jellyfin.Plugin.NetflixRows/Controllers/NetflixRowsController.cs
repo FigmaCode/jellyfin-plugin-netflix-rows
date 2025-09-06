@@ -296,7 +296,7 @@ public class NetflixRowsController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("[NetflixRows] MyListSection POST endpoint called with UserId: {UserId}, AdditionalData: {AdditionalData}", 
+            _logger.LogError("[NetflixRows] *** CRITICAL DEBUG *** MyListSection POST endpoint WAS CALLED! UserId: {UserId}, AdditionalData: {AdditionalData}", 
                 payload?.UserId, payload?.AdditionalData);
             
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
