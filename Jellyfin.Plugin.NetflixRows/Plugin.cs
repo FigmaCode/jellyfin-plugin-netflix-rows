@@ -80,10 +80,6 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         try
         {
-            // TEMPORARILY DISABLE FILE TRANSFORMATION TO FIX UI BREAKING
-            _logger.LogWarning("[NetflixRows] File transformation temporarily disabled to prevent UI breaking");
-            return;
-            
             // Add a delay to ensure File Transformation plugin is fully loaded
             await Task.Delay(5000);
             
@@ -117,11 +113,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             }
 
             // Register CSS transformation for Netflix styling - payload must be JObject as per docs
-            // NEED TO USE SPECIFIC CSS FILE PATTERN, NOT ALL CSS FILES!
+            // Use specific pattern to only target main CSS files, not chunk CSS files
             var cssPayload = new JObject
             {
                 ["id"] = Guid.NewGuid().ToString(),
-                ["fileNamePattern"] = @"home\..*\.css$", // Only target home page CSS files
+                ["fileNamePattern"] = @"main\.jellyfin\..*\.css$", // Only target main jellyfin CSS file
                 ["callbackAssembly"] = GetType().Assembly.FullName,
                 ["callbackClass"] = "Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation",
                 ["callbackMethod"] = "TransformCss"
@@ -141,8 +137,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         try
         {
-            // Wait longer for server and plugins to be fully ready
-            await Task.Delay(10000);
+            // Wait much longer for server and plugins to be fully ready
+            await Task.Delay(20000); // Increased from 10 to 20 seconds
             
             _logger.LogInformation("[NetflixRows] Registering Netflix sections with Home Screen Sections plugin...");
             
@@ -252,36 +248,69 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
                 }
             }
 
-            // Register each section
+            // Register each section with retry logic
             using var httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromSeconds(10);
             var registeredCount = 0;
             
             foreach (var section in sections)
             {
-                try
+                bool registered = false;
+                int retryCount = 0;
+                const int maxRetries = 5;
+                
+                while (!registered && retryCount < maxRetries)
                 {
-                    var json = JsonSerializer.Serialize(section);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    
-                    _logger.LogInformation("[NetflixRows] Attempting to register section: {SectionData}", json);
-                    
-                    var response = await httpClient.PostAsync($"{baseUrl}/HomeScreen/RegisterSection", content);
-                    
-                    if (response.IsSuccessStatusCode)
+                    try
                     {
-                        _logger.LogInformation("[NetflixRows] Successfully registered section");
-                        registeredCount++;
+                        var json = JsonSerializer.Serialize(section);
+                        var content = new StringContent(json, Encoding.UTF8, "application/json");
+                        
+                        if (retryCount > 0)
+                        {
+                            _logger.LogInformation("[NetflixRows] Retry {Retry}/{MaxRetries} for section registration", retryCount + 1, maxRetries);
+                            await Task.Delay(5000 * retryCount); // Exponential backoff
+                        }
+                        
+                        _logger.LogInformation("[NetflixRows] Attempting to register section: {SectionData}", json);
+                        
+                        var response = await httpClient.PostAsync($"{baseUrl}/HomeScreen/RegisterSection", content);
+                        
+                        if (response.IsSuccessStatusCode)
+                        {
+                            _logger.LogInformation("[NetflixRows] Successfully registered section");
+                            registeredCount++;
+                            registered = true;
+                        }
+                        else if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+                        {
+                            var responseContent = await response.Content.ReadAsStringAsync();
+                            _logger.LogWarning("[NetflixRows] Server not ready yet (attempt {Attempt}): {StatusCode} - {Response}", 
+                                retryCount + 1, response.StatusCode, responseContent);
+                            retryCount++;
+                        }
+                        else
+                        {
+                            var responseContent = await response.Content.ReadAsStringAsync();
+                            _logger.LogWarning("[NetflixRows] Failed to register section: {StatusCode} - {Response}", 
+                                response.StatusCode, responseContent);
+                            break; // Don't retry for other errors
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        _logger.LogWarning("[NetflixRows] Failed to register section: {StatusCode} - {Response}", 
-                            response.StatusCode, responseContent);
+                        _logger.LogError(ex, "[NetflixRows] Error registering section (attempt {Attempt}): {Section}", retryCount + 1, section);
+                        retryCount++;
+                        if (retryCount < maxRetries)
+                        {
+                            await Task.Delay(3000);
+                        }
                     }
                 }
-                catch (Exception ex)
+                
+                if (!registered)
                 {
-                    _logger.LogError(ex, "[NetflixRows] Error registering section: {Section}", section);
+                    _logger.LogError("[NetflixRows] Failed to register section after {MaxRetries} attempts", maxRetries);
                 }
             }
             
