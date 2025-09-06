@@ -9,66 +9,7 @@ using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.NetflixRows.Configuration;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
-using MediaBrowse            return GetGenre(genre, 25);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[NetflixRows] Error in GenreSection POST endpoint");
-            return StatusCode(500, "Internal server error");
-        }
-    }
-
-    [HttpGet("Genre/{genre}")]
-    public ActionResult<QueryResult<BaseItemDto>> GetGenre(
-        [FromRoute] string genre,
-        [FromQuery] int limit = 25)
-    {
-        try
-        {
-            _logger.LogInformation("[NetflixRows] Genre requested: {Genre} with limit {Limit}", genre, limit);
-
-            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-            
-            // Check if genre is enabled
-            if (config.EnabledGenres?.Contains(genre) != true)
-            {
-                _logger.LogWarning("[NetflixRows] Genre {Genre} is not enabled in configuration", genre);
-                return Ok(new QueryResult<BaseItemDto>
-                {
-                    Items = Array.Empty<BaseItemDto>(),
-                    TotalRecordCount = 0
-                });
-            }
-
-            var actualLimit = Math.Min(limit, 50); // Max 50 items
-
-            var query = new InternalItemsQuery
-            {
-                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-                IsVirtualItem = false,
-                Genres = new[] { genre },
-                OrderBy = new[] { (ItemSortBy.Random, SortOrder.Ascending) },
-                Limit = actualLimit
-            };
-
-            var items = _libraryManager.GetItemsResult(query);
-            var dtoOptions = new DtoOptions(true);
-            var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions)).ToArray();
-
-            _logger.LogInformation("[NetflixRows] Retrieved {Count} items for genre {Genre}", dtos.Length, genre);
-
-            return Ok(new QueryResult<BaseItemDto>
-            {
-                Items = dtos,
-                TotalRecordCount = items.TotalRecordCount
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[NetflixRows] Error getting genre {Genre}", genre);
-            return StatusCode(500, "Internal server error: " + ex.Message);
-        }
-    }ller.Entities.Movies;
+using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Dto;
@@ -280,6 +221,41 @@ public class NetflixRowsController : ControllerBase
         }
     }
 
+    [HttpGet("Genre/{genre}")]
+    public ActionResult<QueryResult<BaseItemDto>> GetGenre(
+        [FromRoute] string genre,
+        [FromQuery] int limit = 25)
+    {
+        try
+        {
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+
+            var query = new InternalItemsQuery
+            {
+                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
+                IsVirtualItem = false,
+                Genres = new[] { genre },
+                OrderBy = new[] { (ItemSortBy.Random, SortOrder.Ascending) },
+                Limit = Math.Min(limit, config.MaxItemsPerRow)
+            };
+
+            var items = _libraryManager.GetItemsResult(query);
+            var dtoOptions = new DtoOptions(true);
+            var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions)).ToArray();
+
+            return Ok(new QueryResult<BaseItemDto>
+            {
+                Items = dtos,
+                TotalRecordCount = items.TotalRecordCount
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[NetflixRows] Error getting genre {Genre}", genre);
+            return StatusCode(500, "Internal server error: " + ex.Message);
+        }
+    }
+
     [HttpGet("Script")]
     [AllowAnonymous]
     public async Task<ActionResult> GetScript()
@@ -371,30 +347,26 @@ public class NetflixRowsController : ControllerBase
     /// Gets the Random Picks section for Home Screen Sections.
     /// </summary>
     /// <returns>Section data for Random Picks.</returns>
-    [HttpGet("RandomPicksSection")]
-    public ActionResult<object> GetRandomPicksSection()
+    [HttpPost("RandomPicksSection")]
+    public ActionResult<QueryResult<BaseItemDto>> GetRandomPicksSection([FromBody] HomeScreenSectionPayload payload)
     {
         try
         {
+            _logger.LogInformation("[NetflixRows] RandomPicksSection POST endpoint called with UserId: {UserId}, AdditionalData: {AdditionalData}", 
+                payload?.UserId, payload?.AdditionalData);
+                
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
             if (!config.EnableRandomPicks)
             {
-                return NotFound("Random Picks section is disabled");
+                _logger.LogWarning("[NetflixRows] Random Picks section is disabled in config");
+                return Ok(new QueryResult<BaseItemDto>(Array.Empty<BaseItemDto>()));
             }
 
-            var items = GetNetflixItems(config.RandomPicksCount * 3, item => true)
-                .OrderBy(x => Guid.NewGuid())
-                .Take(config.RandomPicksCount);
-
-            return Ok(new
-            {
-                displayName = "Random Picks",
-                items = items.Select(FormatItemForSection).ToList()
-            });
+            return GetRandomPicks(25);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting Random Picks section");
+            _logger.LogError(ex, "[NetflixRows] Error getting Random Picks section");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -429,48 +401,5 @@ public class NetflixRowsController : ControllerBase
         }
     }
 
-    private IEnumerable<BaseItem> GetNetflixItems(int count, Func<BaseItem, bool> filter)
-    {
-        try
-        {
-            _logger.LogInformation("[NetflixRows] GetNetflixItems called with count: {Count}", count);
-            
-            var query = new InternalItemsQuery
-            {
-                IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
-                IsVirtualItem = false,
-                Limit = count * 2 // Get more to filter from
-            };
 
-            var result = _libraryManager.GetItemsResult(query);
-            _logger.LogInformation("[NetflixRows] Library query returned {Total} total items", result.TotalRecordCount);
-            
-            var filteredItems = result.Items.Where(filter).Take(count).ToList();
-            _logger.LogInformation("[NetflixRows] After filtering: {Count} items", filteredItems.Count);
-            
-            return filteredItems;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[NetflixRows] Error getting Netflix items");
-            return Enumerable.Empty<BaseItem>();
-        }
-    }
-
-    private object FormatItemForSection(BaseItem item)
-    {
-        return new
-        {
-            id = item.Id.ToString(),
-            name = item.Name,
-            overview = item.Overview,
-            type = item.GetType().Name,
-            backdropImageUrl = $"/Items/{item.Id}/Images/Backdrop",
-            primaryImageUrl = $"/Items/{item.Id}/Images/Primary",
-            year = item.ProductionYear,
-            rating = item.CommunityRating,
-            runtime = item.RunTimeTicks.HasValue ? (double?)TimeSpan.FromTicks(item.RunTimeTicks.Value).TotalMinutes : null,
-            genres = item.Genres.ToList()
-        };
-    }
 }
