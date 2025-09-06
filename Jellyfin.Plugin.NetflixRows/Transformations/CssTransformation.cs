@@ -1,5 +1,4 @@
 using System;
-using System.Text.Json;
 
 namespace Jellyfin.Plugin.NetflixRows.Transformations;
 
@@ -13,26 +12,25 @@ public static class CssTransformation
     /// </summary>
     /// <param name="data">Transformation data containing file contents.</param>
     /// <returns>Modified file contents.</returns>
-    public static string TransformCss(string data)
+    public static string TransformCss(TransformData data)
     {
         try
         {
-            var transformData = JsonSerializer.Deserialize<TransformData>(data);
-            if (transformData?.Contents == null)
+            if (data?.Contents == null)
             {
-                return data;
+                return "";
             }
 
             var cssCode = GetNetflixRowsCss();
             
             // Inject our Netflix Rows CSS at the end of the file
-            var modifiedContents = transformData.Contents + "\n" + cssCode;
+            var modifiedContents = data.Contents + "\n" + cssCode;
 
-            return JsonSerializer.Serialize(new { contents = modifiedContents });
+            return modifiedContents;
         }
         catch (Exception)
         {
-            return data;
+            return data?.Contents ?? "";
         }
     }
 

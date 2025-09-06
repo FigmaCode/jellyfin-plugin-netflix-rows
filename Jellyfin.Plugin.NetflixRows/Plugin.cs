@@ -45,7 +45,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         _logger.LogInformation("Netflix Rows Plugin v{Version} initializing...", GetType().Assembly.GetName().Version);
         
         // Register with File Transformation for CSS styling
-        RegisterFileTransformations();
+        _ = Task.Run(RegisterFileTransformationsAsync);
         
         // Register sections with Home Screen Sections plugin
         _ = Task.Run(RegisterNetflixSectionsAsync);
@@ -76,48 +76,48 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         };
     }
 
-    private void RegisterFileTransformations()
+    private async Task RegisterFileTransformationsAsync()
     {
         try
         {
             _logger.LogInformation("[NetflixRows] Registering File Transformations...");
             
-            var assemblies = AssemblyLoadContext.All.SelectMany(x => x.Assemblies).ToList();
-            var assembly = assemblies.FirstOrDefault(x => x.FullName?.Contains(".FileTransformation", StringComparison.OrdinalIgnoreCase) ?? false);
-
-            if (assembly == null)
-            {
-                _logger.LogWarning("[NetflixRows] File Transformation plugin not found. Install it from https://www.iamparadox.dev/jellyfin/plugins/manifest.json");
-                return;
-            }
-
-            var pluginInterfaceType = assembly.GetType("Jellyfin.Plugin.FileTransformation.PluginInterface");
-            if (pluginInterfaceType == null)
-            {
-                _logger.LogWarning("[NetflixRows] File Transformation PluginInterface type not found");
-                return;
-            }
-
-            var registerMethod = pluginInterfaceType.GetMethod("RegisterTransformation");
-            if (registerMethod == null)
-            {
-                _logger.LogWarning("[NetflixRows] RegisterTransformation method not found");
-                return;
-            }
+            using var httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri("http://localhost:8096");
+            httpClient.Timeout = TimeSpan.FromSeconds(10);
 
             // Register CSS transformation for Netflix styling
-            var cssPayload = new JObject
+            var cssPayload = new
             {
-                ["id"] = Guid.NewGuid().ToString(),
-                ["fileNamePattern"] = @".*\.css$",
-                ["callbackAssembly"] = GetType().Assembly.FullName,
-                ["callbackClass"] = "Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation",
-                ["callbackMethod"] = "TransformCss"
+                id = Guid.NewGuid().ToString(),
+                fileNamePattern = @".*\.css$",
+                callbackAssembly = GetType().Assembly.FullName,
+                callbackClass = "Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation",
+                callbackMethod = "TransformCss"
             };
 
-            registerMethod.Invoke(null, new object[] { cssPayload });
-            _logger.LogInformation("[NetflixRows] CSS transformation registered successfully");
+            var cssContent = new StringContent(
+                JsonSerializer.Serialize(cssPayload),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var cssResponse = await httpClient.PostAsync("/FileTransformation/RegisterTransformation", cssContent);
+            if (cssResponse.IsSuccessStatusCode)
+            {
+                _logger.LogInformation("[NetflixRows] CSS transformation registered successfully");
+            }
+            else
+            {
+                var responseContent = await cssResponse.Content.ReadAsStringAsync();
+                _logger.LogWarning("[NetflixRows] Failed to register CSS transformation: {StatusCode} - {Response}", 
+                    cssResponse.StatusCode, responseContent);
+            }
             
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogWarning("[NetflixRows] File Transformation plugin not available: {Message}", ex.Message);
         }
         catch (Exception ex)
         {
