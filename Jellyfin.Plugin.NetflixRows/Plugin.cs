@@ -140,9 +140,9 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             // Check if Home Screen Sections plugin is available
             var assemblies = AssemblyLoadContext.All.SelectMany(x => x.Assemblies).ToList();
             var homeSectionsAssembly = assemblies.FirstOrDefault(x => 
-                x.FullName?.Contains("HomeScreenSections", StringComparison.OrdinalIgnoreCase) ?? false ||
-                x.FullName?.Contains("Home.Sections", StringComparison.OrdinalIgnoreCase) ?? false ||
-                x.FullName?.Contains("HomeSections", StringComparison.OrdinalIgnoreCase) ?? false);
+                (x.FullName?.Contains("HomeScreenSections", StringComparison.OrdinalIgnoreCase) == true) ||
+                (x.FullName?.Contains("Home.Sections", StringComparison.OrdinalIgnoreCase) == true) ||
+                (x.FullName?.Contains("HomeSections", StringComparison.OrdinalIgnoreCase) == true));
 
             if (homeSectionsAssembly == null)
             {
