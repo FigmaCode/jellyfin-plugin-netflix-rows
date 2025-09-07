@@ -282,11 +282,18 @@
             const pluginId = '12345678-1234-5678-9abc-123456789012';
 
             function setupTabs() {
+                console.log('Setting up tabs...');
                 const tabs = document.querySelectorAll('.jellyfin-tab-button');
                 const tabContents = document.querySelectorAll('.jellyfin-tab-content');
                 
-                tabs.forEach(tab => {
-                    tab.addEventListener('click', () => {
+                console.log('Found tabs:', tabs.length, 'Found content:', tabContents.length);
+                
+                tabs.forEach((tab, index) => {
+                    console.log('Setting up tab:', index, tab.dataset.tab);
+                    tab.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        console.log('Tab clicked:', tab.dataset.tab);
+                        
                         // Reset all tabs
                         tabs.forEach(t => {
                             t.classList.remove('active');
@@ -307,6 +314,7 @@
                         
                         // Show selected tab content
                         const activeTab = document.getElementById(tab.dataset.tab);
+                        console.log('Showing tab content:', tab.dataset.tab, activeTab);
                         if (activeTab) {
                             activeTab.classList.add('active');
                             activeTab.style.display = 'block';
@@ -397,11 +405,30 @@
                     .finally(() => Dashboard.hideLoadingMsg());
             }
 
-            document.querySelector('#netflixRowsConfigurationPage').addEventListener("pageshow", function () {
+            // Initialize when page loads
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOM loaded, initializing...');
                 setupTabs();
                 loadConfig();
                 document.querySelector('#btnSaveConfig').addEventListener("click", saveConfig);
             });
+            
+            // Also initialize on pageshow for Jellyfin compatibility
+            setTimeout(function() {
+                const page = document.querySelector('#netflixRowsConfigurationPage');
+                if (page) {
+                    page.addEventListener("pageshow", function () {
+                        console.log('Page show event');
+                        setupTabs();
+                        loadConfig();
+                    });
+                } else {
+                    console.log('Page element not found, initializing anyway');
+                    setupTabs();
+                    loadConfig();
+                    document.querySelector('#btnSaveConfig').addEventListener("click", saveConfig);
+                }
+            }, 100);
         })();
     </script>
 </div>
