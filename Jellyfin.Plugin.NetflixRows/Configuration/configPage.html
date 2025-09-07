@@ -99,11 +99,9 @@
                     </div>
                     
                     <div class="verticalSection">
-                        <div class="sectionTitleContainer flex align-items-center">
+                        <div class="sectionTitleContainer flex align-items-center" data-target="advancedSection">
                             <h3 class="sectionTitle">Advanced Options</h3>
-                            <button type="button" class="collapsible-toggle" data-target="advancedSection" style="margin-left: auto;">
-                                <i class="md-icon">keyboard_arrow_down</i>
-                            </button>
+                            <span class="collapsible-arrow">▼</span>
                         </div>
                         
                         <div id="advancedSection" class="collapsible-content" style="display: none;">
@@ -134,11 +132,9 @@
                     </div>
                     
                     <div class="verticalSection">
-                        <div class="sectionTitleContainer flex align-items-center">
+                        <div class="sectionTitleContainer flex align-items-center" data-target="genreSection">
                             <h3 class="sectionTitle">Genre Rows</h3>
-                            <button type="button" class="collapsible-toggle" data-target="genreSection" style="margin-left: auto;">
-                                <i class="md-icon">keyboard_arrow_down</i>
-                            </button>
+                            <span class="collapsible-arrow">▼</span>
                         </div>
                         
                         <div id="genreSection" class="collapsible-content" style="display: none;">
@@ -458,22 +454,23 @@
                 },
                 
                 initCollapsibleSections: function() {
-                    var toggleButtons = document.querySelectorAll('.collapsible-toggle');
-                    toggleButtons.forEach(function(button) {
-                        button.addEventListener('click', function() {
+                    var sectionHeaders = document.querySelectorAll('.sectionTitleContainer[data-target]');
+                    sectionHeaders.forEach(function(header) {
+                        header.style.cursor = 'pointer';
+                        header.addEventListener('click', function() {
                             var targetId = this.getAttribute('data-target');
                             var targetElement = document.getElementById(targetId);
-                            var icon = this.querySelector('.md-icon');
+                            var arrow = this.querySelector('.collapsible-arrow');
                             
-                            if (targetElement) {
+                            if (targetElement && arrow) {
                                 var isVisible = targetElement.style.display !== 'none';
                                 
                                 if (isVisible) {
                                     targetElement.style.display = 'none';
-                                    icon.textContent = 'keyboard_arrow_down';
+                                    arrow.textContent = '▼';
                                 } else {
                                     targetElement.style.display = 'block';
-                                    icon.textContent = 'keyboard_arrow_up';
+                                    arrow.textContent = '▲';
                                 }
                             }
                         });
@@ -522,29 +519,27 @@
             margin-bottom: 1.5em;
         }
         
-        .checkboxFieldDescription {
-            margin-left: 1.8em;
-            margin-top: 0.3em;
-        }
-        
         /* Collapsible sections */
-        .collapsible-toggle {
-            background: none;
-            border: none;
-            color: #00a4dc;
+        .sectionTitleContainer[data-target] {
             cursor: pointer;
-            padding: 4px;
+            padding: 0.5em 0;
             border-radius: 4px;
             transition: background-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .collapsible-toggle:hover {
-            background-color: rgba(0, 164, 220, 0.1);
+        .sectionTitleContainer[data-target]:hover {
+            background-color: rgba(255, 255, 255, 0.05);
         }
         
-        .collapsible-toggle .md-icon {
-            font-size: 20px;
+        .collapsible-arrow {
+            color: #00a4dc;
+            font-size: 14px;
+            margin-left: auto;
             transition: transform 0.2s;
+            user-select: none;
         }
         
         .collapsible-content {
@@ -552,15 +547,21 @@
             transition: all 0.3s ease;
         }
         
-        .sectionTitleContainer {
-            cursor: pointer;
-            padding: 0.5em 0;
-            border-radius: 4px;
-            transition: background-color 0.2s;
+        /* Fix checkbox alignment */
+        .emby-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
         }
         
-        .sectionTitleContainer:hover {
-            background-color: rgba(255, 255, 255, 0.02);
+        .checkboxContainer {
+            margin-bottom: 1em;
+        }
+        
+        .checkboxFieldDescription {
+            margin-left: 0;
+            margin-top: 0.3em;
+            padding-left: 1.5em;
         }
     </style>
 </body>
