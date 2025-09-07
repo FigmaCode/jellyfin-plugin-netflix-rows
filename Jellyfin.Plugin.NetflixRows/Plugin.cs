@@ -226,24 +226,12 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             // Genre sections
             if (config.EnabledGenres != null)
             {
-                // Use default display names for genres
-                var genreDisplayNames = new Dictionary<string, string>
-                {
-                    { "Action", "Adrenalinkick" },
-                    { "Comedy", "Zum Lachen" },
-                    { "Drama", "Gefühlvoll" },
-                    { "Horror", "Gruselig" },
-                    { "Sci-Fi", "Science Fiction" },
-                    { "Anime", "Anime" }
-                };
-                
                 foreach (var genre in config.EnabledGenres)
                 {
-                    var displayName = genreDisplayNames.GetValueOrDefault(genre, genre);
                     sections.Add(new
                     {
                         id = $"netflix-genre-{genre.ToLowerInvariant()}",
-                        displayText = displayName,
+                        displayText = genre, // Use genre name directly
                         limit = 1,
                         route = (string?)null,
                         additionalData = genre,

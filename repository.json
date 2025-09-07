@@ -6,7 +6,7 @@
     "owner": "jellyfin-netflix-rows",
     "category": "General",
     "guid": "12345678-1234-5678-9abc-123456789012",
-    "imageUrl": "https://github.com/FigmaCode/jellyfin-plugin-netflix-rows/blob/main/Jellyfin.Plugin.NetflixRows/src/assets/img/Jellyflix_Banner.png",
+    "imageUrl": "https://raw.githubusercontent.com/FigmaCode/jellyfin-plugin-netflix-rows/main/Jellyfin.Plugin.NetflixRows/src/assets/img/Jellyflix_Banner.png",
     "repositoryUrl": "https://github.com/FigmaCode/jellyfin-plugin-netflix-rows",
     "versions": [
       {

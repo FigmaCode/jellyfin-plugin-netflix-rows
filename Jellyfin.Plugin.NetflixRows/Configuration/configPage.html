@@ -65,36 +65,38 @@
                             <h3 class="sectionTitle">Row Types</h3>
                         </div>
                         
-                        <div class="checkboxContainer checkboxContainer-withDescription">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="enableMyList" name="enableMyList" checked is="emby-checkbox">
-                                <span>My List</span>
-                            </label>
-                            <div class="fieldDescription checkboxFieldDescription">❤️ Your favorites (click heart on any item)</div>
-                        </div>
-                        
-                        <div class="checkboxContainer checkboxContainer-withDescription">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="enableRecentlyAdded" name="enableRecentlyAdded" checked is="emby-checkbox">
-                                <span>Recently Added</span>
-                            </label>
-                            <div class="fieldDescription checkboxFieldDescription">🆕 Latest content added to your library</div>
-                        </div>
-                        
-                        <div class="checkboxContainer checkboxContainer-withDescription">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="enableRandomPicks" name="enableRandomPicks" checked is="emby-checkbox">
-                                <span>Random Picks</span>
-                            </label>
-                            <div class="fieldDescription checkboxFieldDescription">🎲 Discover something new</div>
-                        </div>
-                        
-                        <div class="checkboxContainer checkboxContainer-withDescription">
-                            <label class="emby-checkbox-label">
-                                <input type="checkbox" id="enableLongNotWatched" name="enableLongNotWatched" is="emby-checkbox">
-                                <span>Long Not Watched</span>
-                            </label>
-                            <div class="fieldDescription checkboxFieldDescription">⏳ Rediscover forgotten content</div>
+                        <div class="row-types-grid">
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="enableMyList" name="enableMyList" checked is="emby-checkbox">
+                                    <span>My List</span>
+                                </label>
+                                <div class="fieldDescription">❤️ Your favorites (click heart on any item)</div>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="enableRecentlyAdded" name="enableRecentlyAdded" checked is="emby-checkbox">
+                                    <span>Recently Added</span>
+                                </label>
+                                <div class="fieldDescription">🆕 Latest content added to your library</div>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="enableRandomPicks" name="enableRandomPicks" checked is="emby-checkbox">
+                                    <span>Random Picks</span>
+                                </label>
+                                <div class="fieldDescription">🎲 Discover something new</div>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input type="checkbox" id="enableLongNotWatched" name="enableLongNotWatched" is="emby-checkbox">
+                                    <span>Long Not Watched</span>
+                                </label>
+                                <div class="fieldDescription">⏳ Rediscover forgotten content</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -433,27 +435,38 @@
                 },
                 
                 initCollapsibleSections: function() {
-                    var sectionHeaders = document.querySelectorAll('.sectionTitleContainer[data-target]');
-                    sectionHeaders.forEach(function(header) {
-                        header.style.cursor = 'pointer';
-                        header.addEventListener('click', function() {
-                            var targetId = this.getAttribute('data-target');
-                            var targetElement = document.getElementById(targetId);
-                            var arrow = this.querySelector('.collapsible-arrow');
-                            
-                            if (targetElement && arrow) {
-                                var isVisible = targetElement.style.display !== 'none';
+                    var self = this;
+                    // Wait for DOM to be fully loaded
+                    setTimeout(function() {
+                        var sectionHeaders = document.querySelectorAll('.sectionTitleContainer[data-target]');
+                        console.log('Found collapsible sections:', sectionHeaders.length);
+                        
+                        sectionHeaders.forEach(function(header) {
+                            header.style.cursor = 'pointer';
+                            header.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 
-                                if (isVisible) {
-                                    targetElement.style.display = 'none';
-                                    arrow.textContent = '▼';
-                                } else {
-                                    targetElement.style.display = 'block';
-                                    arrow.textContent = '▲';
+                                var targetId = this.getAttribute('data-target');
+                                var targetElement = document.getElementById(targetId);
+                                var arrow = this.querySelector('.collapsible-arrow');
+                                
+                                console.log('Clicked section:', targetId, targetElement, arrow);
+                                
+                                if (targetElement && arrow) {
+                                    var isVisible = targetElement.style.display !== 'none';
+                                    
+                                    if (isVisible) {
+                                        targetElement.style.display = 'none';
+                                        arrow.textContent = '▼';
+                                    } else {
+                                        targetElement.style.display = 'block';
+                                        arrow.textContent = '▲';
+                                    }
                                 }
-                            }
+                            });
                         });
-                    });
+                    }, 100);
                 }
             };
 
@@ -541,6 +554,33 @@
             margin-left: 0;
             margin-top: 0.3em;
             padding-left: 1.5em;
+        }
+        
+        /* Row Types Grid Layout */
+        .row-types-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5em;
+            margin-top: 1em;
+        }
+        
+        .row-types-grid .checkboxContainer {
+            margin-bottom: 0;
+        }
+        
+        .row-types-grid .fieldDescription {
+            margin-left: 0;
+            margin-top: 0.5em;
+            padding-left: 0;
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        @media (max-width: 768px) {
+            .row-types-grid {
+                grid-template-columns: 1fr;
+                gap: 1em;
+            }
         }
     </style>
 </body>
