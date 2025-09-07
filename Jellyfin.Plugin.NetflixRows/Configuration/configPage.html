@@ -1,587 +1,411 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <title>Netflix Rows Configuration</title>
 </head>
 <body>
-    <div data-role="page" class="page type-interior pluginConfigurationPage" id="netflixRowsConfigPage">
-        <div data-role="content">
-            <div class="content-primary">
-                <form id="netflixRowsConfigForm">
-                    <div class="sectionTitleContainer flex align-items-center">
-                        <h2 class="sectionTitle">Netflix Rows Plugin</h2>
-                    </div>
-                    
-                    <div class="verticalSection">
-                        <div class="sectionTitleContainer flex align-items-center">
-                            <h3 class="sectionTitle">General Settings</h3>
+<div data-role="page" id="netflixRowsConfigurationPage" class="page type-interior pluginConfigurationPage fullWidthContent">
+    <div class="content-primary">
+        <div class="verticalSection">
+            <div class="sectionTitleContainer">
+                <h2 class="sectionTitle">Netflix Rows Plugin</h2>
+                <img src="https://raw.githubusercontent.com/FigmaCode/jellyfin-plugin-netflix-rows/main/Jellyfin.Plugin.NetflixRows/src/assets/img/Jellyflix_Banner.png" 
+                     alt="Netflix Rows Plugin" style="height: 40px; margin-left: 2em; border-radius: 4px;">
+            </div>
+        </div>
+        <hr class="solid" style="margin-bottom: 1.5em;">
+        
+        <div style="margin-bottom: 1.5em;">
+            <button class="jellyfin-tab-button active" data-tab="general" style="background: none; border: none; color: #fff; cursor: pointer; transition: color 0.3s, border-bottom 0.3s; border-bottom: 2px solid #fff; padding: 0.5em 1em;">
+                <h3>General Settings</h3>
+            </button>
+            <button class="jellyfin-tab-button" data-tab="rowtypes" style="background: none; border: none; color: #ccc; cursor: pointer; transition: color 0.3s, border-bottom 0.3s; border-bottom: 2px solid transparent; padding: 0.5em 1em;">
+                <h3>Row Types</h3>
+            </button>
+            <button class="jellyfin-tab-button" data-tab="genres" style="background: none; border: none; color: #ccc; cursor: pointer; transition: color 0.3s, border-bottom 0.3s; border-bottom: 2px solid transparent; padding: 0.5em 1em;">
+                <h3>Genre Rows</h3>
+            </button>
+        </div>
+
+        <form class="netflixRowsConfigurationForm">
+            <div id="general" class="jellyfin-tab-content active" style="display: block;">
+                <fieldset class="verticalSection-extrabottompadding">
+                    <legend style="padding-bottom:10px; font-weight: bolder; font-size: 1.2em;">Basic Settings</legend>
+                    <div style="padding-left: .5em;">
+                        <div class="inputContainer">
+                            <input is="emby-input" type="number" id="maxRows" label="Maximum Rows" value="8" min="1" max="20" />
+                            <div class="fieldDescription">Number of rows to display on homepage (8 = Netflix-like experience)</div>
                         </div>
                         
                         <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="maxRows">Maximum Rows</label>
-                            <input type="number" id="maxRows" name="maxRows" value="8" min="1" max="20" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">📺 How many rows to show on homepage (8 = Netflix-like)</div>
+                            <input is="emby-input" type="number" id="maxItemsPerRow" label="Items per Row" value="25" min="5" max="50" />
+                            <div class="fieldDescription">Number of items shown in each row (25 = smooth scrolling)</div>
                         </div>
                         
                         <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="maxItemsPerRow">Items per Row</label>
-                            <input type="number" id="maxItemsPerRow" name="maxItemsPerRow" value="25" min="5" max="50" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">🎬 Items per row (25 = smooth scrolling, fewer = faster loading)</div>
-                        </div>
-                        
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="minItemsPerRow">Minimum Items per Row</label>
-                            <input type="number" id="minItemsPerRow" name="minItemsPerRow" value="10" min="1" max="25" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">⚡ Hide rows with fewer items (prevents empty-looking rows)</div>
-                        </div>
-                        
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="recentlyAddedDays">Recently Added Period</label>
-                            <input type="number" id="recentlyAddedDays" name="recentlyAddedDays" value="30" min="1" max="365" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">📅 Days (30 = last month, 7 = last week)</div>
-                        </div>
-                        
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="longNotWatchedMonths">Long Not Watched Period</label>
-                            <input type="number" id="longNotWatchedMonths" name="longNotWatchedMonths" value="6" min="1" max="24" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">🕒 Months (6 = half year, 12 = full year)</div>
-                        </div>
-                        
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="minGenreItems">Minimum Genre Items</label>
-                            <input type="number" id="minGenreItems" name="minGenreItems" value="5" min="1" max="20" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">🎭 Skip genres with too few items (5 = good balance)</div>
-                        </div>
-                        
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="myListLimit">My List Limit</label>
-                            <input type="number" id="myListLimit" name="myListLimit" value="50" min="10" max="200" is="emby-input" class="emby-input">
-                            <div class="fieldDescription">❤️ Max favorites shown (50 = good performance)</div>
+                            <input is="emby-input" type="number" id="minItemsPerRow" label="Minimum Items per Row" value="10" min="1" max="25" />
+                            <div class="fieldDescription">Hide rows with fewer items to prevent empty-looking rows</div>
                         </div>
                     </div>
-                    
-                    <div class="verticalSection">
-                        <div class="sectionTitleContainer flex align-items-center">
-                            <h3 class="sectionTitle">Row Types</h3>
+                </fieldset>
+
+                <fieldset class="verticalSection-extrabottompadding">
+                    <legend style="padding-bottom:10px; font-weight: bolder; font-size: 1.2em;">Content Settings</legend>
+                    <div style="padding-left: .5em;">
+                        <div class="inputContainer">
+                            <input is="emby-input" type="number" id="recentlyAddedDays" label="Recently Added Period (Days)" value="30" min="1" max="365" />
+                            <div class="fieldDescription">Content added within this timeframe appears in Recently Added</div>
                         </div>
                         
-                        <div class="row-types-grid">
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="enableMyList" name="enableMyList" checked is="emby-checkbox">
-                                    <span>My List</span>
-                                </label>
-                                <div class="fieldDescription">❤️ Your favorites (click heart on any item)</div>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="enableRecentlyAdded" name="enableRecentlyAdded" checked is="emby-checkbox">
-                                    <span>Recently Added</span>
-                                </label>
-                                <div class="fieldDescription">🆕 Latest content added to your library</div>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="enableRandomPicks" name="enableRandomPicks" checked is="emby-checkbox">
-                                    <span>Random Picks</span>
-                                </label>
-                                <div class="fieldDescription">🎲 Discover something new</div>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="enableLongNotWatched" name="enableLongNotWatched" is="emby-checkbox">
-                                    <span>Long Not Watched</span>
-                                </label>
-                                <div class="fieldDescription">⏳ Rediscover forgotten content</div>
-                            </div>
+                        <div class="inputContainer">
+                            <input is="emby-input" type="number" id="longNotWatchedMonths" label="Long Not Watched Period (Months)" value="6" min="1" max="24" />
+                            <div class="fieldDescription">Content not watched for this period appears in rediscovery rows</div>
+                        </div>
+                        
+                        <div class="inputContainer">
+                            <input is="emby-input" type="number" id="minGenreItems" label="Minimum Genre Items" value="5" min="1" max="20" />
+                            <div class="fieldDescription">Skip genres with fewer items than this number</div>
+                        </div>
+                        
+                        <div class="inputContainer">
+                            <input is="emby-input" type="number" id="myListLimit" label="My List Limit" value="50" min="10" max="200" />
+                            <div class="fieldDescription">Maximum number of favorites to show in My List</div>
                         </div>
                     </div>
-                    
-                    <div class="verticalSection">
-                        <div class="sectionTitleContainer flex align-items-center" data-target="advancedSection">
-                            <h3 class="sectionTitle">Advanced Options</h3>
-                            <span class="collapsible-arrow">▼</span>
+                </fieldset>
+
+                <fieldset class="verticalSection-extrabottompadding">
+                    <legend style="padding-bottom:10px; font-weight: bolder; font-size: 1.2em;">Advanced Options</legend>
+                    <div style="padding-left: .5em;">
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input id="randomRowOrder" type="checkbox" is="emby-checkbox" class="emby-checkbox">
+                                <span>Random Row Order</span>
+                            </label>
+                            <div class="fieldDescription">Randomize the order of rows on each page load</div>
                         </div>
                         
-                        <div id="advancedSection" class="collapsible-content" style="display: none;">
-                            <div class="checkboxContainer checkboxContainer-withDescription">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="randomRowOrder" name="randomRowOrder" is="emby-checkbox">
-                                    <span>Random Row Order</span>
-                                </label>
-                                <div class="fieldDescription checkboxFieldDescription">🔀 Fresh layout every time</div>
-                            </div>
-                            
-                            <div class="checkboxContainer checkboxContainer-withDescription">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="lazyLoadRows" name="lazyLoadRows" checked is="emby-checkbox">
-                                    <span>Lazy Load Rows</span>
-                                </label>
-                                <div class="fieldDescription checkboxFieldDescription">⚡ Faster page loading (recommended)</div>
-                            </div>
-                            
-                            <div class="checkboxContainer checkboxContainer-withDescription">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="replaceHeartWithPlus" name="replaceHeartWithPlus" checked is="emby-checkbox">
-                                    <span>Replace Heart with Plus</span>
-                                </label>
-                                <div class="fieldDescription checkboxFieldDescription">➕ Use plus icon instead of heart</div>
-                            </div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input id="lazyLoadRows" type="checkbox" is="emby-checkbox" class="emby-checkbox" checked>
+                                <span>Lazy Load Rows</span>
+                            </label>
+                            <div class="fieldDescription">Load row content as needed for better performance</div>
+                        </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input id="replaceHeartWithPlus" type="checkbox" is="emby-checkbox" class="emby-checkbox" checked>
+                                <span>Replace Heart with Plus Icon</span>
+                            </label>
+                            <div class="fieldDescription">Use plus icon instead of heart for My List functionality</div>
                         </div>
                     </div>
-                    
-                    <div class="verticalSection">
-                        <div class="sectionTitleContainer flex align-items-center" data-target="genreSection">
-                            <h3 class="sectionTitle">Genre Rows</h3>
-                            <span class="collapsible-arrow">▼</span>
+                </fieldset>
+            </div>
+
+            <div id="rowtypes" class="jellyfin-tab-content" style="display: none;">
+                <fieldset class="verticalSection-extrabottompadding">
+                    <legend style="padding-bottom:10px; font-weight: bolder; font-size: 1.2em;">Available Row Types</legend>
+                    <div style="padding-left: .5em;">
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input id="enableMyList" type="checkbox" is="emby-checkbox" class="emby-checkbox" checked>
+                                <span>My List</span>
+                            </label>
+                            <div class="fieldDescription">Show user's favorited items (click heart/plus on any item to add)</div>
                         </div>
                         
-                        <div id="genreSection" class="collapsible-content" style="display: none;">
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input id="enableRecentlyAdded" type="checkbox" is="emby-checkbox" class="emby-checkbox" checked>
+                                <span>Recently Added</span>
+                            </label>
+                            <div class="fieldDescription">Display newest content added to your library</div>
+                        </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input id="enableRandomPicks" type="checkbox" is="emby-checkbox" class="emby-checkbox" checked>
+                                <span>Random Picks</span>
+                            </label>
+                            <div class="fieldDescription">Show random selection of content for discovery</div>
+                        </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input id="enableLongNotWatched" type="checkbox" is="emby-checkbox" class="emby-checkbox">
+                                <span>Long Not Watched</span>
+                            </label>
+                            <div class="fieldDescription">Rediscover content that hasn't been watched recently</div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div id="genres" class="jellyfin-tab-content" style="display: none;">
+                <fieldset class="verticalSection-extrabottompadding">
+                    <legend style="padding-bottom:10px; font-weight: bolder; font-size: 1.2em;">Genre Rows</legend>
+                    <div style="padding-left: .5em;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1em;">
                             <div class="checkboxContainer">
                                 <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreAction" name="enabledGenres" value="Action" checked is="emby-checkbox">
+                                    <input id="genreAction" name="enabledGenres" value="Action" type="checkbox" is="emby-checkbox" class="emby-checkbox" checked>
                                     <span>Action</span>
                                 </label>
                             </div>
                             
                             <div class="checkboxContainer">
                                 <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreComedy" name="enabledGenres" value="Comedy" checked is="emby-checkbox">
-                                    <span>Comedy</span>
-                                </label>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreAnime" name="enabledGenres" value="Anime" checked is="emby-checkbox">
-                                    <span>Anime</span>
-                                </label>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreDrama" name="enabledGenres" value="Drama" is="emby-checkbox">
-                                    <span>Drama</span>
-                                </label>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreHorror" name="enabledGenres" value="Horror" is="emby-checkbox">
-                                    <span>Horror</span>
-                                </label>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreSciFi" name="enabledGenres" value="Sci-Fi" is="emby-checkbox">
-                                    <span>Science Fiction</span>
-                                </label>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreRomance" name="enabledGenres" value="Romance" is="emby-checkbox">
-                                    <span>Romance</span>
-                                </label>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreThriller" name="enabledGenres" value="Thriller" is="emby-checkbox">
-                                    <span>Thriller</span>
-                                </label>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreFantasy" name="enabledGenres" value="Fantasy" is="emby-checkbox">
-                                    <span>Fantasy</span>
-                                </label>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreCrime" name="enabledGenres" value="Crime" is="emby-checkbox">
-                                    <span>Crime</span>
-                                </label>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreDocumentary" name="enabledGenres" value="Documentary" is="emby-checkbox">
-                                    <span>Documentary</span>
-                                </label>
-                            </div>
-                            
-                            <div class="checkboxContainer">
-                                <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreAdventure" name="enabledGenres" value="Adventure" is="emby-checkbox">
+                                    <input id="genreAdventure" name="enabledGenres" value="Adventure" type="checkbox" is="emby-checkbox" class="emby-checkbox">
                                     <span>Adventure</span>
                                 </label>
                             </div>
                             
                             <div class="checkboxContainer">
                                 <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreAnimation" name="enabledGenres" value="Animation" is="emby-checkbox">
+                                    <input id="genreAnimation" name="enabledGenres" value="Animation" type="checkbox" is="emby-checkbox" class="emby-checkbox">
                                     <span>Animation</span>
                                 </label>
                             </div>
                             
                             <div class="checkboxContainer">
                                 <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreFamily" name="enabledGenres" value="Family" is="emby-checkbox">
+                                    <input id="genreAnime" name="enabledGenres" value="Anime" type="checkbox" is="emby-checkbox" class="emby-checkbox" checked>
+                                    <span>Anime</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input id="genreComedy" name="enabledGenres" value="Comedy" type="checkbox" is="emby-checkbox" class="emby-checkbox" checked>
+                                    <span>Comedy</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input id="genreCrime" name="enabledGenres" value="Crime" type="checkbox" is="emby-checkbox" class="emby-checkbox">
+                                    <span>Crime</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input id="genreDocumentary" name="enabledGenres" value="Documentary" type="checkbox" is="emby-checkbox" class="emby-checkbox">
+                                    <span>Documentary</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input id="genreDrama" name="enabledGenres" value="Drama" type="checkbox" is="emby-checkbox" class="emby-checkbox">
+                                    <span>Drama</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input id="genreFamily" name="enabledGenres" value="Family" type="checkbox" is="emby-checkbox" class="emby-checkbox">
                                     <span>Family</span>
                                 </label>
                             </div>
                             
                             <div class="checkboxContainer">
                                 <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreHistory" name="enabledGenres" value="History" is="emby-checkbox">
+                                    <input id="genreFantasy" name="enabledGenres" value="Fantasy" type="checkbox" is="emby-checkbox" class="emby-checkbox">
+                                    <span>Fantasy</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input id="genreHistory" name="enabledGenres" value="History" type="checkbox" is="emby-checkbox" class="emby-checkbox">
                                     <span>History</span>
                                 </label>
                             </div>
                             
                             <div class="checkboxContainer">
                                 <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreMusic" name="enabledGenres" value="Music" is="emby-checkbox">
+                                    <input id="genreHorror" name="enabledGenres" value="Horror" type="checkbox" is="emby-checkbox" class="emby-checkbox">
+                                    <span>Horror</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input id="genreMusic" name="enabledGenres" value="Music" type="checkbox" is="emby-checkbox" class="emby-checkbox">
                                     <span>Music</span>
                                 </label>
                             </div>
                             
                             <div class="checkboxContainer">
                                 <label class="emby-checkbox-label">
-                                    <input type="checkbox" id="genreWestern" name="enabledGenres" value="Western" is="emby-checkbox">
+                                    <input id="genreRomance" name="enabledGenres" value="Romance" type="checkbox" is="emby-checkbox" class="emby-checkbox">
+                                    <span>Romance</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input id="genreSciFi" name="enabledGenres" value="Sci-Fi" type="checkbox" is="emby-checkbox" class="emby-checkbox">
+                                    <span>Science Fiction</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input id="genreThriller" name="enabledGenres" value="Thriller" type="checkbox" is="emby-checkbox" class="emby-checkbox">
+                                    <span>Thriller</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkboxContainer">
+                                <label class="emby-checkbox-label">
+                                    <input id="genreWestern" name="enabledGenres" value="Western" type="checkbox" is="emby-checkbox" class="emby-checkbox">
                                     <span>Western</span>
                                 </label>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="verticalSection">
-                        <button type="button" id="saveBtn" is="emby-button" class="raised button-submit emby-button">
-                            <span>Save</span>
-                        </button>
-                    </div>
-                </form>
-                
-                <div id="status" style="margin-top: 1em; display: none;"></div>
+                </fieldset>
             </div>
-        </div>
+
+            <br>
+            <button id="btnSaveConfig" is="emby-button" type="submit" class="raised button-submit block emby-button">
+                <span>Save</span>
+            </button>
+        </form>
     </div>
-
     <script type="text/javascript">
-        (function() {
-            'use strict';
+        (() => {
+            const pluginId = '12345678-1234-5678-9abc-123456789012';
 
-            var NetflixRowsConfigPage = {
-                currentConfig: {},
-
-                loadConfig: function() {
-                    var self = this;
-                    ApiClient.getJSON(ApiClient.getUrl('NetflixRows/Config')).then(function(config) {
-                        self.currentConfig = config;
-                        self.populateForm(config);
-                        self.showStatus('Configuration loaded', 'success');
-                    }).catch(function(error) {
-                        console.error('Error loading configuration:', error);
-                        self.showStatus('Error loading configuration', 'error');
-                    });
-                },
-
-                populateForm: function(config) {
-                    // Basic settings
-                    var maxRows = document.getElementById('maxRows');
-                    if (maxRows && config.maxRows !== undefined) {
-                        maxRows.value = config.maxRows;
-                    }
-                    
-                    var maxItemsPerRow = document.getElementById('maxItemsPerRow');
-                    if (maxItemsPerRow && config.maxItemsPerRow !== undefined) {
-                        maxItemsPerRow.value = config.maxItemsPerRow;
-                    }
-                    
-                    var minItemsPerRow = document.getElementById('minItemsPerRow');
-                    if (minItemsPerRow && config.minItemsPerRow !== undefined) {
-                        minItemsPerRow.value = config.minItemsPerRow;
-                    }
-                    
-                    var recentlyAddedDays = document.getElementById('recentlyAddedDays');
-                    if (recentlyAddedDays && config.recentlyAddedDays !== undefined) {
-                        recentlyAddedDays.value = config.recentlyAddedDays;
-                    }
-                    
-                    var longNotWatchedMonths = document.getElementById('longNotWatchedMonths');
-                    if (longNotWatchedMonths && config.longNotWatchedMonths !== undefined) {
-                        longNotWatchedMonths.value = config.longNotWatchedMonths;
-                    }
-                    
-                    var minGenreItems = document.getElementById('minGenreItems');
-                    if (minGenreItems && config.minGenreItems !== undefined) {
-                        minGenreItems.value = config.minGenreItems;
-                    }
-                    
-                    var myListLimit = document.getElementById('myListLimit');
-                    if (myListLimit && config.myListLimit !== undefined) {
-                        myListLimit.value = config.myListLimit;
-                    }
-                    
-                    // Row types
-                    this.setCheckbox('enableMyList', config.enableMyList !== false);
-                    this.setCheckbox('enableRecentlyAdded', config.enableRecentlyAdded !== false);
-                    this.setCheckbox('enableRandomPicks', config.enableRandomPicks !== false);
-                    this.setCheckbox('enableLongNotWatched', config.enableLongNotWatched === true);
-                    
-                    // Advanced options
-                    this.setCheckbox('randomRowOrder', config.randomRowOrder === true);
-                    this.setCheckbox('lazyLoadRows', config.lazyLoadRows !== false);
-                    this.setCheckbox('replaceHeartWithPlus', config.replaceHeartWithPlus !== false);
-                    
-                    // Genres
-                    if (config.enabledGenres && Array.isArray(config.enabledGenres)) {
-                        var genreCheckboxes = document.querySelectorAll('input[name="enabledGenres"]');
-                        genreCheckboxes.forEach(function(checkbox) {
-                            checkbox.checked = config.enabledGenres.indexOf(checkbox.value) !== -1;
-                        });
-                    }
-                },
-
-                setCheckbox: function(id, checked) {
-                    var element = document.getElementById(id);
-                    if (element) {
-                        element.checked = checked;
-                    }
-                },
-
-                saveConfig: function() {
-                    var self = this;
-                    var config = {
-                        maxRows: parseInt(document.getElementById('maxRows').value) || 8,
-                        maxItemsPerRow: parseInt(document.getElementById('maxItemsPerRow').value) || 25,
-                        minItemsPerRow: parseInt(document.getElementById('minItemsPerRow').value) || 10,
-                        recentlyAddedDays: parseInt(document.getElementById('recentlyAddedDays').value) || 30,
-                        longNotWatchedMonths: parseInt(document.getElementById('longNotWatchedMonths').value) || 6,
-                        minGenreItems: parseInt(document.getElementById('minGenreItems').value) || 5,
-                        myListLimit: parseInt(document.getElementById('myListLimit').value) || 50,
-                        enableMyList: document.getElementById('enableMyList').checked,
-                        enableRecentlyAdded: document.getElementById('enableRecentlyAdded').checked,
-                        enableRandomPicks: document.getElementById('enableRandomPicks').checked,
-                        enableLongNotWatched: document.getElementById('enableLongNotWatched').checked,
-                        randomRowOrder: document.getElementById('randomRowOrder').checked,
-                        lazyLoadRows: document.getElementById('lazyLoadRows').checked,
-                        replaceHeartWithPlus: document.getElementById('replaceHeartWithPlus').checked,
-                        enabledGenres: [],
-                        blacklistedGenres: this.currentConfig.blacklistedGenres || [],
-                        genreDisplayNames: {},
-                        myListCount: this.currentConfig.myListCount || 20,
-                        recentlyAddedCount: this.currentConfig.recentlyAddedCount || 20,
-                        randomPicksCount: this.currentConfig.randomPicksCount || 20
-                    };
-
-                    // Collect enabled genres
-                    var genreCheckboxes = document.querySelectorAll('input[name="enabledGenres"]:checked');
-                    genreCheckboxes.forEach(function(checkbox) {
-                        config.enabledGenres.push(checkbox.value);
-                    });
-
-                    self.showStatus('Saving...', 'info');
-
-                    ApiClient.ajax({
-                        type: 'POST',
-                        url: ApiClient.getUrl('NetflixRows/Config'),
-                        data: JSON.stringify(config),
-                        contentType: 'application/json'
-                    }).then(function() {
-                        self.currentConfig = config;
-                        self.showStatus('Configuration saved successfully!', 'success');
-                    }).catch(function(error) {
-                        console.error('Error saving configuration:', error);
-                        self.showStatus('Error saving configuration', 'error');
-                    });
-                },
-
-                showStatus: function(message, type) {
-                    var statusDiv = document.getElementById('status');
-                    if (statusDiv) {
-                        statusDiv.textContent = message;
-                        statusDiv.style.display = 'block';
-                        statusDiv.className = 'fieldDescription status-' + type;
-                        
-                        if (type === 'success') {
-                            setTimeout(function() {
-                                statusDiv.style.display = 'none';
-                            }, 3000);
-                        }
-                    }
-                },
-
-                init: function() {
-                    var self = this;
-                    var saveBtn = document.getElementById('saveBtn');
-                    if (saveBtn) {
-                        saveBtn.addEventListener('click', function() {
-                            self.saveConfig();
-                        });
-                    }
-                    
-                    // Initialize collapsible sections
-                    this.initCollapsibleSections();
-                    
-                    // Load configuration on page load
-                    this.loadConfig();
-                },
+            function setupTabs() {
+                const tabs = document.querySelectorAll('.jellyfin-tab-button');
+                const tabContents = document.querySelectorAll('.jellyfin-tab-content');
                 
-                initCollapsibleSections: function() {
-                    var self = this;
-                    // Wait for DOM to be fully loaded
-                    setTimeout(function() {
-                        var sectionHeaders = document.querySelectorAll('.sectionTitleContainer[data-target]');
-                        console.log('Found collapsible sections:', sectionHeaders.length);
-                        
-                        sectionHeaders.forEach(function(header) {
-                            header.style.cursor = 'pointer';
-                            header.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                
-                                var targetId = this.getAttribute('data-target');
-                                var targetElement = document.getElementById(targetId);
-                                var arrow = this.querySelector('.collapsible-arrow');
-                                
-                                console.log('Clicked section:', targetId, targetElement, arrow);
-                                
-                                if (targetElement && arrow) {
-                                    var isVisible = targetElement.style.display !== 'none';
-                                    
-                                    if (isVisible) {
-                                        targetElement.style.display = 'none';
-                                        arrow.textContent = '▼';
-                                    } else {
-                                        targetElement.style.display = 'block';
-                                        arrow.textContent = '▲';
-                                    }
-                                }
-                            });
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        // Reset all tabs
+                        tabs.forEach(t => {
+                            t.classList.remove('active');
+                            t.style.color = '#ccc';
+                            t.style.borderBottom = '2px solid transparent';
                         });
-                    }, 100);
-                }
-            };
-
-            // Initialize when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', function() {
-                    NetflixRowsConfigPage.init();
+                        
+                        // Activate clicked tab
+                        tab.classList.add('active');
+                        tab.style.color = '#fff';
+                        tab.style.borderBottom = '2px solid #fff';
+                        
+                        // Hide all tab content
+                        tabContents.forEach(content => {
+                            content.classList.remove('active');
+                            content.style.display = 'none';
+                        });
+                        
+                        // Show selected tab content
+                        const activeTab = document.getElementById(tab.dataset.tab);
+                        if (activeTab) {
+                            activeTab.classList.add('active');
+                            activeTab.style.display = 'block';
+                        }
+                    });
                 });
-            } else {
-                NetflixRowsConfigPage.init();
             }
+
+            function saveConfig(e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+                
+                const config = {
+                    maxRows: parseInt(document.getElementById('maxRows').value) || 8,
+                    maxItemsPerRow: parseInt(document.getElementById('maxItemsPerRow').value) || 25,
+                    minItemsPerRow: parseInt(document.getElementById('minItemsPerRow').value) || 10,
+                    recentlyAddedDays: parseInt(document.getElementById('recentlyAddedDays').value) || 30,
+                    longNotWatchedMonths: parseInt(document.getElementById('longNotWatchedMonths').value) || 6,
+                    minGenreItems: parseInt(document.getElementById('minGenreItems').value) || 5,
+                    myListLimit: parseInt(document.getElementById('myListLimit').value) || 50,
+                    enableMyList: document.getElementById('enableMyList').checked,
+                    enableRecentlyAdded: document.getElementById('enableRecentlyAdded').checked,
+                    enableRandomPicks: document.getElementById('enableRandomPicks').checked,
+                    enableLongNotWatched: document.getElementById('enableLongNotWatched').checked,
+                    randomRowOrder: document.getElementById('randomRowOrder').checked,
+                    lazyLoadRows: document.getElementById('lazyLoadRows').checked,
+                    replaceHeartWithPlus: document.getElementById('replaceHeartWithPlus').checked,
+                    enabledGenres: [],
+                    blacklistedGenres: [],
+                    genreDisplayNames: {},
+                    myListCount: 20,
+                    recentlyAddedCount: 20,
+                    randomPicksCount: 20
+                };
+
+                // Collect enabled genres
+                document.querySelectorAll('input[name="enabledGenres"]:checked').forEach(checkbox => {
+                    config.enabledGenres.push(checkbox.value);
+                });
+
+                window.ApiClient.updatePluginConfiguration(pluginId, config)
+                    .then(() => {
+                        Dashboard.processPluginConfigurationUpdateResult();
+                        Dashboard.alert('Configuration saved successfully!');
+                    })
+                    .catch(e => {
+                        console.error('Error saving configuration:', e);
+                        Dashboard.alert('Error saving configuration: ' + (e.message || e));
+                    })
+                    .finally(() => Dashboard.hideLoadingMsg());
+            }
+
+            function loadConfig() {
+                Dashboard.showLoadingMsg();
+                
+                window.ApiClient.getPluginConfiguration(pluginId)
+                    .then(function (config) {
+                        // Load basic settings
+                        document.getElementById('maxRows').value = config.maxRows || 8;
+                        document.getElementById('maxItemsPerRow').value = config.maxItemsPerRow || 25;
+                        document.getElementById('minItemsPerRow').value = config.minItemsPerRow || 10;
+                        document.getElementById('recentlyAddedDays').value = config.recentlyAddedDays || 30;
+                        document.getElementById('longNotWatchedMonths').value = config.longNotWatchedMonths || 6;
+                        document.getElementById('minGenreItems').value = config.minGenreItems || 5;
+                        document.getElementById('myListLimit').value = config.myListLimit || 50;
+                        
+                        // Load row types
+                        document.getElementById('enableMyList').checked = config.enableMyList !== false;
+                        document.getElementById('enableRecentlyAdded').checked = config.enableRecentlyAdded !== false;
+                        document.getElementById('enableRandomPicks').checked = config.enableRandomPicks !== false;
+                        document.getElementById('enableLongNotWatched').checked = config.enableLongNotWatched === true;
+                        
+                        // Load advanced options
+                        document.getElementById('randomRowOrder').checked = config.randomRowOrder === true;
+                        document.getElementById('lazyLoadRows').checked = config.lazyLoadRows !== false;
+                        document.getElementById('replaceHeartWithPlus').checked = config.replaceHeartWithPlus !== false;
+                        
+                        // Load genres
+                        if (config.enabledGenres && Array.isArray(config.enabledGenres)) {
+                            document.querySelectorAll('input[name="enabledGenres"]').forEach(checkbox => {
+                                checkbox.checked = config.enabledGenres.includes(checkbox.value);
+                            });
+                        }
+                    })
+                    .catch(function (error) {
+                        console.error('Failed to load config:', error);
+                    })
+                    .finally(() => Dashboard.hideLoadingMsg());
+            }
+
+            document.querySelector('#netflixRowsConfigurationPage').addEventListener("pageshow", function () {
+                setupTabs();
+                loadConfig();
+                document.querySelector('#btnSaveConfig').addEventListener("click", saveConfig);
+            });
         })();
     </script>
-    
-    <style>
-        .status-success {
-            color: #00a652;
-        }
-        
-        .status-error {
-            color: #cc3333;
-        }
-        
-        .status-info {
-            color: #00a4dc;
-        }
-        
-        .description {
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 2em;
-        }
-        
-        .verticalSection {
-            margin-bottom: 2em;
-        }
-        
-        .sectionTitle {
-            color: #00a4dc;
-        }
-        
-        .checkboxContainer-withDescription {
-            margin-bottom: 1.5em;
-        }
-        
-        /* Collapsible sections */
-        .sectionTitleContainer[data-target] {
-            cursor: pointer;
-            padding: 0.5em 0;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .sectionTitleContainer[data-target]:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-        
-        .collapsible-arrow {
-            color: #00a4dc;
-            font-size: 14px;
-            margin-left: auto;
-            transition: transform 0.2s;
-            user-select: none;
-        }
-        
-        .collapsible-content {
-            padding-top: 1em;
-            transition: all 0.3s ease;
-        }
-        
-        /* Fix checkbox alignment */
-        .emby-checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 0.5em;
-        }
-        
-        .checkboxContainer {
-            margin-bottom: 1em;
-        }
-        
-        .checkboxFieldDescription {
-            margin-left: 0;
-            margin-top: 0.3em;
-            padding-left: 1.5em;
-        }
-        
-        /* Row Types Grid Layout */
-        .row-types-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5em;
-            margin-top: 1em;
-        }
-        
-        .row-types-grid .checkboxContainer {
-            margin-bottom: 0;
-        }
-        
-        .row-types-grid .fieldDescription {
-            margin-left: 0;
-            margin-top: 0.5em;
-            padding-left: 0;
-            font-size: 0.9em;
-            color: rgba(255, 255, 255, 0.7);
-        }
-        
-        @media (max-width: 768px) {
-            .row-types-grid {
-                grid-template-columns: 1fr;
-                gap: 1em;
-            }
-        }
-    </style>
+</div>
+</body>
+</html>
 </body>
 </html>
