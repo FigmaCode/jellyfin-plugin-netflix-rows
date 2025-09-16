@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.NetflixRows.Configuration;
@@ -23,8 +24,8 @@ public class PluginConfiguration : BasePluginConfiguration
         EnableRandomPicks = true;
         EnableLongNotWatched = true;
         
-        EnabledGenres = new List<string> { "Action", "Anime", "Comedy" };
-        BlacklistedGenres = new List<string>();
+        EnabledGenres = new Collection<string> { "Action", "Anime", "Comedy" };
+        BlacklistedGenres = new Collection<string>();
         
         RecentlyAddedDays = 30;
         LongNotWatchedMonths = 6;
@@ -72,14 +73,14 @@ public class PluginConfiguration : BasePluginConfiguration
     public bool EnableLongNotWatched { get; set; }
 
     /// <summary>
-    /// Gets or sets the list of enabled genres.
+    /// Gets the list of enabled genres.
     /// </summary>
-    public List<string> EnabledGenres { get; set; }
+    public Collection<string> EnabledGenres { get; }
 
     /// <summary>
-    /// Gets or sets the list of blacklisted genres.
+    /// Gets the list of blacklisted genres.
     /// </summary>
-    public List<string> BlacklistedGenres { get; set; }
+    public Collection<string> BlacklistedGenres { get; }
 
     /// <summary>
     /// Gets or sets the number of days for "Recently Added" definition.

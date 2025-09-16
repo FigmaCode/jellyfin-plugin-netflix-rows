@@ -1,4 +1,4 @@
-name: Build and Release Netflix Rows Plugin
+﻿name: Build and Release Netflix Rows Plugin
 
 on:
   push:

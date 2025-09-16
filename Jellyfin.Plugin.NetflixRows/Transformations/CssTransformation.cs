@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 
 namespace Jellyfin.Plugin.NetflixRows.Transformations;
 
@@ -12,7 +13,7 @@ public static class CssTransformation
     /// </summary>
     /// <param name="data">Transformation data containing file contents.</param>
     /// <returns>Modified file contents.</returns>
-    public static string TransformCss(TransformData data)
+    internal static string TransformCss(TransformData data)
     {
         try
         {
@@ -28,7 +29,7 @@ public static class CssTransformation
 
             return modifiedContents;
         }
-        catch (Exception)
+        catch (JsonException)
         {
             return data?.Contents ?? "";
         }
@@ -420,14 +421,4 @@ public static class CssTransformation
 ";
     }
 
-    /// <summary>
-    /// Transform data structure.
-    /// </summary>
-    public class TransformData
-    {
-        /// <summary>
-        /// Gets or sets the file contents.
-        /// </summary>
-        public string? Contents { get; set; }
-    }
 }

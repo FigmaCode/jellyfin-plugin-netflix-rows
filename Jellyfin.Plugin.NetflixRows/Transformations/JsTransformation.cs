@@ -30,7 +30,7 @@ public static class JsTransformation
 
             return JsonSerializer.Serialize(new { contents = modifiedContents });
         }
-        catch (Exception)
+        catch (JsonException)
         {
             return data;
         }
@@ -51,7 +51,7 @@ public static class JsTransformation
                 return reader.ReadToEnd();
             }
         }
-        catch
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or FileNotFoundException)
         {
             // Fall back to simple JavaScript if resource loading fails
         }
@@ -93,14 +93,15 @@ public static class JsTransformation
         return string.Join(Environment.NewLine, lines);
     }
 
+}
+
+/// <summary>
+/// Transform data structure for JavaScript transformations.
+/// </summary>
+internal class TransformData
+{
     /// <summary>
-    /// Transform data structure.
+    /// Gets or sets the file contents.
     /// </summary>
-    public class TransformData
-    {
-        /// <summary>
-        /// Gets or sets the file contents.
-        /// </summary>
-        public string? Contents { get; set; }
-    }
+    public string? Contents { get; set; }
 }
