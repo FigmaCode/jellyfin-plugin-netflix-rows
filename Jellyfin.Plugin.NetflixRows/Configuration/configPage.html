@@ -2,6 +2,31 @@
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <title>Netflix Rows Configuration</title>
+    <!--
+    Netflix Rows Plugin Configuration Page
+    
+    This page provides a comprehensive admin interface for configuring the Netflix Rows plugin.
+    It integrates with Jellyfin's admin dashboard and uses Jellyfin's built-in UI components
+    for consistency with the overall admin experience.
+    
+    Features:
+    - Tabbed interface for organized settings management
+    - Real-time configuration validation
+    - Jellyfin API integration for configuration persistence
+    - Responsive design for mobile and desktop admin access
+    - Visual feedback for user actions
+    
+    Technical Architecture:
+    - Uses Jellyfin's emby-* UI components for consistency
+    - JavaScript handles tab switching and API communication
+    - Configuration is persisted via Jellyfin's plugin configuration API
+    - Error handling provides user feedback for configuration issues
+    
+    Sections:
+    1. General Settings: Basic display and performance options
+    2. Row Types: Enable/disable different content row types
+    3. Genre Rows: Select which genres to display as individual rows
+    -->
 </head>
 <body>
 <div data-role="page" id="netflixRowsConfigurationPage" class="page type-interior pluginConfigurationPage fullWidthContent">
@@ -15,13 +40,17 @@
         </div>
         <hr class="solid" style="margin-bottom: 1.5em;">
         
+        <!-- Tab Navigation: Provides organized access to different configuration categories -->
         <div style="margin-bottom: 1.5em;">
+            <!-- General Settings Tab: Basic display and performance configuration -->
             <button class="jellyfin-tab-button active" data-tab="general" style="background: none; border: none; color: #fff; cursor: pointer; transition: color 0.3s, border-bottom 0.3s; border-bottom: 2px solid #fff; padding: 0.5em 1em;">
                 <h3>General Settings</h3>
             </button>
+            <!-- Row Types Tab: Enable/disable specific content row types -->
             <button class="jellyfin-tab-button" data-tab="rowtypes" style="background: none; border: none; color: #ccc; cursor: pointer; transition: color 0.3s, border-bottom 0.3s; border-bottom: 2px solid transparent; padding: 0.5em 1em;">
                 <h3>Row Types</h3>
             </button>
+            <!-- Genre Rows Tab: Select which genres to display as individual rows -->
             <button class="jellyfin-tab-button" data-tab="genres" style="background: none; border: none; color: #ccc; cursor: pointer; transition: color 0.3s, border-bottom 0.3s; border-bottom: 2px solid transparent; padding: 0.5em 1em;">
                 <h3>Genre Rows</h3>
             </button>

@@ -19,8 +19,58 @@ using Newtonsoft.Json.Linq;
 namespace Jellyfin.Plugin.NetflixRows;
 
 /// <summary>
-/// The main plugin.
+/// Netflix Rows Plugin for Jellyfin - Transforms the home screen with Netflix-style horizontal content rows.
 /// </summary>
+/// <remarks>
+/// This plugin provides a Netflix-like streaming experience by:
+/// <list type="bullet">
+/// <item><description>Creating horizontal scrolling content rows</description></item>
+/// <item><description>Organizing content by categories (My List, Recently Added, Genres, etc.)</description></item>
+/// <item><description>Integrating with Jellyfin's File Transformation and Home Screen Sections plugins</description></item>
+/// <item><description>Providing responsive design for all device types</description></item>
+/// <item><description>Supporting theme integration and accessibility</description></item>
+/// </list>
+/// 
+/// <para><strong>Architecture Overview:</strong></para>
+/// <para>
+/// The plugin follows a modular architecture with three main components:
+/// </para>
+/// <list type="number">
+/// <item><description><strong>File Transformation Integration:</strong> Injects CSS and JavaScript for Netflix-style UI</description></item>
+/// <item><description><strong>API Controllers:</strong> Provide content endpoints for different row types</description></item>
+/// <item><description><strong>Configuration System:</strong> Manages user preferences and display settings</description></item>
+/// </list>
+/// 
+/// <para><strong>Dependencies:</strong></para>
+/// <list type="bullet">
+/// <item><description>File Transformation Plugin (required for UI styling)</description></item>
+/// <item><description>Home Screen Sections Plugin (optional, for enhanced integration)</description></item>
+/// </list>
+/// 
+/// <para><strong>Performance Considerations:</strong></para>
+/// <para>
+/// This plugin is optimized for performance with:
+/// </para>
+/// <list type="bullet">
+/// <item><description>LoggerMessage delegates for high-performance logging</description></item>
+/// <item><description>Async operations with ConfigureAwait(false)</description></item>
+/// <item><description>Efficient resource disposal patterns</description></item>
+/// <item><description>Lazy loading for content sections</description></item>
+/// </list>
+/// </remarks>
+/// <example>
+/// <para><strong>Usage Example:</strong></para>
+/// <code>
+/// // Plugin automatically registers during Jellyfin startup
+/// // Access configuration via Admin Dashboard → Plugins → Netflix Rows
+/// 
+/// // API endpoints are available at:
+/// // GET /NetflixRows/Test - Health check
+/// // GET /NetflixRows/Config - Current configuration
+/// // POST /NetflixRows/MyListSection - My List content
+/// // POST /NetflixRows/RecentlyAddedSection - Recently added content
+/// </code>
+/// </example>
 public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     private readonly ILogger<Plugin> _logger;
@@ -127,16 +177,86 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             "[NetflixRows] Failed to register Netflix sections");
 
     /// <summary>
-    /// Gets the current plugin instance.
+    /// Gets the current plugin instance for global access throughout the application.
     /// </summary>
+    /// <value>
+    /// The singleton instance of the Netflix Rows plugin, or <c>null</c> if the plugin hasn't been initialized yet.
+    /// </value>
+    /// <remarks>
+    /// This static property provides access to the plugin instance from anywhere in the application,
+    /// particularly useful for:
+    /// <list type="bullet">
+    /// <item><description>Accessing configuration settings from controllers</description></item>
+    /// <item><description>Checking plugin availability from other components</description></item>
+    /// <item><description>Debugging and diagnostic purposes</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Thread Safety:</strong> This property is thread-safe for reads but should only be set during plugin initialization.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Access plugin configuration from anywhere
+    /// var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+    /// 
+    /// // Check if plugin is available
+    /// if (Plugin.Instance != null)
+    /// {
+    ///     // Plugin is loaded and available
+    /// }
+    /// </code>
+    /// </example>
     public static Plugin? Instance { get; private set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Plugin"/> class.
+    /// Initializes a new instance of the <see cref="Plugin"/> class with required dependencies.
     /// </summary>
-    /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
-    /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
-    /// <param name="logger">Instance of the <see cref="ILogger{Plugin}"/> interface.</param>
+    /// <param name="applicationPaths">
+    /// Application paths interface providing access to Jellyfin's directory structure.
+    /// Used for locating configuration files and plugin resources.
+    /// </param>
+    /// <param name="xmlSerializer">
+    /// XML serialization interface for reading and writing plugin configuration.
+    /// Handles serialization of <see cref="PluginConfiguration"/> objects.
+    /// </param>
+    /// <param name="logger">
+    /// Logger instance for recording plugin activities, errors, and diagnostic information.
+    /// Uses high-performance LoggerMessage delegates for optimal performance.
+    /// </param>
+    /// <remarks>
+    /// <para><strong>Initialization Process:</strong></para>
+    /// <list type="number">
+    /// <item><description>Sets the singleton Instance property for global access</description></item>
+    /// <item><description>Initializes logging with performance-optimized LoggerMessage delegates</description></item>
+    /// <item><description>Asynchronously registers File Transformation for CSS/JS injection</description></item>
+    /// <item><description>Asynchronously registers sections with Home Screen Sections plugin</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Error Handling:</strong></para>
+    /// <para>
+    /// The constructor uses fire-and-forget async operations for plugin integrations.
+    /// Failures in these operations are logged but don't prevent plugin initialization,
+    /// allowing the plugin to function in degraded mode if dependencies are unavailable.
+    /// </para>
+    /// 
+    /// <para><strong>Performance Considerations:</strong></para>
+    /// <para>
+    /// Plugin registration operations run asynchronously to avoid blocking Jellyfin startup.
+    /// This ensures fast server startup times even if external plugins are slow to respond.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Plugin is automatically instantiated by Jellyfin during server startup
+    /// // Manual instantiation is not typically required, but would look like:
+    /// 
+    /// var plugin = new Plugin(applicationPaths, xmlSerializer, logger);
+    /// // Plugin.Instance is now available globally
+    /// </code>
+    /// </example>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when any of the required parameters (<paramref name="applicationPaths"/>, 
+    /// <paramref name="xmlSerializer"/>, or <paramref name="logger"/>) are <c>null</c>.
+    /// </exception>
     public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ILogger<Plugin> logger)
         : base(applicationPaths, xmlSerializer)
     {
@@ -154,16 +274,103 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         LogPluginInitialized(_logger, null);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets the human-readable name of the plugin as displayed in the Jellyfin admin interface.
+    /// </summary>
+    /// <value>The display name "Netflix Rows" for the plugin.</value>
+    /// <remarks>
+    /// This name appears in:
+    /// <list type="bullet">
+    /// <item><description>Admin Dashboard → Plugins → My Plugins</description></item>
+    /// <item><description>Plugin configuration pages</description></item>
+    /// <item><description>Log entries and error messages</description></item>
+    /// <item><description>Plugin repository listings</description></item>
+    /// </list>
+    /// </remarks>
     public override string Name => "Netflix Rows";
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets the unique identifier for this plugin instance.
+    /// </summary>
+    /// <value>A unique GUID that identifies this plugin across all Jellyfin installations.</value>
+    /// <remarks>
+    /// <para><strong>Important:</strong> This GUID must remain constant across all versions of the plugin
+    /// to ensure proper plugin updates and configuration persistence.</para>
+    /// 
+    /// <para>This identifier is used for:</para>
+    /// <list type="bullet">
+    /// <item><description>Plugin registration and discovery</description></item>
+    /// <item><description>Configuration file management</description></item>
+    /// <item><description>Update detection and compatibility checking</description></item>
+    /// <item><description>Dependency resolution between plugins</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Format:</strong> Standard GUID format (8-4-4-4-12 hexadecimal digits)</para>
+    /// </remarks>
     public override Guid Id => Guid.Parse("12345678-1234-5678-9abc-123456789012");
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets a comprehensive description of the plugin's functionality and features.
+    /// </summary>
+    /// <value>
+    /// A detailed description explaining how the plugin transforms Jellyfin into a Netflix-like experience.
+    /// </value>
+    /// <remarks>
+    /// This description is displayed in:
+    /// <list type="bullet">
+    /// <item><description>Plugin catalog listings</description></item>
+    /// <item><description>Plugin repository metadata</description></item>
+    /// <item><description>Admin dashboard plugin details</description></item>
+    /// <item><description>Installation and update dialogs</description></item>
+    /// </list>
+    /// 
+    /// <para>The description should be concise yet informative, highlighting key features that differentiate
+    /// this plugin from others in the ecosystem.</para>
+    /// </remarks>
     public override string Description => "Transform your Jellyfin home screen into a Netflix-like experience with dynamic rows, genres, and a custom watchlist.";
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Provides configuration pages for the plugin's admin interface.
+    /// </summary>
+    /// <returns>
+    /// An enumerable collection of <see cref="PluginPageInfo"/> objects describing the available configuration pages.
+    /// </returns>
+    /// <remarks>
+    /// <para><strong>Configuration Page Features:</strong></para>
+    /// <list type="bullet">
+    /// <item><description>Enable/disable different content sections (My List, Recently Added, etc.)</description></item>
+    /// <item><description>Configure content limits and display preferences</description></item>
+    /// <item><description>Customize genre selections and display names</description></item>
+    /// <item><description>Adjust performance and responsive design settings</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Technical Implementation:</strong></para>
+    /// <para>
+    /// The configuration page is served as an embedded HTML resource from the plugin assembly.
+    /// It uses JavaScript to interact with the plugin's API endpoints for real-time configuration updates.
+    /// </para>
+    /// 
+    /// <para><strong>Security Considerations:</strong></para>
+    /// <para>
+    /// Access to configuration pages is restricted to administrators and requires proper authentication
+    /// through Jellyfin's built-in security system.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Configuration page is automatically registered and accessible at:
+    /// // http://your-server:8096/web/configurationpage?name=NetflixRowsConfigPage
+    /// 
+    /// // The page provides a user-friendly interface for settings like:
+    /// var configExample = new PluginConfiguration
+    /// {
+    ///     EnableMyList = true,
+    ///     EnableRecentlyAdded = true,
+    ///     MaxItemsPerRow = 25,
+    ///     EnabledGenres = new[] { "Action", "Comedy", "Drama" }
+    /// };
+    /// </code>
+    /// </example>
     public IEnumerable<PluginPageInfo> GetPages()
     {
         LogGettingConfigPages(_logger, null);

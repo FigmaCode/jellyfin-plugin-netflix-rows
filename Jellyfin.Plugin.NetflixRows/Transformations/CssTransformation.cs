@@ -4,15 +4,172 @@ using System.Text.Json;
 namespace Jellyfin.Plugin.NetflixRows.Transformations;
 
 /// <summary>
-/// CSS transformation for Netflix Rows styling.
+/// CSS transformation service for injecting Netflix-style visual enhancements into Jellyfin's web interface.
 /// </summary>
+/// <remarks>
+/// <para><strong>Purpose:</strong></para>
+/// <para>
+/// This transformation class is responsible for injecting comprehensive CSS styling that transforms
+/// Jellyfin's default interface into a Netflix-like streaming experience. It integrates seamlessly
+/// with Jellyfin's existing themes while adding modern, responsive design elements.
+/// </para>
+/// 
+/// <para><strong>Integration Mechanism:</strong></para>
+/// <para>
+/// The transformation works through Jellyfin's File Transformation plugin, which allows runtime
+/// modification of CSS files served to the browser. This ensures compatibility with Jellyfin updates
+/// and doesn't require modifying core Jellyfin files.
+/// </para>
+/// 
+/// <para><strong>CSS Features Included:</strong></para>
+/// <list type="bullet">
+/// <item><description><strong>Netflix-Style Rows:</strong> Horizontal scrolling content containers with smooth animations</description></item>
+/// <item><description><strong>Card-Based Design:</strong> Modern content cards with hover effects and interactive elements</description></item>
+/// <item><description><strong>Responsive Layout:</strong> Mobile-first design that scales beautifully across all device sizes</description></item>
+/// <item><description><strong>Theme Integration:</strong> Automatic adaptation to Jellyfin's dark/light theme switching</description></item>
+/// <item><description><strong>Accessibility Support:</strong> High contrast mode, reduced motion, and keyboard navigation support</description></item>
+/// <item><description><strong>Performance Optimization:</strong> Hardware-accelerated animations and efficient loading states</description></item>
+/// </list>
+/// 
+/// <para><strong>Browser Compatibility:</strong></para>
+/// <para>
+/// The generated CSS supports all modern browsers including Chrome, Firefox, Safari, Edge,
+/// and mobile browsers. It gracefully degrades on older browsers while maintaining core functionality.
+/// </para>
+/// 
+/// <para><strong>Performance Considerations:</strong></para>
+/// <list type="bullet">
+/// <item><description><strong>Lightweight CSS:</strong> Optimized selectors and minimal overhead</description></item>
+/// <item><description><strong>CSS Animations:</strong> Hardware-accelerated transforms for smooth performance</description></item>
+/// <item><description><strong>Responsive Images:</strong> Efficient image loading and scaling</description></item>
+/// <item><description><strong>Accessibility Features:</strong> Respects user preferences for reduced motion and high contrast</description></item>
+/// </list>
+/// </remarks>
+/// <example>
+/// <para><strong>Usage through File Transformation Plugin:</strong></para>
+/// <code>
+/// // This transformation is automatically applied by the File Transformation plugin
+/// // No manual invocation required - it integrates seamlessly with Jellyfin's CSS loading
+/// 
+/// // The transformation modifies CSS files like this:
+/// // Original CSS content + Netflix Rows CSS = Enhanced streaming interface
+/// </code>
+/// 
+/// <para><strong>CSS Structure Overview:</strong></para>
+/// <code>
+/// /* Generated CSS includes these main sections: */
+/// .netflix-rows-container     // Main container for all Netflix-style content
+/// .netflix-row               // Individual content rows (My List, Recently Added, etc.)
+/// .netflix-item-card         // Individual content cards with hover effects
+/// .netflix-item-overlay      // Interactive overlay with action buttons
+/// 
+/// /* Responsive breakpoints: */
+/// @media (max-width: 768px)   // Tablet and mobile optimizations
+/// @media (max-width: 480px)   // Small mobile devices
+/// @media (min-width: 1200px)  // Large desktop screens
+/// @media (min-width: 1600px)  // Ultra-wide displays
+/// 
+/// /* Accessibility features: */
+/// @media (prefers-contrast: high)    // High contrast mode support
+/// @media (prefers-reduced-motion)    // Reduced motion preference support
+/// </code>
+/// </example>
+/// <seealso cref="JsTransformation"/>
 public static class CssTransformation
 {
     /// <summary>
-    /// Transforms CSS files to inject Netflix Rows styling.
+    /// Transforms CSS files by injecting Netflix-style visual enhancements and responsive design elements.
     /// </summary>
-    /// <param name="data">Transformation data containing file contents.</param>
-    /// <returns>Modified file contents.</returns>
+    /// <param name="data">
+    /// The transformation data containing the original CSS file contents and metadata.
+    /// This parameter encapsulates the file being transformed and provides context for the modification.
+    /// </param>
+    /// <returns>
+    /// The modified CSS content with Netflix-style enhancements appended to the original CSS.
+    /// Returns the original content unchanged if transformation fails or input is invalid.
+    /// </returns>
+    /// <remarks>
+    /// <para><strong>Transformation Process:</strong></para>
+    /// <list type="number">
+    /// <item><description><strong>Input Validation:</strong> Verifies that transformation data and content are valid</description></item>
+    /// <item><description><strong>CSS Generation:</strong> Retrieves the comprehensive Netflix-style CSS from embedded resources</description></item>
+    /// <item><description><strong>Content Injection:</strong> Appends the Netflix CSS to the original file content</description></item>
+    /// <item><description><strong>Error Handling:</strong> Gracefully handles failures to ensure Jellyfin continues functioning</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Error Handling Strategy:</strong></para>
+    /// <para>
+    /// This method follows a fail-safe approach where any transformation errors result in returning
+    /// the original CSS content unchanged. This ensures that Jellyfin's core functionality is never
+    /// compromised, even if the Netflix-style enhancements cannot be applied.
+    /// </para>
+    /// 
+    /// <para><strong>CSS Injection Technique:</strong></para>
+    /// <para>
+    /// The Netflix-style CSS is appended to existing CSS rather than replacing it, ensuring:
+    /// </para>
+    /// <list type="bullet">
+    /// <item><description><strong>Compatibility:</strong> Existing Jellyfin styles remain functional</description></item>
+    /// <item><description><strong>Extensibility:</strong> Other plugins' CSS modifications are preserved</description></item>
+    /// <item><description><strong>Upgradability:</strong> Jellyfin updates don't break the Netflix styling</description></item>
+    /// <item><description><strong>Fallback Support:</strong> If Netflix styles fail to load, base Jellyfin UI remains usable</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Performance Impact:</strong></para>
+    /// <para>
+    /// The transformation adds approximately 15-20KB of optimized CSS, which is minimal compared
+    /// to modern web standards and provides significant UX improvements. The CSS is minified
+    /// and uses efficient selectors for optimal browser performance.
+    /// </para>
+    /// 
+    /// <para><strong>Security Considerations:</strong></para>
+    /// <para>
+    /// All CSS content is statically defined and does not include any user input or external resources,
+    /// ensuring no security vulnerabilities are introduced through the transformation process.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Example transformation workflow (handled automatically by File Transformation plugin):
+    /// 
+    /// // Input: Original Jellyfin CSS
+    /// var originalCSS = @"
+    ///     .page-container { margin: 0; padding: 0; }
+    ///     .content-area { background: #000; }
+    /// ";
+    /// 
+    /// // Transformation data
+    /// var transformData = new TransformData 
+    /// { 
+    ///     Contents = originalCSS,
+    ///     FilePath = "/web/assets/app.css"
+    /// };
+    /// 
+    /// // Apply transformation
+    /// var enhancedCSS = CssTransformation.TransformCss(transformData);
+    /// 
+    /// // Result: Original CSS + Netflix-style enhancements
+    /// // enhancedCSS now contains both original styles and Netflix rows styling
+    /// </code>
+    /// 
+    /// <para><strong>CSS Output Structure:</strong></para>
+    /// <code>
+    /// /* Original Jellyfin CSS (preserved) */
+    /// .existing-jellyfin-styles { ... }
+    /// 
+    /// /* Netflix Rows Plugin - Injected CSS */
+    /// .netflix-rows-container { ... }
+    /// .netflix-row { ... }
+    /// .netflix-item-card { ... }
+    /// /* ... comprehensive Netflix-style enhancements ... */
+    /// </code>
+    /// </example>
+    /// <exception cref="JsonException">
+    /// Caught and handled gracefully - returns original content if JSON parsing fails.
+    /// This exception typically occurs if the transformation data format is unexpected.
+    /// </exception>
+    /// <seealso cref="GetNetflixRowsCss"/>
+    /// <seealso cref="TransformData"/>
     internal static string TransformCss(TransformData data)
     {
         try

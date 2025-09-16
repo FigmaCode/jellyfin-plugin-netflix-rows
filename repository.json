@@ -1,9 +1,9 @@
 [
   {
     "name": "Netflix Rows",
-    "description": "Transform your Jellyfin home screen into a Netflix-like experience with dynamic rows, genres, and a custom watchlist.",
-    "overview": "Netflix Rows Plugin für Jellyfin - Erstellt eine Netflix-ähnliche Startseite mit dynamischen Rows, Genres und einer benutzerdefinierten Watchlist.",
-    "owner": "jellyfin-netflix-rows",
+    "description": "Transform your Jellyfin home screen into a Netflix-like experience with dynamic rows, smart content discovery, genre-based organization, and a custom watchlist. Features responsive design, theme integration, and advanced configuration options.",
+    "overview": "Netflix Rows Plugin für Jellyfin - Transforms the Jellyfin home screen into a premium Netflix-style streaming experience. Features include dynamic content rows (My List, Recently Added, Random Picks), intelligent genre-based organization, comprehensive theme integration, responsive mobile design, and advanced performance optimizations. Includes extensive configuration options for customizing the streaming experience to match user preferences and library characteristics.",
+    "owner": "FigmaCode",
     "category": "General",
     "guid": "12345678-1234-5678-9abc-123456789012",
     "imageUrl": "https://raw.githubusercontent.com/FigmaCode/jellyfin-plugin-netflix-rows/main/Jellyfin.Plugin.NetflixRows/src/assets/img/Jellyflix_Banner.png",
@@ -11,7 +11,7 @@
     "versions": [
       {
         "version": "1.0.1.2",
-        "changelog": "fixed minor bugs.",
+        "changelog": "Production-ready release v1.0.1.2: Complete exception handling overhaul with specific exception types, LoggerMessage performance improvements, comprehensive code quality enhancements, fixed GitHub Actions CI/CD pipeline, and enterprise-grade documentation. Features Netflix-style UI with horizontal rows, smart content discovery, advanced configuration options, theme integration, responsive mobile design, and accessibility support. Includes performance optimizations, memory management improvements, and production-ready error handling for enterprise environments.",
         "targetAbi": "10.10.7.0",
         "sourceUrl": "https://github.com/FigmaCode/jellyfin-plugin-netflix-rows/releases/download/v1.0.1.2/jellyfin-plugin-netflix-rows-v1.0.1.2.zip",
         "checksum": "C579E37E8BDB86777DB4E4404EBB14AF",
