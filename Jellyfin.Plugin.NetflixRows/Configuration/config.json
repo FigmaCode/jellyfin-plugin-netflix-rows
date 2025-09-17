@@ -19,5 +19,11 @@
   "myListLimit": 50,
   "randomRowOrder": false,
   "lazyLoadRows": true,
-  "replaceHeartWithPlus": true
+  "replaceHeartWithPlus": true,
+  "autoRemoveWatchedFromMyList": false,
+  "watchedThresholdPercentage": 95,
+  "requireCompleteSeriesWatch": true,
+  "myListCount": 20,
+  "recentlyAddedCount": 20,
+  "randomPicksCount": 20
 }

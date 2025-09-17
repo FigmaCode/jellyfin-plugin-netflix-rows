@@ -12,11 +12,11 @@ using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("Jellyfin.Plugin.NetflixRows")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.1.2")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dfbde87b708619caa82be52780d7e401f3331c5f")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.2.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+16a29d3debcc2eaa182dd6b2787a8c958b58d6fa")]
 [assembly: System.Reflection.AssemblyProductAttribute("Jellyfin.Plugin.NetflixRows")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Jellyfin.Plugin.NetflixRows")]
-[assembly: System.Reflection.AssemblyVersionAttribute("1.0.1.2")]
+[assembly: System.Reflection.AssemblyVersionAttribute("1.0.2.0")]
 
 // Von der MSBuild WriteCodeFragment-Klasse generiert.
 
