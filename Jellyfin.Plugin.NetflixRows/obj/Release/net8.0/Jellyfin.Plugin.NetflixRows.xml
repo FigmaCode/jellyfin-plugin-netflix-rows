@@ -1,0 +1,239 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Jellyfin.Plugin.NetflixRows</name>
+    </assembly>
+    <members>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration">
+            <summary>
+            Plugin configuration.
+            </summary>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration"/> class.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MaxRows">
+            <summary>
+            Gets or sets the maximum number of rows to display.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MinItemsPerRow">
+            <summary>
+            Gets or sets the minimum items per row.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MaxItemsPerRow">
+            <summary>
+            Gets or sets the maximum items per row.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.EnableMyList">
+            <summary>
+            Gets or sets a value indicating whether "My List" row is enabled.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.EnableRecentlyAdded">
+            <summary>
+            Gets or sets a value indicating whether "Recently Added" row is enabled.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.EnableRandomPicks">
+            <summary>
+            Gets or sets a value indicating whether "Random Picks" row is enabled.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.EnableLongNotWatched">
+            <summary>
+            Gets or sets a value indicating whether "Long Not Watched" row is enabled.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.EnabledGenres">
+            <summary>
+            Gets or sets the list of enabled genres.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.BlacklistedGenres">
+            <summary>
+            Gets or sets the list of blacklisted genres.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.RecentlyAddedDays">
+            <summary>
+            Gets or sets the number of days for "Recently Added" definition.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.LongNotWatchedMonths">
+            <summary>
+            Gets or sets the number of months for "Long Not Watched" definition.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MinGenreItems">
+            <summary>
+            Gets or sets the minimum number of items a genre must have to be displayed.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MyListLimit">
+            <summary>
+            Gets or sets the maximum number of items in "My List".
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.RandomRowOrder">
+            <summary>
+            Gets or sets a value indicating whether row order should be randomized.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.LazyLoadRows">
+            <summary>
+            Gets or sets a value indicating whether rows should be lazy loaded.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.ReplaceHeartWithPlus">
+            <summary>
+            Gets or sets a value indicating whether heart buttons should be replaced with plus icons.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MyListCount">
+            <summary>
+            Gets or sets the number of items in My List row.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.RecentlyAddedCount">
+            <summary>
+            Gets or sets the number of items in Recently Added row.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.RandomPicksCount">
+            <summary>
+            Gets or sets the number of items in Random Picks row.
+            </summary>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload">
+            <summary>
+            Payload for Home Screen Section requests.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload.UserId">
+            <summary>
+            Gets or sets the user ID.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload.AdditionalData">
+            <summary>
+            Gets or sets additional data for the section.
+            </summary>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController">
+            <summary>
+            Netflix Rows API Controller.
+            </summary>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetMyListSection(Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload)">
+            <summary>
+            Gets the My List section for Home Screen Sections.
+            </summary>
+            <returns>Section data for My List.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetRecentlyAddedSection(Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload)">
+            <summary>
+            Gets the Recently Added section for Home Screen Sections.
+            </summary>
+            <returns>Section data for Recently Added.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetRandomPicksSection(Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload)">
+            <summary>
+            Gets the Random Picks section for Home Screen Sections.
+            </summary>
+            <returns>Section data for Random Picks.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetGenreSection(Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload)">
+            <summary>
+            Gets a genre section for Home Screen Sections.
+            </summary>
+            <returns>Section data for the specified genre from additionalData.</returns>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Plugin">
+            <summary>
+            The main plugin.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Plugin.Instance">
+            <summary>
+            Gets the current plugin instance.
+            </summary>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Plugin.#ctor(MediaBrowser.Common.Configuration.IApplicationPaths,MediaBrowser.Model.Serialization.IXmlSerializer,Microsoft.Extensions.Logging.ILogger{Jellyfin.Plugin.NetflixRows.Plugin})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Jellyfin.Plugin.NetflixRows.Plugin"/> class.
+            </summary>
+            <param name="applicationPaths">Instance of the <see cref="T:MediaBrowser.Common.Configuration.IApplicationPaths"/> interface.</param>
+            <param name="xmlSerializer">Instance of the <see cref="T:MediaBrowser.Model.Serialization.IXmlSerializer"/> interface.</param>
+            <param name="logger">Instance of the <see cref="T:Microsoft.Extensions.Logging.ILogger`1"/> interface.</param>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Plugin.Name">
+            <inheritdoc />
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Plugin.Id">
+            <inheritdoc />
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Plugin.Description">
+            <inheritdoc />
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Plugin.GetPages">
+            <inheritdoc />
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.PluginServiceRegistrator">
+            <summary>
+            Register plugin services for dependency injection.
+            </summary>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.PluginServiceRegistrator.RegisterServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,MediaBrowser.Controller.IServerApplicationHost)">
+            <inheritdoc />
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation">
+            <summary>
+            CSS transformation for Netflix Rows styling.
+            </summary>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation.TransformCss(Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation.TransformData)">
+            <summary>
+            Transforms CSS files to inject Netflix Rows styling.
+            </summary>
+            <param name="data">Transformation data containing file contents.</param>
+            <returns>Modified file contents.</returns>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation.TransformData">
+            <summary>
+            Transform data structure.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation.TransformData.Contents">
+            <summary>
+            Gets or sets the file contents.
+            </summary>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation">
+            <summary>
+            JavaScript transformation for injecting Netflix Rows functionality.
+            </summary>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation.TransformJs(System.String)">
+            <summary>
+            Transforms JavaScript files to inject Netflix Rows functionality.
+            </summary>
+            <param name="data">Transformation data containing file contents.</param>
+            <returns>Modified file contents.</returns>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation.TransformData">
+            <summary>
+            Transform data structure.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation.TransformData.Contents">
+            <summary>
+            Gets or sets the file contents.
+            </summary>
+        </member>
+    </members>
+</doc>
