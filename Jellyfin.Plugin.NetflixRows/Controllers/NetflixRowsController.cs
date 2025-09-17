@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.NetflixRows.Configuration;
+using Jellyfin.Plugin.NetflixRows.Logging;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
@@ -218,7 +219,30 @@ public class NetflixRowsController : ControllerBase
     public ActionResult<string> Test()
     {
         LogTestEndpointCalled(_logger, null);
+        PluginLogger.LogInfo("Test endpoint called at {0}", DateTime.Now);
         return Ok("Netflix Rows Controller is working! " + DateTime.Now);
+    }
+
+    /// <summary>
+    /// Gets debug information including log file location.
+    /// </summary>
+    /// <returns>Debug information about the plugin.</returns>
+    [HttpGet("Debug")]
+    [AllowAnonymous]
+    public ActionResult<object> GetDebugInfo()
+    {
+        PluginLogger.LogInfo("Debug info requested");
+        
+        var debugInfo = new
+        {
+            Status = "Running",
+            Timestamp = DateTime.Now,
+            LogFile = PluginLogger.LogFilePath,
+            Version = GetType().Assembly.GetName().Version?.ToString() ?? "Unknown",
+            Configuration = Plugin.Instance?.Configuration != null ? "Loaded" : "Not Available"
+        };
+        
+        return Ok(debugInfo);
     }
 
     /// <summary>
@@ -231,8 +255,17 @@ public class NetflixRowsController : ControllerBase
         try
         {
             LogConfigRequested(_logger, null);
+            PluginLogger.LogConfig("GET", "Configuration requested");
+            
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            
+            // Log the current configuration values
+            PluginLogger.LogConfig("LOAD", "autoRemoveWatchedFromMyList = {0}", config.AutoRemoveWatchedFromMyList);
+            PluginLogger.LogConfig("LOAD", "watchedThresholdPercentage = {0}", config.WatchedThresholdPercentage);
+            PluginLogger.LogConfig("LOAD", "requireCompleteSeriesWatch = {0}", config.RequireCompleteSeriesWatch);
+            
             LogReturningConfig(_logger, System.Text.Json.JsonSerializer.Serialize(config), null);
+            PluginLogger.LogConfig("GET", "Configuration returned successfully");
             return Ok(config);
         }
         catch (System.Text.Json.JsonException ex)
@@ -263,15 +296,25 @@ public class NetflixRowsController : ControllerBase
         try
         {
             LogConfigUpdateRequested(_logger, null);
+            PluginLogger.LogConfig("UPDATE", "Configuration update requested");
+            
             if (Plugin.Instance != null && config != null)
             {
+                // Log the configuration values we're trying to save
+                PluginLogger.LogConfig("SAVE", "autoRemoveWatchedFromMyList = {0}", config.AutoRemoveWatchedFromMyList);
+                PluginLogger.LogConfig("SAVE", "watchedThresholdPercentage = {0}", config.WatchedThresholdPercentage);
+                PluginLogger.LogConfig("SAVE", "requireCompleteSeriesWatch = {0}", config.RequireCompleteSeriesWatch);
+                
                 Plugin.Instance.UpdateConfiguration(config);
                 Plugin.Instance.SaveConfiguration();
+                
                 LogConfigurationUpdatedSuccessfully(_logger, null);
+                PluginLogger.LogConfig("UPDATE", "Configuration saved successfully");
                 return Ok();
             }
             
             LogPluginInstanceOrConfigNull(_logger, null);
+            PluginLogger.LogConfig("ERROR", "Plugin instance or config is null");
             return BadRequest("Plugin instance not available or invalid config");
         }
         catch (ArgumentNullException ex)
@@ -333,15 +376,20 @@ public class NetflixRowsController : ControllerBase
         try
         {
             LogMyListRequested(_logger, null);
+            PluginLogger.LogApi("MYLIST", "My List requested with limit={0}, userId={1}", limit, userId?.ToString() ?? "null");
 
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
             var actualLimit = Math.Min(limit, config.MyListLimit);
+            
+            PluginLogger.LogApi("MYLIST", "Auto-remove enabled: {0}, threshold: {1}%, require complete series: {2}", 
+                config.AutoRemoveWatchedFromMyList, config.WatchedThresholdPercentage, config.RequireCompleteSeriesWatch);
             
             // Get user context if provided
             var user = userId.HasValue ? _userManager.GetUserById(userId.Value) : null;
 
             // If auto-remove is enabled, load more items to account for filtering
             var queryLimit = config.AutoRemoveWatchedFromMyList ? actualLimit * 2 : actualLimit;
+            PluginLogger.LogApi("MYLIST", "Query limit: {0} (auto-remove {1})", queryLimit, config.AutoRemoveWatchedFromMyList ? "enabled" : "disabled");
 
             var query = new InternalItemsQuery(user)
             {
@@ -356,20 +404,30 @@ public class NetflixRowsController : ControllerBase
             var dtoOptions = new DtoOptions(true);
             var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
 
+            PluginLogger.LogApi("MYLIST", "Retrieved {0} favorite items from database", dtos.Length);
+
             // Apply watched filter if enabled
             if (config.AutoRemoveWatchedFromMyList)
             {
+                PluginLogger.LogApi("MYLIST", "Applying auto-remove filter...");
                 var originalCount = dtos.Length;
                 dtos = FilterWatchedItems(dtos, config).Take(actualLimit).ToArray();
                 var filteredCount = originalCount - dtos.Length;
+                
+                PluginLogger.LogApi("MYLIST", "Filtered out {0} watched items from {1} total favorites", filteredCount, originalCount);
                 
                 if (filteredCount > 0)
                 {
                     LogAutoRemovedWatchedItems(_logger, filteredCount, originalCount, null);
                 }
             }
+            else
+            {
+                PluginLogger.LogApi("MYLIST", "Auto-remove filter disabled, returning all favorites");
+            }
 
             LogRetrievedMyListItems(_logger, dtos.Length, null);
+            PluginLogger.LogApi("MYLIST", "Returning {0} items to client", dtos.Length);
 
             return Ok(new QueryResult<BaseItemDto>
             {

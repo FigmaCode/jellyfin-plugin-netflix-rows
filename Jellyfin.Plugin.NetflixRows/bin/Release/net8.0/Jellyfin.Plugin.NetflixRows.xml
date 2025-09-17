@@ -558,6 +558,12 @@
             </summary>
             <returns>Test message with current timestamp.</returns>
         </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetDebugInfo">
+            <summary>
+            Gets debug information including log file location.
+            </summary>
+            <returns>Debug information about the plugin.</returns>
+        </member>
         <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetConfig">
             <summary>
             Gets the current plugin configuration.
@@ -671,6 +677,129 @@
             Gets a genre section for Home Screen Sections.
             </summary>
             <returns>Section data for the specified genre from additionalData.</returns>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger">
+            <summary>
+            Custom logger implementation for Netflix Rows plugin that writes to a dedicated log file.
+            </summary>
+            <remarks>
+            <para><strong>Purpose:</strong></para>
+            <para>
+            This logger provides isolated logging for the Netflix Rows plugin, making it easier to
+            debug configuration issues, API calls, and plugin behavior without searching through
+            the entire Jellyfin log.
+            </para>
+            
+            <para><strong>Log File Location:</strong></para>
+            <para>
+            Logs are written to: <c>[JellyfinDataDirectory]/logs/netflixrows.log</c>
+            </para>
+            
+            <para><strong>Features:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Timestamped Entries:</strong> Each log entry includes precise timestamps</description></item>
+            <item><description><strong>Log Level Filtering:</strong> Supports all standard log levels</description></item>
+            <item><description><strong>Thread-Safe:</strong> Safe for concurrent use across plugin components</description></item>
+            <item><description><strong>Auto-Rotation:</strong> Prevents log file from growing too large</description></item>
+            </list>
+            
+            <para><strong>Usage Examples:</strong></para>
+            <code>
+            // In controllers or services
+            PluginLogger.LogInfo("Configuration loaded successfully");
+            PluginLogger.LogDebug("Processing MyList request for user {0}", userId);
+            PluginLogger.LogError("Failed to save configuration: {0}", ex.Message);
+            
+            // For debugging configuration persistence
+            PluginLogger.LogDebug("CONFIG_SAVE: autoRemoveWatched = {0}", config.AutoRemoveWatchedFromMyList);
+            PluginLogger.LogDebug("CONFIG_LOAD: autoRemoveWatched = {0}", loadedConfig.AutoRemoveWatchedFromMyList);
+            </code>
+            </remarks>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.GetLogDirectory">
+            <summary>
+            Gets the log directory path, ensuring it exists.
+            </summary>
+            <returns>The log directory path.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.LogInfo(System.String,System.Object[])">
+            <summary>
+            Logs an informational message.
+            </summary>
+            <param name="message">The message to log.</param>
+            <param name="args">Optional format arguments.</param>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.LogDebug(System.String,System.Object[])">
+            <summary>
+            Logs a debug message.
+            </summary>
+            <param name="message">The message to log.</param>
+            <param name="args">Optional format arguments.</param>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.LogWarning(System.String,System.Object[])">
+            <summary>
+            Logs a warning message.
+            </summary>
+            <param name="message">The message to log.</param>
+            <param name="args">Optional format arguments.</param>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.LogError(System.String,System.Object[])">
+            <summary>
+            Logs an error message.
+            </summary>
+            <param name="message">The message to log.</param>
+            <param name="args">Optional format arguments.</param>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.LogCritical(System.String,System.Object[])">
+            <summary>
+            Logs a critical error message.
+            </summary>
+            <param name="message">The message to log.</param>
+            <param name="args">Optional format arguments.</param>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.LogConfig(System.String,System.String,System.Object[])">
+            <summary>
+            Logs configuration-related debug information with a specific prefix for easy filtering.
+            </summary>
+            <param name="operation">The configuration operation (SAVE, LOAD, UPDATE, etc.).</param>
+            <param name="message">The message to log.</param>
+            <param name="args">Optional format arguments.</param>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.LogApi(System.String,System.String,System.Object[])">
+            <summary>
+            Logs API-related debug information with a specific prefix for easy filtering.
+            </summary>
+            <param name="endpoint">The API endpoint being called.</param>
+            <param name="message">The message to log.</param>
+            <param name="args">Optional format arguments.</param>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.WriteLog(Microsoft.Extensions.Logging.LogLevel,System.String,System.Object[])">
+            <summary>
+            Core logging method that writes formatted log entries to the file.
+            </summary>
+            <param name="level">The log level.</param>
+            <param name="message">The message to log.</param>
+            <param name="args">Optional format arguments.</param>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.RotateLogFile">
+            <summary>
+            Rotates the log file when it becomes too large.
+            </summary>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.TruncateLogFile">
+            <summary>
+            Truncates the log file when rotation fails.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.LogFilePath">
+            <summary>
+            Gets the current log file path for diagnostic purposes.
+            </summary>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Logging.PluginLogger.ClearLog">
+            <summary>
+            Clears the current log file.
+            </summary>
         </member>
         <member name="T:Jellyfin.Plugin.NetflixRows.Plugin">
             <summary>

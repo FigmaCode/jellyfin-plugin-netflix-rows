@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using Jellyfin.Plugin.NetflixRows.Logging;
 
 namespace Jellyfin.Plugin.NetflixRows.Transformations;
 
@@ -174,20 +175,36 @@ public static class CssTransformation
     {
         try
         {
+            PluginLogger.LogDebug("CSS transformation requested");
+            
             if (data?.Contents == null)
             {
+                PluginLogger.LogWarning("CSS transformation failed: data or contents is null");
                 return "";
             }
 
             var cssCode = GetNetflixRowsCss();
+            PluginLogger.LogDebug("Netflix CSS loaded, length: {0} characters", cssCode.Length);
             
             // Inject our Netflix Rows CSS at the end of the file
             var modifiedContents = data.Contents + "\n" + cssCode;
+            PluginLogger.LogInfo("CSS transformation completed successfully");
 
             return modifiedContents;
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
+            PluginLogger.LogError("CSS transformation failed due to JSON error: {0}", ex.Message);
+            return data?.Contents ?? "";
+        }
+        catch (ArgumentException ex)
+        {
+            PluginLogger.LogError("CSS transformation failed due to argument error: {0}", ex.Message);
+            return data?.Contents ?? "";
+        }
+        catch (InvalidOperationException ex)
+        {
+            PluginLogger.LogError("CSS transformation failed due to invalid operation: {0}", ex.Message);
             return data?.Contents ?? "";
         }
     }

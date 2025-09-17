@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Jellyfin.Plugin.NetflixRows")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.2.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+16a29d3debcc2eaa182dd6b2787a8c958b58d6fa")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2e72b17cd69c1d8c79ed9af6ce944128848353f6")]
 [assembly: System.Reflection.AssemblyProductAttribute("Jellyfin.Plugin.NetflixRows")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Jellyfin.Plugin.NetflixRows")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.2.0")]

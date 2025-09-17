@@ -1,7 +1,9 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
+using Jellyfin.Plugin.NetflixRows.Logging;
 
 namespace Jellyfin.Plugin.NetflixRows.Transformations;
 
@@ -202,19 +204,26 @@ public static class JsTransformation
     {
         try
         {
+            PluginLogger.LogDebug("JavaScript transformation requested");
+            
             var transformData = JsonSerializer.Deserialize<TransformData>(data);
             if (transformData?.Contents == null)
             {
+                PluginLogger.LogWarning("JavaScript transformation failed: transform data or contents is null");
                 return data;
             }
 
             var jsCode = GetNetflixRowsJs();
+            PluginLogger.LogDebug("Netflix JavaScript loaded, length: {0} characters", jsCode.Length);
+            
             var modifiedContents = transformData.Contents + Environment.NewLine + jsCode;
+            PluginLogger.LogInfo("JavaScript transformation completed successfully");
 
             return JsonSerializer.Serialize(new { contents = modifiedContents });
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
+            PluginLogger.LogError("JavaScript transformation failed due to JSON error: {0}", ex.Message);
             return data;
         }
     }
@@ -334,7 +343,8 @@ public static class JsTransformation
 /// </example>
 /// <seealso cref="JsTransformation"/>
 /// <seealso cref="CssTransformation"/>
-internal class TransformData
+[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Used by JsonSerializer for deserialization")]
+internal sealed class TransformData
 {
     /// <summary>
     /// Gets or sets the original file contents to be transformed.

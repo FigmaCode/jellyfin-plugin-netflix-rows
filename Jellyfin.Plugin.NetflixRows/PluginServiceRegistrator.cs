@@ -1,5 +1,6 @@
 using System;
 using Jellyfin.Plugin.NetflixRows.Controllers;
+using Jellyfin.Plugin.NetflixRows.Logging;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.Extensions.DependencyInjection;
@@ -150,7 +151,11 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     /// <seealso cref="NetflixRowsController"/>
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
+        PluginLogger.LogInfo("Registering Netflix Rows plugin services...");
+        
         // Register the Netflix Rows controller explicitly
         serviceCollection.AddSingleton<NetflixRowsController>();
+        
+        PluginLogger.LogInfo("Netflix Rows plugin services registered successfully");
     }
 }

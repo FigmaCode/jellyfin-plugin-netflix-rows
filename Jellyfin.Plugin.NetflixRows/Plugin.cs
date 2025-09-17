@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.NetflixRows.Configuration;
+using Jellyfin.Plugin.NetflixRows.Logging;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -71,6 +73,7 @@ namespace Jellyfin.Plugin.NetflixRows;
 /// // POST /NetflixRows/RecentlyAddedSection - Recently added content
 /// </code>
 /// </example>
+[SuppressMessage("Design", "CA1724:Type names should not match namespaces", Justification = "Standard naming convention for Jellyfin plugins")]
 public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     private readonly ILogger<Plugin> _logger;
@@ -264,6 +267,8 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         _logger = logger;
         
         LogPluginInitializing(_logger, GetType().Assembly.GetName().Version, null);
+        PluginLogger.LogInfo("Netflix Rows Plugin starting up - Version {0}", GetType().Assembly.GetName().Version?.ToString() ?? "Unknown");
+        PluginLogger.LogInfo("Plugin log file location: {0}", PluginLogger.LogFilePath);
         
         // Register with File Transformation for CSS styling
         _ = Task.Run(RegisterFileTransformationsAsync);
@@ -272,6 +277,7 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         _ = Task.Run(RegisterNetflixSectionsAsync);
         
         LogPluginInitialized(_logger, null);
+        PluginLogger.LogInfo("Netflix Rows Plugin initialized successfully");
     }
 
     /// <summary>
