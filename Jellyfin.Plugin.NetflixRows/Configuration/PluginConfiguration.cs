@@ -155,6 +155,11 @@ public class PluginConfiguration : BasePluginConfiguration
         RandomRowOrder = false;
         LazyLoadRows = true;
         ReplaceHeartWithPlus = true;
+        
+        // Auto-remove watched items configuration
+        AutoRemoveWatchedFromMyList = false;
+        WatchedThresholdPercentage = 95;
+        RequireCompleteSeriesWatch = true;
     }
 
     /// <summary>
@@ -404,4 +409,145 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets the number of items in Random Picks row.
     /// </summary>
     public int RandomPicksCount { get; set; } = 20;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether watched items should be automatically removed from My List.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> to automatically hide watched content from My List; <c>false</c> to show all favorites regardless of watch status. Default: <c>false</c>.
+    /// </value>
+    /// <remarks>
+    /// <para><strong>Smart Filtering Behavior:</strong></para>
+    /// <list type="bullet">
+    /// <item><description><strong>Movies:</strong> Hidden when watch percentage exceeds <see cref="WatchedThresholdPercentage"/></description></item>
+    /// <item><description><strong>Series:</strong> Hidden when all episodes are watched (if <see cref="RequireCompleteSeriesWatch"/> is true)</description></item>
+    /// <item><description><strong>User Control:</strong> Users can re-favorite items to add them back to My List</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Use Cases:</strong></para>
+    /// <list type="bullet">
+    /// <item><description><strong>Active Discovery:</strong> Keep My List focused on unwatched content</description></item>
+    /// <item><description><strong>Clean Interface:</strong> Automatically maintain a curated watchlist</description></item>
+    /// <item><description><strong>Continued Watching:</strong> Show only content that needs completion</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Performance Impact:</strong></para>
+    /// <para>
+    /// When enabled, the system loads additional items to ensure the requested number of visible
+    /// items after filtering. This may slightly increase initial load time but improves user experience.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Enable auto-removal with default settings
+    /// config.AutoRemoveWatchedFromMyList = true;
+    /// config.WatchedThresholdPercentage = 95;  // 95% completion = watched
+    /// config.RequireCompleteSeriesWatch = true; // All episodes must be watched
+    /// 
+    /// // Strict setting - remove at 100% completion only
+    /// config.WatchedThresholdPercentage = 100;
+    /// 
+    /// // Lenient setting - remove at 85% completion
+    /// config.WatchedThresholdPercentage = 85;
+    /// </code>
+    /// </example>
+    public bool AutoRemoveWatchedFromMyList { get; set; }
+
+    /// <summary>
+    /// Gets or sets the percentage threshold at which movies are considered "watched" and removed from My List.
+    /// </summary>
+    /// <value>
+    /// The watch percentage threshold (0-100). Default: 95.
+    /// </value>
+    /// <remarks>
+    /// <para><strong>Threshold Selection Guidelines:</strong></para>
+    /// <list type="bullet">
+    /// <item><description><strong>95% (Recommended):</strong> Accounts for users who don't watch credits</description></item>
+    /// <item><description><strong>90%:</strong> More aggressive removal, good for users who often skip endings</description></item>
+    /// <item><description><strong>100%:</strong> Only remove completely finished content</description></item>
+    /// <item><description><strong>85%:</strong> Remove content that's substantially watched</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Movie vs Series Behavior:</strong></para>
+    /// <para>
+    /// This threshold applies only to movies and individual episodes. For series, the completion
+    /// is determined by whether all episodes have been watched, regardless of this percentage.
+    /// </para>
+    /// 
+    /// <para><strong>User Experience Considerations:</strong></para>
+    /// <para>
+    /// A threshold below 100% accounts for real-world viewing behavior where users may not
+    /// watch credits or may stop slightly before the end. This creates a more natural
+    /// "watched" experience.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Conservative approach - only remove 100% completed
+    /// config.WatchedThresholdPercentage = 100;
+    /// 
+    /// // Netflix-like behavior - remove at 95%
+    /// config.WatchedThresholdPercentage = 95;
+    /// 
+    /// // Aggressive cleaning - remove at 85%
+    /// config.WatchedThresholdPercentage = 85;
+    /// 
+    /// // Validation example
+    /// if (config.WatchedThresholdPercentage &lt; 1 || config.WatchedThresholdPercentage &gt; 100)
+    /// {
+    ///     config.WatchedThresholdPercentage = 95; // Reset to default
+    /// }
+    /// </code>
+    /// </example>
+    public int WatchedThresholdPercentage { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether series require all episodes to be watched before removal from My List.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> to require complete series watch for removal; <c>false</c> to remove based on current episode progress. Default: <c>true</c>.
+    /// </value>
+    /// <remarks>
+    /// <para><strong>Series Completion Logic:</strong></para>
+    /// <list type="bullet">
+    /// <item><description><strong>Complete Series (true):</strong> All episodes must be watched to remove from My List</description></item>
+    /// <item><description><strong>Current Progress (false):</strong> Remove based on current episode watch percentage</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Recommended Setting:</strong></para>
+    /// <para>
+    /// <c>true</c> is recommended because users typically want to keep series in My List until
+    /// they've finished the entire show, even if they've completed the current episode.
+    /// This prevents premature removal of ongoing series.
+    /// </para>
+    /// 
+    /// <para><strong>Use Case Examples:</strong></para>
+    /// <list type="bullet">
+    /// <item><description><strong>Binge Watchers:</strong> Keep series until completely finished</description></item>
+    /// <item><description><strong>Episode-by-Episode:</strong> Remove when current episode is done</description></item>
+    /// <item><description><strong>Seasonal Viewing:</strong> Maintain series across multiple viewing sessions</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Technical Implementation:</strong></para>
+    /// <para>
+    /// When true, the system checks if all episodes in the series have UserData.Played = true.
+    /// When false, it only checks the current episode's watch percentage against the threshold.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Recommended: Keep series until completely finished
+    /// config.RequireCompleteSeriesWatch = true;
+    /// 
+    /// // Alternative: Remove based on current episode only
+    /// config.RequireCompleteSeriesWatch = false;
+    /// 
+    /// // Combined with threshold for movies
+    /// config.AutoRemoveWatchedFromMyList = true;
+    /// config.WatchedThresholdPercentage = 95;
+    /// config.RequireCompleteSeriesWatch = true;
+    /// // Result: Movies removed at 95%, series only when completely finished
+    /// </code>
+    /// </example>
+    public bool RequireCompleteSeriesWatch { get; set; }
 }

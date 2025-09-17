@@ -1,0 +1,16 @@
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\bin\Release\net8.0\Configuration\config.json
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\bin\Release\net8.0\Jellyfin.Plugin.NetflixRows.deps.json
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\bin\Release\net8.0\Jellyfin.Plugin.NetflixRows.dll
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\bin\Release\net8.0\Jellyfin.Plugin.NetflixRows.pdb
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\bin\Release\net8.0\Jellyfin.Plugin.NetflixRows.xml
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\obj\Release\net8.0\Jellyfin.Plugin.NetflixRows.csproj.AssemblyReference.cache
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\obj\Release\net8.0\Jellyfin.Plugin.NetflixRows.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\obj\Release\net8.0\Jellyfin.Plugin.NetflixRows.AssemblyInfoInputs.cache
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\obj\Release\net8.0\Jellyfin.Plugin.NetflixRows.AssemblyInfo.cs
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\obj\Release\net8.0\Jellyfin.Plugin.NetflixRows.csproj.CoreCompileInputs.cache
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\obj\Release\net8.0\Jellyfin.Plugin.NetflixRows.sourcelink.json
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\obj\Release\net8.0\Jellyfin.Plugin.NetflixRows.dll
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\obj\Release\net8.0\refint\Jellyfin.Plugin.NetflixRows.dll
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\obj\Release\net8.0\Jellyfin.Plugin.NetflixRows.xml
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\obj\Release\net8.0\Jellyfin.Plugin.NetflixRows.pdb
+C:\Users\samue\Downloads\Programmier Projekte\Netflixify2\Jellyfin.Plugin.NetflixRows\obj\Release\net8.0\ref\Jellyfin.Plugin.NetflixRows.dll

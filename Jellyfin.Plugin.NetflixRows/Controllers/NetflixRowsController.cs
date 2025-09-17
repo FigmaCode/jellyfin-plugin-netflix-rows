@@ -183,6 +183,10 @@ public class NetflixRowsController : ControllerBase
     private static readonly Action<ILogger, Exception?> LogErrorGettingGenreSection = 
         LoggerMessage.Define(LogLevel.Error, new EventId(133, nameof(LogErrorGettingGenreSection)), 
             "[NetflixRows] Error getting genre section");
+    
+    private static readonly Action<ILogger, int, int, Exception?> LogAutoRemovedWatchedItems = 
+        LoggerMessage.Define<int, int>(LogLevel.Information, new EventId(134, nameof(LogAutoRemovedWatchedItems)), 
+            "[NetflixRows] Auto-removed {FilteredCount} watched items from My List (of {OriginalCount} total favorites)");
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NetflixRowsController"/> class.
@@ -298,11 +302,30 @@ public class NetflixRowsController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the user's favorite items (My List).
+    /// Gets the user's favorite items (My List) with optional filtering of watched content.
     /// </summary>
-    /// <param name="limit">Maximum number of items to return.</param>
+    /// <param name="limit">Maximum number of items to return after filtering.</param>
     /// <param name="userId">Optional user ID, uses current user if not provided.</param>
-    /// <returns>Query result containing the user's favorite items.</returns>
+    /// <returns>Query result containing the user's favorite items, optionally filtered to exclude watched content.</returns>
+    /// <remarks>
+    /// <para><strong>Auto-Remove Watched Feature:</strong></para>
+    /// <para>
+    /// When <see cref="PluginConfiguration.AutoRemoveWatchedFromMyList"/> is enabled, this method
+    /// intelligently filters out watched content based on configurable thresholds:
+    /// </para>
+    /// <list type="bullet">
+    /// <item><description><strong>Movies:</strong> Removed when watch percentage exceeds threshold</description></item>
+    /// <item><description><strong>Series:</strong> Removed when all episodes are completed (configurable)</description></item>
+    /// <item><description><strong>Performance:</strong> Loads extra items to ensure sufficient unwatched content</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Filtering Logic:</strong></para>
+    /// <para>
+    /// The system uses Jellyfin's UserData.PlayedPercentage and UserData.Played properties
+    /// to determine watch status. This integrates seamlessly with Jellyfin's existing
+    /// progress tracking without requiring additional data storage.
+    /// </para>
+    /// </remarks>
     [HttpGet("MyList")]
     public ActionResult<QueryResult<BaseItemDto>> GetMyList(
         [FromQuery] int limit = 25, [FromQuery] Guid? userId = null)
@@ -313,9 +336,12 @@ public class NetflixRowsController : ControllerBase
 
             var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
             var actualLimit = Math.Min(limit, config.MyListLimit);
-
+            
             // Get user context if provided
             var user = userId.HasValue ? _userManager.GetUserById(userId.Value) : null;
+
+            // If auto-remove is enabled, load more items to account for filtering
+            var queryLimit = config.AutoRemoveWatchedFromMyList ? actualLimit * 2 : actualLimit;
 
             var query = new InternalItemsQuery(user)
             {
@@ -323,19 +349,32 @@ public class NetflixRowsController : ControllerBase
                 IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
                 IsVirtualItem = false,
                 OrderBy = new[] { (ItemSortBy.DateCreated, SortOrder.Descending) },
-                Limit = actualLimit
+                Limit = Math.Min(queryLimit, config.MyListLimit)
             };
 
             var items = _libraryManager.GetItemsResult(query);
             var dtoOptions = new DtoOptions(true);
             var dtos = items.Items.Select(i => _dtoService.GetBaseItemDto(i, dtoOptions, user)).ToArray();
 
+            // Apply watched filter if enabled
+            if (config.AutoRemoveWatchedFromMyList)
+            {
+                var originalCount = dtos.Length;
+                dtos = FilterWatchedItems(dtos, config).Take(actualLimit).ToArray();
+                var filteredCount = originalCount - dtos.Length;
+                
+                if (filteredCount > 0)
+                {
+                    LogAutoRemovedWatchedItems(_logger, filteredCount, originalCount, null);
+                }
+            }
+
             LogRetrievedMyListItems(_logger, dtos.Length, null);
 
             return Ok(new QueryResult<BaseItemDto>
             {
                 Items = dtos,
-                TotalRecordCount = items.TotalRecordCount
+                TotalRecordCount = dtos.Length
             });
         }
         catch (ArgumentException ex)
@@ -352,6 +391,75 @@ public class NetflixRowsController : ControllerBase
         {
             LogErrorGettingMyList(_logger, ex);
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Filters out watched items from a collection based on plugin configuration.
+    /// </summary>
+    /// <param name="items">The collection of items to filter.</param>
+    /// <param name="config">The plugin configuration containing filter settings.</param>
+    /// <returns>An enumerable of items that are not considered watched.</returns>
+    /// <remarks>
+    /// <para><strong>Filtering Logic:</strong></para>
+    /// <list type="bullet">
+    /// <item><description><strong>Movies:</strong> Filtered based on PlayedPercentage vs WatchedThresholdPercentage</description></item>
+    /// <item><description><strong>Series:</strong> Filtered based on RequireCompleteSeriesWatch setting</description></item>
+    /// <item><description><strong>Unknown Types:</strong> Not filtered, returned as-is</description></item>
+    /// </list>
+    /// 
+    /// <para><strong>Performance Considerations:</strong></para>
+    /// <para>
+    /// This method is designed to be efficient for typical My List sizes. For very large
+    /// favorite lists, consider implementing database-level filtering in future versions.
+    /// </para>
+    /// </remarks>
+    private static IEnumerable<BaseItemDto> FilterWatchedItems(BaseItemDto[] items, PluginConfiguration config)
+    {
+        foreach (var item in items)
+        {
+            // Skip items without user data
+            if (item.UserData == null)
+            {
+                yield return item;
+                continue;
+            }
+
+            var isWatched = false;
+
+            // Check watch status based on item type
+            switch (item.Type)
+            {
+                case BaseItemKind.Movie:
+                    // Movies: check percentage watched
+                    var playedPercentage = item.UserData.PlayedPercentage ?? 0;
+                    isWatched = playedPercentage >= config.WatchedThresholdPercentage;
+                    break;
+
+                case BaseItemKind.Series:
+                    if (config.RequireCompleteSeriesWatch)
+                    {
+                        // Series: check if marked as played (all episodes watched)
+                        isWatched = item.UserData.Played;
+                    }
+                    else
+                    {
+                        // Series: check current episode percentage like movies
+                        var seriesPercentage = item.UserData.PlayedPercentage ?? 0;
+                        isWatched = seriesPercentage >= config.WatchedThresholdPercentage;
+                    }
+                    break;
+
+                default:
+                    // For other types, don't filter - include in results
+                    break;
+            }
+
+            // Include item if not watched
+            if (!isWatched)
+            {
+                yield return item;
+            }
         }
     }
 

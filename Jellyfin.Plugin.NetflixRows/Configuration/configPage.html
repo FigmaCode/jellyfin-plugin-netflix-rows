@@ -129,6 +129,32 @@
                             </label>
                             <div class="fieldDescription">Use plus icon instead of heart for My List functionality</div>
                         </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input id="autoRemoveWatchedFromMyList" type="checkbox" is="emby-checkbox" class="emby-checkbox">
+                                <span>Auto-Remove Watched from My List</span>
+                            </label>
+                            <div class="fieldDescription">Automatically hide completed movies and series from My List for cleaner discovery</div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="verticalSection-extrabottompadding" id="watchedFilterSettings" style="display: none;">
+                    <legend style="padding-bottom:10px; font-weight: bolder; font-size: 1.2em;">Watched Filter Settings</legend>
+                    <div style="padding-left: .5em;">
+                        <div class="inputContainer">
+                            <input is="emby-input" type="number" id="watchedThresholdPercentage" label="Watched Threshold (%)" value="95" min="1" max="100" />
+                            <div class="fieldDescription">Consider movies watched at this percentage (95% = skip credits, 100% = only when completely finished)</div>
+                        </div>
+                        
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input id="requireCompleteSeriesWatch" type="checkbox" is="emby-checkbox" class="emby-checkbox" checked>
+                                <span>Require Complete Series Watch</span>
+                            </label>
+                            <div class="fieldDescription">Only hide series when ALL episodes are watched (recommended for binge-watching)</div>
+                        </div>
                     </div>
                 </fieldset>
             </div>
@@ -352,6 +378,15 @@
                 });
             }
 
+            function toggleWatchedFilterSettings() {
+                const autoRemoveCheckbox = document.getElementById('autoRemoveWatchedFromMyList');
+                const watchedFilterSettings = document.getElementById('watchedFilterSettings');
+                
+                if (autoRemoveCheckbox && watchedFilterSettings) {
+                    watchedFilterSettings.style.display = autoRemoveCheckbox.checked ? 'block' : 'none';
+                }
+            }
+
             function saveConfig(e) {
                 e.preventDefault();
                 Dashboard.showLoadingMsg();
@@ -371,6 +406,9 @@
                     randomRowOrder: document.getElementById('randomRowOrder').checked,
                     lazyLoadRows: document.getElementById('lazyLoadRows').checked,
                     replaceHeartWithPlus: document.getElementById('replaceHeartWithPlus').checked,
+                    autoRemoveWatchedFromMyList: document.getElementById('autoRemoveWatchedFromMyList').checked,
+                    watchedThresholdPercentage: parseInt(document.getElementById('watchedThresholdPercentage').value) || 95,
+                    requireCompleteSeriesWatch: document.getElementById('requireCompleteSeriesWatch').checked,
                     enabledGenres: [],
                     blacklistedGenres: [],
                     genreDisplayNames: {},
@@ -420,6 +458,12 @@
                         document.getElementById('randomRowOrder').checked = config.randomRowOrder === true;
                         document.getElementById('lazyLoadRows').checked = config.lazyLoadRows !== false;
                         document.getElementById('replaceHeartWithPlus').checked = config.replaceHeartWithPlus !== false;
+                        document.getElementById('autoRemoveWatchedFromMyList').checked = config.autoRemoveWatchedFromMyList === true;
+                        document.getElementById('watchedThresholdPercentage').value = config.watchedThresholdPercentage || 95;
+                        document.getElementById('requireCompleteSeriesWatch').checked = config.requireCompleteSeriesWatch !== false;
+                        
+                        // Toggle visibility of watched filter settings
+                        toggleWatchedFilterSettings();
                         
                         // Load genres
                         if (config.enabledGenres && Array.isArray(config.enabledGenres)) {
@@ -439,7 +483,15 @@
                 console.log('DOM loaded, initializing...');
                 setupTabs();
                 loadConfig();
+                
+                // Setup event listeners
                 document.querySelector('#btnSaveConfig').addEventListener("click", saveConfig);
+                
+                // Setup toggle for watched filter settings
+                const autoRemoveCheckbox = document.getElementById('autoRemoveWatchedFromMyList');
+                if (autoRemoveCheckbox) {
+                    autoRemoveCheckbox.addEventListener('change', toggleWatchedFilterSettings);
+                }
             });
             
             // Also initialize on pageshow for Jellyfin compatibility

@@ -1,0 +1,23 @@
+{
+  "maxRows": 8,
+  "minItemsPerRow": 10,
+  "maxItemsPerRow": 25,
+  "enableMyList": true,
+  "enableRecentlyAdded": true,
+  "enableRandomPicks": true,
+  "enableLongNotWatched": true,
+  "enabledGenres": [
+    "Action",
+    "Anime", 
+    "Comedy"
+  ],
+  "blacklistedGenres": [],
+  "genreDisplayNames": {},
+  "recentlyAddedDays": 30,
+  "longNotWatchedMonths": 6,
+  "minGenreItems": 5,
+  "myListLimit": 50,
+  "randomRowOrder": false,
+  "lazyLoadRows": true,
+  "replaceHeartWithPlus": true
+}

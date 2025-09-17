@@ -1,0 +1,1519 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Jellyfin.Plugin.NetflixRows</name>
+    </assembly>
+    <members>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration">
+            <summary>
+            Comprehensive configuration settings for the Netflix Rows plugin.
+            </summary>
+            <remarks>
+            <para><strong>Overview:</strong></para>
+            <para>
+            This configuration class manages all user-customizable settings for the Netflix Rows plugin,
+            enabling administrators to fine-tune the streaming experience for their Jellyfin instance.
+            </para>
+            
+            <para><strong>Configuration Categories:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Row Management:</strong> Control which content sections are displayed</description></item>
+            <item><description><strong>Content Limits:</strong> Set maximum items per row and overall limits</description></item>
+            <item><description><strong>Genre Configuration:</strong> Customize genre-based content organization</description></item>
+            <item><description><strong>Performance Options:</strong> Optimize loading behavior and resource usage</description></item>
+            <item><description><strong>UI Customization:</strong> Adjust visual elements and user interface behavior</description></item>
+            </list>
+            
+            <para><strong>Persistence:</strong></para>
+            <para>
+            Configuration is automatically persisted to disk by Jellyfin's configuration system.
+            Changes take effect immediately without requiring a server restart.
+            </para>
+            
+            <para><strong>Default Values:</strong></para>
+            <para>
+            The configuration initializes with sensible defaults optimized for most Jellyfin installations,
+            balancing functionality with performance across different device types and library sizes.
+            </para>
+            
+            <para><strong>Thread Safety:</strong></para>
+            <para>
+            This configuration class uses thread-safe Collection&lt;T&gt; for list properties to ensure
+            safe concurrent access during configuration updates and content retrieval operations.
+            </para>
+            </remarks>
+            <example>
+            <para><strong>Basic Configuration Example:</strong></para>
+            <code>
+            var config = new PluginConfiguration
+            {
+                // Enable core sections
+                EnableMyList = true,
+                EnableRecentlyAdded = true,
+                EnableRandomPicks = true,
+                
+                // Set content limits
+                MaxItemsPerRow = 25,
+                MyListLimit = 50,
+                
+                // Configure genres
+                EnabledGenres = { "Action", "Comedy", "Drama", "Sci-Fi" },
+                
+                // Performance optimization
+                LazyLoadRows = true
+            };
+            </code>
+            
+            <para><strong>Advanced Configuration Example:</strong></para>
+            <code>
+            var advancedConfig = new PluginConfiguration
+            {
+                // Customize display behavior
+                MaxRows = 10,
+                RandomRowOrder = true,
+                ReplaceHeartWithPlus = false,
+                
+                // Fine-tune content filtering
+                RecentlyAddedDays = 14,
+                LongNotWatchedMonths = 3,
+                MinGenreItems = 10,
+                
+                // Genre management
+                EnabledGenres = { "Action", "Adventure", "Animation", "Comedy", "Crime" },
+                BlacklistedGenres = { "Adult", "Erotic" }
+            };
+            </code>
+            </example>
+            <seealso cref="T:MediaBrowser.Model.Plugins.BasePluginConfiguration"/>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration"/> class with optimal default settings.
+            </summary>
+            <remarks>
+            <para><strong>Default Configuration Strategy:</strong></para>
+            <para>
+            The default configuration is designed to provide an immediate, high-quality Netflix-like experience
+            for most Jellyfin installations without requiring extensive customization.
+            </para>
+            
+            <para><strong>Performance Considerations:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Row Limits:</strong> Balanced to provide good content discovery without overwhelming slower devices</description></item>
+            <item><description><strong>Lazy Loading:</strong> Enabled by default to improve initial page load times</description></item>
+            <item><description><strong>Genre Selection:</strong> Limited to popular genres to avoid UI clutter</description></item>
+            <item><description><strong>Content Limits:</strong> Set to reasonable defaults that work well with typical media libraries</description></item>
+            </list>
+            
+            <para><strong>User Experience Defaults:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Core Sections Enabled:</strong> My List, Recently Added, Random Picks for immediate value</description></item>
+            <item><description><strong>Heart to Plus Icon:</strong> Enabled for more intuitive "add to list" behavior</description></item>
+            <item><description><strong>Content Discovery:</strong> Balanced between showing new content and long-term library exploration</description></item>
+            </list>
+            
+            <para><strong>Customization Ready:</strong></para>
+            <para>
+            All defaults can be easily modified through the admin configuration interface,
+            allowing administrators to tailor the experience to their specific needs and user preferences.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Default configuration provides these settings:
+            // - Max 8 rows displayed
+            // - 10-25 items per row
+            // - My List, Recently Added, Random Picks enabled
+            // - Popular genres: Action, Anime, Comedy
+            // - Recently Added = last 30 days
+            // - Long Not Watched = 6+ months
+            // - Lazy loading enabled for performance
+            
+            var config = new PluginConfiguration();
+            // Ready to use with sensible defaults
+            </code>
+            </example>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MaxRows">
+            <summary>
+            Gets or sets the maximum number of rows to display.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MinItemsPerRow">
+            <summary>
+            Gets or sets the minimum items per row.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MaxItemsPerRow">
+            <summary>
+            Gets or sets the maximum number of content items displayed in each horizontal row.
+            </summary>
+            <value>
+            The maximum number of items per row. Valid range: 1-100. Default: 25.
+            </value>
+            <remarks>
+            <para><strong>Performance Impact:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Lower Values (10-20):</strong> Better for mobile devices and slower connections</description></item>
+            <item><description><strong>Medium Values (20-35):</strong> Optimal for most desktop and tablet users</description></item>
+            <item><description><strong>Higher Values (35-50):</strong> Best for large screens and fast connections</description></item>
+            <item><description><strong>Very High Values (50+):</strong> May impact performance, use cautiously</description></item>
+            </list>
+            
+            <para><strong>User Experience Considerations:</strong></para>
+            <para>
+            Higher values provide more content discovery options but may overwhelm users.
+            Lower values create a cleaner interface but may limit content exploration.
+            </para>
+            
+            <para><strong>Responsive Behavior:</strong></para>
+            <para>
+            The actual number of visible items will automatically adjust based on screen size,
+            but this setting controls the total number of items loaded and available for scrolling.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Mobile-optimized setting
+            config.MaxItemsPerRow = 15;
+            
+            // Desktop-optimized setting
+            config.MaxItemsPerRow = 30;
+            
+            // Large screen/high-performance setting
+            config.MaxItemsPerRow = 50;
+            </code>
+            </example>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.EnableMyList">
+            <summary>
+            Gets or sets a value indicating whether "My List" row is enabled.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.EnableRecentlyAdded">
+            <summary>
+            Gets or sets a value indicating whether "Recently Added" row is enabled.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.EnableRandomPicks">
+            <summary>
+            Gets or sets a value indicating whether "Random Picks" row is enabled.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.EnableLongNotWatched">
+            <summary>
+            Gets or sets a value indicating whether "Long Not Watched" row is enabled.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.EnabledGenres">
+            <summary>
+            Gets the collection of genre names that will be displayed as individual content rows.
+            </summary>
+            <value>
+            A thread-safe collection of genre strings. Each genre creates a dedicated horizontal row.
+            </value>
+            <remarks>
+            <para><strong>Genre Row Creation:</strong></para>
+            <para>
+            Each genre in this collection generates a separate horizontal row containing content
+            that matches the specified genre. Genres must exactly match those defined in your
+            Jellyfin media library metadata.
+            </para>
+            
+            <para><strong>Performance Considerations:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Too Many Genres:</strong> Can slow down page loading and overwhelm users</description></item>
+            <item><description><strong>Popular Genres:</strong> Action, Comedy, Drama typically have the most content</description></item>
+            <item><description><strong>Specialized Genres:</strong> Anime, Documentary, Horror may have limited content</description></item>
+            </list>
+            
+            <para><strong>Content Filtering:</strong></para>
+            <para>
+            Only genres with at least <see cref="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MinGenreItems"/> items will be displayed.
+            Empty genre rows are automatically hidden to maintain a clean interface.
+            </para>
+            
+            <para><strong>Common Genre Names:</strong></para>
+            <list type="bullet">
+            <item><description>Action, Adventure, Animation, Comedy, Crime</description></item>
+            <item><description>Documentary, Drama, Family, Fantasy, Horror</description></item>
+            <item><description>Music, Mystery, Romance, Sci-Fi, Thriller</description></item>
+            <item><description>War, Western, Anime, Biography, History</description></item>
+            </list>
+            
+            <para><strong>Thread Safety:</strong></para>
+            <para>
+            This collection is thread-safe and can be safely modified during runtime.
+            Changes take effect immediately for new page loads.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Basic genre configuration
+            config.EnabledGenres.Clear();
+            config.EnabledGenres.Add("Action");
+            config.EnabledGenres.Add("Comedy");
+            config.EnabledGenres.Add("Drama");
+            
+            // Comprehensive genre setup
+            var popularGenres = new[] {
+                "Action", "Adventure", "Animation", "Comedy", "Crime",
+                "Documentary", "Drama", "Family", "Fantasy", "Horror",
+                "Music", "Mystery", "Romance", "Sci-Fi", "Thriller"
+            };
+            foreach (var genre in popularGenres)
+            {
+                config.EnabledGenres.Add(genre);
+            }
+            
+            // Specialized collection for anime fans
+            config.EnabledGenres.Add("Anime");
+            config.EnabledGenres.Add("Animation");
+            config.EnabledGenres.Add("Adventure");
+            </code>
+            </example>
+            <seealso cref="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.BlacklistedGenres"/>
+            <seealso cref="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MinGenreItems"/>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.BlacklistedGenres">
+            <summary>
+            Gets the list of blacklisted genres.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.RecentlyAddedDays">
+            <summary>
+            Gets or sets the number of days for "Recently Added" definition.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.LongNotWatchedMonths">
+            <summary>
+            Gets or sets the number of months for "Long Not Watched" definition.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MinGenreItems">
+            <summary>
+            Gets or sets the minimum number of items a genre must have to be displayed.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MyListLimit">
+            <summary>
+            Gets or sets the maximum number of items in "My List".
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.RandomRowOrder">
+            <summary>
+            Gets or sets a value indicating whether row order should be randomized.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.LazyLoadRows">
+            <summary>
+            Gets or sets a value indicating whether content rows should be loaded on-demand for optimal performance.
+            </summary>
+            <value>
+            <c>true</c> to enable lazy loading (recommended); <c>false</c> to load all content immediately. Default: <c>true</c>.
+            </value>
+            <remarks>
+            <para><strong>Lazy Loading Benefits:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Faster Initial Load:</strong> Home page appears quickly without waiting for all content</description></item>
+            <item><description><strong>Reduced Server Load:</strong> Only visible content is fetched initially</description></item>
+            <item><description><strong>Better Mobile Experience:</strong> Significant improvement on slower mobile connections</description></item>
+            <item><description><strong>Scalable Performance:</strong> Works well with large media libraries</description></item>
+            </list>
+            
+            <para><strong>When to Disable:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Small Libraries:</strong> If you have a limited number of items, immediate loading may be preferable</description></item>
+            <item><description><strong>High-Speed Networks:</strong> On very fast local networks, the loading delay might be unnecessary</description></item>
+            <item><description><strong>Debug/Testing:</strong> For troubleshooting content loading issues</description></item>
+            </list>
+            
+            <para><strong>Technical Implementation:</strong></para>
+            <para>
+            When enabled, rows are loaded as they come into the viewport during scrolling.
+            Content that's not immediately visible is fetched in the background, providing
+            a smooth browsing experience without sacrificing performance.
+            </para>
+            
+            <para><strong>User Experience:</strong></para>
+            <para>
+            With lazy loading enabled, users see the page load quickly and can immediately
+            interact with the first few rows while additional content loads seamlessly.
+            This creates a responsive, modern streaming platform experience.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Recommended for most installations
+            config.LazyLoadRows = true;
+            
+            // For small libraries or high-speed local networks
+            config.LazyLoadRows = false;
+            
+            // Dynamic configuration based on library size
+            if (totalMediaItems > 1000)
+            {
+                config.LazyLoadRows = true;  // Large library benefits from lazy loading
+            }
+            else
+            {
+                config.LazyLoadRows = false; // Small library can load immediately
+            }
+            </code>
+            </example>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.ReplaceHeartWithPlus">
+            <summary>
+            Gets or sets a value indicating whether heart buttons should be replaced with plus icons.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.MyListCount">
+            <summary>
+            Gets or sets the number of items in My List row.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.RecentlyAddedCount">
+            <summary>
+            Gets or sets the number of items in Recently Added row.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.RandomPicksCount">
+            <summary>
+            Gets or sets the number of items in Random Picks row.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.AutoRemoveWatchedFromMyList">
+            <summary>
+            Gets or sets a value indicating whether watched items should be automatically removed from My List.
+            </summary>
+            <value>
+            <c>true</c> to automatically hide watched content from My List; <c>false</c> to show all favorites regardless of watch status. Default: <c>false</c>.
+            </value>
+            <remarks>
+            <para><strong>Smart Filtering Behavior:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Movies:</strong> Hidden when watch percentage exceeds <see cref="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.WatchedThresholdPercentage"/></description></item>
+            <item><description><strong>Series:</strong> Hidden when all episodes are watched (if <see cref="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.RequireCompleteSeriesWatch"/> is true)</description></item>
+            <item><description><strong>User Control:</strong> Users can re-favorite items to add them back to My List</description></item>
+            </list>
+            
+            <para><strong>Use Cases:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Active Discovery:</strong> Keep My List focused on unwatched content</description></item>
+            <item><description><strong>Clean Interface:</strong> Automatically maintain a curated watchlist</description></item>
+            <item><description><strong>Continued Watching:</strong> Show only content that needs completion</description></item>
+            </list>
+            
+            <para><strong>Performance Impact:</strong></para>
+            <para>
+            When enabled, the system loads additional items to ensure the requested number of visible
+            items after filtering. This may slightly increase initial load time but improves user experience.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Enable auto-removal with default settings
+            config.AutoRemoveWatchedFromMyList = true;
+            config.WatchedThresholdPercentage = 95;  // 95% completion = watched
+            config.RequireCompleteSeriesWatch = true; // All episodes must be watched
+            
+            // Strict setting - remove at 100% completion only
+            config.WatchedThresholdPercentage = 100;
+            
+            // Lenient setting - remove at 85% completion
+            config.WatchedThresholdPercentage = 85;
+            </code>
+            </example>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.WatchedThresholdPercentage">
+            <summary>
+            Gets or sets the percentage threshold at which movies are considered "watched" and removed from My List.
+            </summary>
+            <value>
+            The watch percentage threshold (0-100). Default: 95.
+            </value>
+            <remarks>
+            <para><strong>Threshold Selection Guidelines:</strong></para>
+            <list type="bullet">
+            <item><description><strong>95% (Recommended):</strong> Accounts for users who don't watch credits</description></item>
+            <item><description><strong>90%:</strong> More aggressive removal, good for users who often skip endings</description></item>
+            <item><description><strong>100%:</strong> Only remove completely finished content</description></item>
+            <item><description><strong>85%:</strong> Remove content that's substantially watched</description></item>
+            </list>
+            
+            <para><strong>Movie vs Series Behavior:</strong></para>
+            <para>
+            This threshold applies only to movies and individual episodes. For series, the completion
+            is determined by whether all episodes have been watched, regardless of this percentage.
+            </para>
+            
+            <para><strong>User Experience Considerations:</strong></para>
+            <para>
+            A threshold below 100% accounts for real-world viewing behavior where users may not
+            watch credits or may stop slightly before the end. This creates a more natural
+            "watched" experience.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Conservative approach - only remove 100% completed
+            config.WatchedThresholdPercentage = 100;
+            
+            // Netflix-like behavior - remove at 95%
+            config.WatchedThresholdPercentage = 95;
+            
+            // Aggressive cleaning - remove at 85%
+            config.WatchedThresholdPercentage = 85;
+            
+            // Validation example
+            if (config.WatchedThresholdPercentage &lt; 1 || config.WatchedThresholdPercentage &gt; 100)
+            {
+                config.WatchedThresholdPercentage = 95; // Reset to default
+            }
+            </code>
+            </example>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.RequireCompleteSeriesWatch">
+            <summary>
+            Gets or sets a value indicating whether series require all episodes to be watched before removal from My List.
+            </summary>
+            <value>
+            <c>true</c> to require complete series watch for removal; <c>false</c> to remove based on current episode progress. Default: <c>true</c>.
+            </value>
+            <remarks>
+            <para><strong>Series Completion Logic:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Complete Series (true):</strong> All episodes must be watched to remove from My List</description></item>
+            <item><description><strong>Current Progress (false):</strong> Remove based on current episode watch percentage</description></item>
+            </list>
+            
+            <para><strong>Recommended Setting:</strong></para>
+            <para>
+            <c>true</c> is recommended because users typically want to keep series in My List until
+            they've finished the entire show, even if they've completed the current episode.
+            This prevents premature removal of ongoing series.
+            </para>
+            
+            <para><strong>Use Case Examples:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Binge Watchers:</strong> Keep series until completely finished</description></item>
+            <item><description><strong>Episode-by-Episode:</strong> Remove when current episode is done</description></item>
+            <item><description><strong>Seasonal Viewing:</strong> Maintain series across multiple viewing sessions</description></item>
+            </list>
+            
+            <para><strong>Technical Implementation:</strong></para>
+            <para>
+            When true, the system checks if all episodes in the series have UserData.Played = true.
+            When false, it only checks the current episode's watch percentage against the threshold.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Recommended: Keep series until completely finished
+            config.RequireCompleteSeriesWatch = true;
+            
+            // Alternative: Remove based on current episode only
+            config.RequireCompleteSeriesWatch = false;
+            
+            // Combined with threshold for movies
+            config.AutoRemoveWatchedFromMyList = true;
+            config.WatchedThresholdPercentage = 95;
+            config.RequireCompleteSeriesWatch = true;
+            // Result: Movies removed at 95%, series only when completely finished
+            </code>
+            </example>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload">
+            <summary>
+            Payload for Home Screen Section requests.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload.UserId">
+            <summary>
+            Gets or sets the user ID.
+            </summary>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload.AdditionalData">
+            <summary>
+            Gets or sets additional data for the section.
+            </summary>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController">
+            <summary>
+            Netflix Rows API Controller.
+            </summary>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.#ctor(MediaBrowser.Controller.Library.ILibraryManager,MediaBrowser.Controller.Dto.IDtoService,Microsoft.Extensions.Logging.ILogger{Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController},MediaBrowser.Controller.Library.IUserManager)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController"/> class.
+            </summary>
+            <param name="libraryManager">Library manager for accessing media items.</param>
+            <param name="dtoService">DTO service for converting media items.</param>
+            <param name="logger">Logger instance.</param>
+            <param name="userManager">User manager for user operations.</param>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.Test">
+            <summary>
+            Test endpoint to verify the controller is working.
+            </summary>
+            <returns>Test message with current timestamp.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetConfig">
+            <summary>
+            Gets the current plugin configuration.
+            </summary>
+            <returns>The plugin configuration.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.UpdateConfig(Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration)">
+            <summary>
+            Updates the plugin configuration.
+            </summary>
+            <param name="config">The new configuration to apply.</param>
+            <returns>Result of the configuration update.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetMyList(System.Int32,System.Nullable{System.Guid})">
+            <summary>
+            Gets the user's favorite items (My List) with optional filtering of watched content.
+            </summary>
+            <param name="limit">Maximum number of items to return after filtering.</param>
+            <param name="userId">Optional user ID, uses current user if not provided.</param>
+            <returns>Query result containing the user's favorite items, optionally filtered to exclude watched content.</returns>
+            <remarks>
+            <para><strong>Auto-Remove Watched Feature:</strong></para>
+            <para>
+            When <see cref="P:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration.AutoRemoveWatchedFromMyList"/> is enabled, this method
+            intelligently filters out watched content based on configurable thresholds:
+            </para>
+            <list type="bullet">
+            <item><description><strong>Movies:</strong> Removed when watch percentage exceeds threshold</description></item>
+            <item><description><strong>Series:</strong> Removed when all episodes are completed (configurable)</description></item>
+            <item><description><strong>Performance:</strong> Loads extra items to ensure sufficient unwatched content</description></item>
+            </list>
+            
+            <para><strong>Filtering Logic:</strong></para>
+            <para>
+            The system uses Jellyfin's UserData.PlayedPercentage and UserData.Played properties
+            to determine watch status. This integrates seamlessly with Jellyfin's existing
+            progress tracking without requiring additional data storage.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.FilterWatchedItems(MediaBrowser.Model.Dto.BaseItemDto[],Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration)">
+            <summary>
+            Filters out watched items from a collection based on plugin configuration.
+            </summary>
+            <param name="items">The collection of items to filter.</param>
+            <param name="config">The plugin configuration containing filter settings.</param>
+            <returns>An enumerable of items that are not considered watched.</returns>
+            <remarks>
+            <para><strong>Filtering Logic:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Movies:</strong> Filtered based on PlayedPercentage vs WatchedThresholdPercentage</description></item>
+            <item><description><strong>Series:</strong> Filtered based on RequireCompleteSeriesWatch setting</description></item>
+            <item><description><strong>Unknown Types:</strong> Not filtered, returned as-is</description></item>
+            </list>
+            
+            <para><strong>Performance Considerations:</strong></para>
+            <para>
+            This method is designed to be efficient for typical My List sizes. For very large
+            favorite lists, consider implementing database-level filtering in future versions.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetRecentlyAdded(System.Int32)">
+            <summary>
+            Gets recently added items.
+            </summary>
+            <param name="limit">Maximum number of items to return.</param>
+            <returns>Query result containing recently added items.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetRandomPicks(System.Int32)">
+            <summary>
+            Gets random picks from the media library.
+            </summary>
+            <param name="limit">Maximum number of items to return.</param>
+            <returns>Query result containing random media items.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetGenre(System.String,System.Int32)">
+            <summary>
+            Gets items from a specific genre.
+            </summary>
+            <param name="genre">The genre name to filter by.</param>
+            <param name="limit">Maximum number of items to return.</param>
+            <returns>Query result containing items from the specified genre.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetScript">
+            <summary>
+            Serves the Netflix Rows JavaScript file.
+            </summary>
+            <returns>JavaScript content for Netflix Rows functionality.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetMyListSection(Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload)">
+            <summary>
+            Gets the My List section for Home Screen Sections.
+            </summary>
+            <returns>Section data for My List.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetRecentlyAddedSection(Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload)">
+            <summary>
+            Gets the Recently Added section for Home Screen Sections.
+            </summary>
+            <returns>Section data for Recently Added.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetRandomPicksSection(Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload)">
+            <summary>
+            Gets the Random Picks section for Home Screen Sections.
+            </summary>
+            <returns>Section data for Random Picks.</returns>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController.GetGenreSection(Jellyfin.Plugin.NetflixRows.Controllers.HomeScreenSectionPayload)">
+            <summary>
+            Gets a genre section for Home Screen Sections.
+            </summary>
+            <returns>Section data for the specified genre from additionalData.</returns>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Plugin">
+            <summary>
+            Netflix Rows Plugin for Jellyfin - Transforms the home screen with Netflix-style horizontal content rows.
+            </summary>
+            <remarks>
+            This plugin provides a Netflix-like streaming experience by:
+            <list type="bullet">
+            <item><description>Creating horizontal scrolling content rows</description></item>
+            <item><description>Organizing content by categories (My List, Recently Added, Genres, etc.)</description></item>
+            <item><description>Integrating with Jellyfin's File Transformation and Home Screen Sections plugins</description></item>
+            <item><description>Providing responsive design for all device types</description></item>
+            <item><description>Supporting theme integration and accessibility</description></item>
+            </list>
+            
+            <para><strong>Architecture Overview:</strong></para>
+            <para>
+            The plugin follows a modular architecture with three main components:
+            </para>
+            <list type="number">
+            <item><description><strong>File Transformation Integration:</strong> Injects CSS and JavaScript for Netflix-style UI</description></item>
+            <item><description><strong>API Controllers:</strong> Provide content endpoints for different row types</description></item>
+            <item><description><strong>Configuration System:</strong> Manages user preferences and display settings</description></item>
+            </list>
+            
+            <para><strong>Dependencies:</strong></para>
+            <list type="bullet">
+            <item><description>File Transformation Plugin (required for UI styling)</description></item>
+            <item><description>Home Screen Sections Plugin (optional, for enhanced integration)</description></item>
+            </list>
+            
+            <para><strong>Performance Considerations:</strong></para>
+            <para>
+            This plugin is optimized for performance with:
+            </para>
+            <list type="bullet">
+            <item><description>LoggerMessage delegates for high-performance logging</description></item>
+            <item><description>Async operations with ConfigureAwait(false)</description></item>
+            <item><description>Efficient resource disposal patterns</description></item>
+            <item><description>Lazy loading for content sections</description></item>
+            </list>
+            </remarks>
+            <example>
+            <para><strong>Usage Example:</strong></para>
+            <code>
+            // Plugin automatically registers during Jellyfin startup
+            // Access configuration via Admin Dashboard → Plugins → Netflix Rows
+            
+            // API endpoints are available at:
+            // GET /NetflixRows/Test - Health check
+            // GET /NetflixRows/Config - Current configuration
+            // POST /NetflixRows/MyListSection - My List content
+            // POST /NetflixRows/RecentlyAddedSection - Recently added content
+            </code>
+            </example>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Plugin.Instance">
+            <summary>
+            Gets the current plugin instance for global access throughout the application.
+            </summary>
+            <value>
+            The singleton instance of the Netflix Rows plugin, or <c>null</c> if the plugin hasn't been initialized yet.
+            </value>
+            <remarks>
+            This static property provides access to the plugin instance from anywhere in the application,
+            particularly useful for:
+            <list type="bullet">
+            <item><description>Accessing configuration settings from controllers</description></item>
+            <item><description>Checking plugin availability from other components</description></item>
+            <item><description>Debugging and diagnostic purposes</description></item>
+            </list>
+            
+            <para><strong>Thread Safety:</strong> This property is thread-safe for reads but should only be set during plugin initialization.</para>
+            </remarks>
+            <example>
+            <code>
+            // Access plugin configuration from anywhere
+            var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
+            
+            // Check if plugin is available
+            if (Plugin.Instance != null)
+            {
+                // Plugin is loaded and available
+            }
+            </code>
+            </example>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Plugin.#ctor(MediaBrowser.Common.Configuration.IApplicationPaths,MediaBrowser.Model.Serialization.IXmlSerializer,Microsoft.Extensions.Logging.ILogger{Jellyfin.Plugin.NetflixRows.Plugin})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Jellyfin.Plugin.NetflixRows.Plugin"/> class with required dependencies.
+            </summary>
+            <param name="applicationPaths">
+            Application paths interface providing access to Jellyfin's directory structure.
+            Used for locating configuration files and plugin resources.
+            </param>
+            <param name="xmlSerializer">
+            XML serialization interface for reading and writing plugin configuration.
+            Handles serialization of <see cref="T:Jellyfin.Plugin.NetflixRows.Configuration.PluginConfiguration"/> objects.
+            </param>
+            <param name="logger">
+            Logger instance for recording plugin activities, errors, and diagnostic information.
+            Uses high-performance LoggerMessage delegates for optimal performance.
+            </param>
+            <remarks>
+            <para><strong>Initialization Process:</strong></para>
+            <list type="number">
+            <item><description>Sets the singleton Instance property for global access</description></item>
+            <item><description>Initializes logging with performance-optimized LoggerMessage delegates</description></item>
+            <item><description>Asynchronously registers File Transformation for CSS/JS injection</description></item>
+            <item><description>Asynchronously registers sections with Home Screen Sections plugin</description></item>
+            </list>
+            
+            <para><strong>Error Handling:</strong></para>
+            <para>
+            The constructor uses fire-and-forget async operations for plugin integrations.
+            Failures in these operations are logged but don't prevent plugin initialization,
+            allowing the plugin to function in degraded mode if dependencies are unavailable.
+            </para>
+            
+            <para><strong>Performance Considerations:</strong></para>
+            <para>
+            Plugin registration operations run asynchronously to avoid blocking Jellyfin startup.
+            This ensures fast server startup times even if external plugins are slow to respond.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Plugin is automatically instantiated by Jellyfin during server startup
+            // Manual instantiation is not typically required, but would look like:
+            
+            var plugin = new Plugin(applicationPaths, xmlSerializer, logger);
+            // Plugin.Instance is now available globally
+            </code>
+            </example>
+            <exception cref="T:System.ArgumentNullException">
+            Thrown when any of the required parameters (<paramref name="applicationPaths"/>, 
+            <paramref name="xmlSerializer"/>, or <paramref name="logger"/>) are <c>null</c>.
+            </exception>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Plugin.Name">
+            <summary>
+            Gets the human-readable name of the plugin as displayed in the Jellyfin admin interface.
+            </summary>
+            <value>The display name "Netflix Rows" for the plugin.</value>
+            <remarks>
+            This name appears in:
+            <list type="bullet">
+            <item><description>Admin Dashboard → Plugins → My Plugins</description></item>
+            <item><description>Plugin configuration pages</description></item>
+            <item><description>Log entries and error messages</description></item>
+            <item><description>Plugin repository listings</description></item>
+            </list>
+            </remarks>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Plugin.Id">
+            <summary>
+            Gets the unique identifier for this plugin instance.
+            </summary>
+            <value>A unique GUID that identifies this plugin across all Jellyfin installations.</value>
+            <remarks>
+            <para><strong>Important:</strong> This GUID must remain constant across all versions of the plugin
+            to ensure proper plugin updates and configuration persistence.</para>
+            
+            <para>This identifier is used for:</para>
+            <list type="bullet">
+            <item><description>Plugin registration and discovery</description></item>
+            <item><description>Configuration file management</description></item>
+            <item><description>Update detection and compatibility checking</description></item>
+            <item><description>Dependency resolution between plugins</description></item>
+            </list>
+            
+            <para><strong>Format:</strong> Standard GUID format (8-4-4-4-12 hexadecimal digits)</para>
+            </remarks>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Plugin.Description">
+            <summary>
+            Gets a comprehensive description of the plugin's functionality and features.
+            </summary>
+            <value>
+            A detailed description explaining how the plugin transforms Jellyfin into a Netflix-like experience.
+            </value>
+            <remarks>
+            This description is displayed in:
+            <list type="bullet">
+            <item><description>Plugin catalog listings</description></item>
+            <item><description>Plugin repository metadata</description></item>
+            <item><description>Admin dashboard plugin details</description></item>
+            <item><description>Installation and update dialogs</description></item>
+            </list>
+            
+            <para>The description should be concise yet informative, highlighting key features that differentiate
+            this plugin from others in the ecosystem.</para>
+            </remarks>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Plugin.GetPages">
+            <summary>
+            Provides configuration pages for the plugin's admin interface.
+            </summary>
+            <returns>
+            An enumerable collection of <see cref="T:MediaBrowser.Model.Plugins.PluginPageInfo"/> objects describing the available configuration pages.
+            </returns>
+            <remarks>
+            <para><strong>Configuration Page Features:</strong></para>
+            <list type="bullet">
+            <item><description>Enable/disable different content sections (My List, Recently Added, etc.)</description></item>
+            <item><description>Configure content limits and display preferences</description></item>
+            <item><description>Customize genre selections and display names</description></item>
+            <item><description>Adjust performance and responsive design settings</description></item>
+            </list>
+            
+            <para><strong>Technical Implementation:</strong></para>
+            <para>
+            The configuration page is served as an embedded HTML resource from the plugin assembly.
+            It uses JavaScript to interact with the plugin's API endpoints for real-time configuration updates.
+            </para>
+            
+            <para><strong>Security Considerations:</strong></para>
+            <para>
+            Access to configuration pages is restricted to administrators and requires proper authentication
+            through Jellyfin's built-in security system.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Configuration page is automatically registered and accessible at:
+            // http://your-server:8096/web/configurationpage?name=NetflixRowsConfigPage
+            
+            // The page provides a user-friendly interface for settings like:
+            var configExample = new PluginConfiguration
+            {
+                EnableMyList = true,
+                EnableRecentlyAdded = true,
+                MaxItemsPerRow = 25,
+                EnabledGenres = new[] { "Action", "Comedy", "Drama" }
+            };
+            </code>
+            </example>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.PluginServiceRegistrator">
+            <summary>
+            Service registrator for the Netflix Rows plugin, responsible for dependency injection configuration.
+            </summary>
+            <remarks>
+            <para><strong>Purpose:</strong></para>
+            <para>
+            This class implements Jellyfin's plugin service registration interface to properly configure
+            dependency injection for the Netflix Rows plugin. It ensures that all plugin services are
+            correctly registered in Jellyfin's DI container and available throughout the application lifecycle.
+            </para>
+            
+            <para><strong>Service Registration Strategy:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Controller Registration:</strong> Registers API controllers as singletons for optimal performance</description></item>
+            <item><description><strong>Lifecycle Management:</strong> Ensures proper service lifecycle aligned with Jellyfin's architecture</description></item>
+            <item><description><strong>Dependency Resolution:</strong> Enables automatic dependency injection for plugin components</description></item>
+            </list>
+            
+            <para><strong>Architecture Integration:</strong></para>
+            <para>
+            This registrator integrates the Netflix Rows plugin seamlessly into Jellyfin's service architecture,
+            ensuring that all plugin components can leverage Jellyfin's built-in services (logging, library management,
+            user management, etc.) through constructor injection.
+            </para>
+            
+            <para><strong>Performance Considerations:</strong></para>
+            <para>
+            Services are registered as singletons where appropriate to minimize object creation overhead
+            and ensure consistent state management across requests. This is particularly important for
+            API controllers that handle multiple concurrent requests.
+            </para>
+            
+            <para><strong>Plugin Lifecycle:</strong></para>
+            <para>
+            Service registration occurs during Jellyfin's startup phase, ensuring all plugin services
+            are available before any plugin functionality is invoked. This guarantees reliable operation
+            and proper initialization order.
+            </para>
+            </remarks>
+            <example>
+            <para><strong>Service Registration Flow:</strong></para>
+            <code>
+            // Jellyfin automatically calls this during plugin initialization:
+            // 1. Plugin discovery phase
+            // 2. Service registration phase (this class)
+            // 3. Plugin activation phase
+            // 4. Service resolution and dependency injection
+            
+            // Example of how registered services are used:
+            public class NetflixRowsController : ControllerBase
+            {
+                // These dependencies are automatically injected by Jellyfin's DI container
+                public NetflixRowsController(
+                    ILibraryManager libraryManager,    // Jellyfin core service
+                    IDtoService dtoService,             // Jellyfin core service
+                    ILogger&lt;NetflixRowsController&gt; logger // Jellyfin logging service
+                ) { ... }
+            }
+            </code>
+            </example>
+            <seealso cref="T:MediaBrowser.Controller.Plugins.IPluginServiceRegistrator"/>
+            <seealso cref="T:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController"/>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.PluginServiceRegistrator.RegisterServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,MediaBrowser.Controller.IServerApplicationHost)">
+            <summary>
+            Registers plugin services in Jellyfin's dependency injection container.
+            </summary>
+            <param name="serviceCollection">
+            The service collection to register services with. This is Jellyfin's main DI container
+            that manages service lifetimes and dependency resolution throughout the application.
+            </param>
+            <param name="applicationHost">
+            The server application host providing access to Jellyfin's core services and configuration.
+            This parameter can be used to access server-wide settings and services during registration.
+            </param>
+            <remarks>
+            <para><strong>Service Registration Process:</strong></para>
+            <list type="number">
+            <item><description><strong>Controller Registration:</strong> Registers the main API controller as a singleton</description></item>
+            <item><description><strong>Lifecycle Configuration:</strong> Ensures proper service lifetime management</description></item>
+            <item><description><strong>Dependency Validation:</strong> Verifies that all required dependencies are available</description></item>
+            </list>
+            
+            <para><strong>Singleton Pattern Rationale:</strong></para>
+            <para>
+            The NetflixRowsController is registered as a singleton because:
+            </para>
+            <list type="bullet">
+            <item><description><strong>Stateless Operation:</strong> The controller doesn't maintain request-specific state</description></item>
+            <item><description><strong>Performance:</strong> Avoids object creation overhead for each request</description></item>
+            <item><description><strong>Resource Efficiency:</strong> Minimizes memory allocation and garbage collection</description></item>
+            <item><description><strong>Thread Safety:</strong> Controller methods are designed to be thread-safe</description></item>
+            </list>
+            
+            <para><strong>Dependency Injection Benefits:</strong></para>
+            <para>
+            By registering services through DI, the plugin benefits from:
+            </para>
+            <list type="bullet">
+            <item><description><strong>Automatic Resolution:</strong> Jellyfin automatically injects required dependencies</description></item>
+            <item><description><strong>Lifecycle Management:</strong> Services are properly disposed when no longer needed</description></item>
+            <item><description><strong>Testability:</strong> Easy to mock dependencies for unit testing</description></item>
+            <item><description><strong>Consistency:</strong> Same service instances used throughout the application</description></item>
+            </list>
+            
+            <para><strong>Error Handling:</strong></para>
+            <para>
+            If service registration fails, Jellyfin will log the error and continue startup,
+            but the plugin functionality will be unavailable. This fail-safe approach ensures
+            that plugin issues don't crash the entire Jellyfin server.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // This method is called automatically by Jellyfin during startup
+            // The registration enables dependency injection like this:
+            
+            // In the controller, dependencies are automatically injected:
+            public NetflixRowsController(
+                ILibraryManager libraryManager,     // ← Automatically injected by Jellyfin
+                IDtoService dtoService,              // ← Automatically injected by Jellyfin
+                ILogger&lt;NetflixRowsController&gt; logger // ← Automatically injected by Jellyfin
+            )
+            {
+                // Controller can immediately use these injected services
+                _libraryManager = libraryManager;
+                _dtoService = dtoService;
+                _logger = logger;
+            }
+            
+            // Alternative registration patterns (not used in this plugin):
+            // serviceCollection.AddTransient&lt;IService, ServiceImpl&gt;(); // New instance per request
+            // serviceCollection.AddScoped&lt;IService, ServiceImpl&gt;();    // One instance per request scope
+            // serviceCollection.AddSingleton&lt;IService, ServiceImpl&gt;(); // One instance for application lifetime
+            </code>
+            </example>
+            <exception cref="T:System.ArgumentNullException">
+            Thrown if <paramref name="serviceCollection"/> is null, indicating a serious
+            Jellyfin startup issue that would prevent proper plugin initialization.
+            </exception>
+            <seealso cref="T:Microsoft.Extensions.DependencyInjection.ServiceLifetime"/>
+            <seealso cref="T:Jellyfin.Plugin.NetflixRows.Controllers.NetflixRowsController"/>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation">
+            <summary>
+            CSS transformation service for injecting Netflix-style visual enhancements into Jellyfin's web interface.
+            </summary>
+            <remarks>
+            <para><strong>Purpose:</strong></para>
+            <para>
+            This transformation class is responsible for injecting comprehensive CSS styling that transforms
+            Jellyfin's default interface into a Netflix-like streaming experience. It integrates seamlessly
+            with Jellyfin's existing themes while adding modern, responsive design elements.
+            </para>
+            
+            <para><strong>Integration Mechanism:</strong></para>
+            <para>
+            The transformation works through Jellyfin's File Transformation plugin, which allows runtime
+            modification of CSS files served to the browser. This ensures compatibility with Jellyfin updates
+            and doesn't require modifying core Jellyfin files.
+            </para>
+            
+            <para><strong>CSS Features Included:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Netflix-Style Rows:</strong> Horizontal scrolling content containers with smooth animations</description></item>
+            <item><description><strong>Card-Based Design:</strong> Modern content cards with hover effects and interactive elements</description></item>
+            <item><description><strong>Responsive Layout:</strong> Mobile-first design that scales beautifully across all device sizes</description></item>
+            <item><description><strong>Theme Integration:</strong> Automatic adaptation to Jellyfin's dark/light theme switching</description></item>
+            <item><description><strong>Accessibility Support:</strong> High contrast mode, reduced motion, and keyboard navigation support</description></item>
+            <item><description><strong>Performance Optimization:</strong> Hardware-accelerated animations and efficient loading states</description></item>
+            </list>
+            
+            <para><strong>Browser Compatibility:</strong></para>
+            <para>
+            The generated CSS supports all modern browsers including Chrome, Firefox, Safari, Edge,
+            and mobile browsers. It gracefully degrades on older browsers while maintaining core functionality.
+            </para>
+            
+            <para><strong>Performance Considerations:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Lightweight CSS:</strong> Optimized selectors and minimal overhead</description></item>
+            <item><description><strong>CSS Animations:</strong> Hardware-accelerated transforms for smooth performance</description></item>
+            <item><description><strong>Responsive Images:</strong> Efficient image loading and scaling</description></item>
+            <item><description><strong>Accessibility Features:</strong> Respects user preferences for reduced motion and high contrast</description></item>
+            </list>
+            </remarks>
+            <example>
+            <para><strong>Usage through File Transformation Plugin:</strong></para>
+            <code>
+            // This transformation is automatically applied by the File Transformation plugin
+            // No manual invocation required - it integrates seamlessly with Jellyfin's CSS loading
+            
+            // The transformation modifies CSS files like this:
+            // Original CSS content + Netflix Rows CSS = Enhanced streaming interface
+            </code>
+            
+            <para><strong>CSS Structure Overview:</strong></para>
+            <code>
+            /* Generated CSS includes these main sections: */
+            .netflix-rows-container     // Main container for all Netflix-style content
+            .netflix-row               // Individual content rows (My List, Recently Added, etc.)
+            .netflix-item-card         // Individual content cards with hover effects
+            .netflix-item-overlay      // Interactive overlay with action buttons
+            
+            /* Responsive breakpoints: */
+            @media (max-width: 768px)   // Tablet and mobile optimizations
+            @media (max-width: 480px)   // Small mobile devices
+            @media (min-width: 1200px)  // Large desktop screens
+            @media (min-width: 1600px)  // Ultra-wide displays
+            
+            /* Accessibility features: */
+            @media (prefers-contrast: high)    // High contrast mode support
+            @media (prefers-reduced-motion)    // Reduced motion preference support
+            </code>
+            </example>
+            <seealso cref="T:Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation"/>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation.TransformCss(Jellyfin.Plugin.NetflixRows.Transformations.TransformData)">
+            <summary>
+            Transforms CSS files by injecting Netflix-style visual enhancements and responsive design elements.
+            </summary>
+            <param name="data">
+            The transformation data containing the original CSS file contents and metadata.
+            This parameter encapsulates the file being transformed and provides context for the modification.
+            </param>
+            <returns>
+            The modified CSS content with Netflix-style enhancements appended to the original CSS.
+            Returns the original content unchanged if transformation fails or input is invalid.
+            </returns>
+            <remarks>
+            <para><strong>Transformation Process:</strong></para>
+            <list type="number">
+            <item><description><strong>Input Validation:</strong> Verifies that transformation data and content are valid</description></item>
+            <item><description><strong>CSS Generation:</strong> Retrieves the comprehensive Netflix-style CSS from embedded resources</description></item>
+            <item><description><strong>Content Injection:</strong> Appends the Netflix CSS to the original file content</description></item>
+            <item><description><strong>Error Handling:</strong> Gracefully handles failures to ensure Jellyfin continues functioning</description></item>
+            </list>
+            
+            <para><strong>Error Handling Strategy:</strong></para>
+            <para>
+            This method follows a fail-safe approach where any transformation errors result in returning
+            the original CSS content unchanged. This ensures that Jellyfin's core functionality is never
+            compromised, even if the Netflix-style enhancements cannot be applied.
+            </para>
+            
+            <para><strong>CSS Injection Technique:</strong></para>
+            <para>
+            The Netflix-style CSS is appended to existing CSS rather than replacing it, ensuring:
+            </para>
+            <list type="bullet">
+            <item><description><strong>Compatibility:</strong> Existing Jellyfin styles remain functional</description></item>
+            <item><description><strong>Extensibility:</strong> Other plugins' CSS modifications are preserved</description></item>
+            <item><description><strong>Upgradability:</strong> Jellyfin updates don't break the Netflix styling</description></item>
+            <item><description><strong>Fallback Support:</strong> If Netflix styles fail to load, base Jellyfin UI remains usable</description></item>
+            </list>
+            
+            <para><strong>Performance Impact:</strong></para>
+            <para>
+            The transformation adds approximately 15-20KB of optimized CSS, which is minimal compared
+            to modern web standards and provides significant UX improvements. The CSS is minified
+            and uses efficient selectors for optimal browser performance.
+            </para>
+            
+            <para><strong>Security Considerations:</strong></para>
+            <para>
+            All CSS content is statically defined and does not include any user input or external resources,
+            ensuring no security vulnerabilities are introduced through the transformation process.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Example transformation workflow (handled automatically by File Transformation plugin):
+            
+            // Input: Original Jellyfin CSS
+            var originalCSS = @"
+                .page-container { margin: 0; padding: 0; }
+                .content-area { background: #000; }
+            ";
+            
+            // Transformation data
+            var transformData = new TransformData 
+            { 
+                Contents = originalCSS,
+                FilePath = "/web/assets/app.css"
+            };
+            
+            // Apply transformation
+            var enhancedCSS = CssTransformation.TransformCss(transformData);
+            
+            // Result: Original CSS + Netflix-style enhancements
+            // enhancedCSS now contains both original styles and Netflix rows styling
+            </code>
+            
+            <para><strong>CSS Output Structure:</strong></para>
+            <code>
+            /* Original Jellyfin CSS (preserved) */
+            .existing-jellyfin-styles { ... }
+            
+            /* Netflix Rows Plugin - Injected CSS */
+            .netflix-rows-container { ... }
+            .netflix-row { ... }
+            .netflix-item-card { ... }
+            /* ... comprehensive Netflix-style enhancements ... */
+            </code>
+            </example>
+            <exception cref="T:System.Text.Json.JsonException">
+            Caught and handled gracefully - returns original content if JSON parsing fails.
+            This exception typically occurs if the transformation data format is unexpected.
+            </exception>
+            <seealso cref="M:Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation.GetNetflixRowsCss"/>
+            <seealso cref="T:Jellyfin.Plugin.NetflixRows.Transformations.TransformData"/>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation">
+            <summary>
+            JavaScript transformation service for injecting Netflix-style interactive functionality into Jellyfin's web interface.
+            </summary>
+            <remarks>
+            <para><strong>Purpose:</strong></para>
+            <para>
+            This transformation class handles the injection of JavaScript code that enhances Jellyfin's web interface
+            with Netflix-like interactive behaviors, lazy loading capabilities, and dynamic content management.
+            It works in conjunction with <see cref="T:Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation"/> to provide a complete Netflix-style experience.
+            </para>
+            
+            <para><strong>Transformation Strategy:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Resource Loading:</strong> Attempts to load optimized JavaScript from embedded resources</description></item>
+            <item><description><strong>Fallback Mechanism:</strong> Provides basic functionality if full script loading fails</description></item>
+            <item><description><strong>Dynamic Enhancement:</strong> Enables progressive enhancement for better user experience</description></item>
+            <item><description><strong>Error Resilience:</strong> Graceful degradation when JavaScript features are unavailable</description></item>
+            </list>
+            
+            <para><strong>JavaScript Features Provided:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Horizontal Scrolling:</strong> Smooth scroll behavior for Netflix-style rows</description></item>
+            <item><description><strong>Lazy Loading:</strong> On-demand content loading for performance optimization</description></item>
+            <item><description><strong>Interactive Elements:</strong> Hover effects, click handlers, and responsive behaviors</description></item>
+            <item><description><strong>Dynamic Content:</strong> AJAX loading of content sections without page refresh</description></item>
+            <item><description><strong>Responsive Adaptation:</strong> Dynamic layout adjustments based on screen size</description></item>
+            <item><description><strong>Integration Testing:</strong> Built-in diagnostics and connection verification</description></item>
+            </list>
+            
+            <para><strong>Error Handling Philosophy:</strong></para>
+            <para>
+            The transformation follows a fail-safe approach where JavaScript errors never break the base Jellyfin
+            functionality. All enhancements are progressive, meaning the interface remains fully functional
+            even if JavaScript transformation fails completely.
+            </para>
+            
+            <para><strong>Performance Considerations:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Async Loading:</strong> Non-blocking script injection to avoid UI freezing</description></item>
+            <item><description><strong>Resource Optimization:</strong> Minimal JavaScript footprint with efficient event handling</description></item>
+            <item><description><strong>Lazy Execution:</strong> JavaScript features activate only when needed</description></item>
+            <item><description><strong>Memory Management:</strong> Proper event listener cleanup and resource disposal</description></item>
+            </list>
+            
+            <para><strong>Browser Compatibility:</strong></para>
+            <para>
+            The injected JavaScript is compatible with all modern browsers and degrades gracefully on older browsers.
+            Essential functionality (content display) works even without JavaScript, while enhanced features
+            require modern browser capabilities.
+            </para>
+            </remarks>
+            <example>
+            <para><strong>Transformation Process Example:</strong></para>
+            <code>
+            // Input: JSON-encoded transformation data
+            var inputData = @"{
+                ""contents"": ""// Original Jellyfin JavaScript\nconsole.log('Jellyfin loaded');""
+            }";
+            
+            // Apply JavaScript transformation
+            var enhancedData = JsTransformation.TransformJs(inputData);
+            
+            // Result: Enhanced JavaScript with Netflix functionality
+            // Enhanced script includes original content plus Netflix-style behaviors
+            </code>
+            
+            <para><strong>JavaScript Features Added:</strong></para>
+            <code>
+            // The transformation adds functionality like:
+            
+            // 1. Content row management
+            $('.netflix-row').each(function() {
+                enableSmoothScrolling(this);
+                enableLazyLoading(this);
+            });
+            
+            // 2. Interactive behaviors
+            $('.netflix-item-card').hover(
+                function() { showItemDetails(this); },
+                function() { hideItemDetails(this); }
+            );
+            
+            // 3. Dynamic content loading
+            function loadNetflixRow(rowType, containerId) {
+                fetch('/NetflixRows/' + rowType + 'Section')
+                    .then(response => response.json())
+                    .then(data => renderNetflixRow(data, containerId));
+            }
+            
+            // 4. Responsive behavior
+            window.addEventListener('resize', function() {
+                adjustNetflixRowsForScreenSize();
+            });
+            </code>
+            </example>
+            <seealso cref="T:Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation"/>
+            <seealso cref="T:Jellyfin.Plugin.NetflixRows.Transformations.TransformData"/>
+        </member>
+        <member name="M:Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation.TransformJs(System.String)">
+            <summary>
+            Transforms JavaScript files by injecting Netflix-style interactive functionality and behaviors.
+            </summary>
+            <param name="data">
+            JSON-serialized transformation data containing the original JavaScript file contents.
+            The data should be in the format: <c>{"contents": "original JavaScript content"}</c>
+            </param>
+            <returns>
+            JSON-serialized object containing the enhanced JavaScript with Netflix functionality injected.
+            Returns the original data unchanged if transformation fails or input is invalid.
+            </returns>
+            <remarks>
+            <para><strong>Transformation Process:</strong></para>
+            <list type="number">
+            <item><description><strong>Input Parsing:</strong> Deserializes JSON data to extract original JavaScript content</description></item>
+            <item><description><strong>Script Enhancement:</strong> Appends Netflix-style interactive functionality</description></item>
+            <item><description><strong>Resource Loading:</strong> Attempts to load optimized scripts from embedded resources</description></item>
+            <item><description><strong>Fallback Handling:</strong> Provides basic functionality if full script loading fails</description></item>
+            <item><description><strong>Output Serialization:</strong> Returns enhanced content in expected JSON format</description></item>
+            </list>
+            
+            <para><strong>Error Handling Strategy:</strong></para>
+            <para>
+            The method implements comprehensive error handling to ensure Jellyfin's JavaScript continues
+            to function even if Netflix enhancements fail. This fail-safe approach prioritizes system
+            stability over feature enhancement.
+            </para>
+            
+            <para><strong>Script Loading Hierarchy:</strong></para>
+            <list type="number">
+            <item><description><strong>Primary:</strong> Load full-featured script from embedded resources</description></item>
+            <item><description><strong>Secondary:</strong> Load external script from API endpoint (/NetflixRows/Script)</description></item>
+            <item><description><strong>Fallback:</strong> Inject basic test functionality to verify plugin operation</description></item>
+            </list>
+            
+            <para><strong>Performance Optimization:</strong></para>
+            <list type="bullet">
+            <item><description><strong>Async Loading:</strong> Scripts load asynchronously to avoid blocking page rendering</description></item>
+            <item><description><strong>Resource Caching:</strong> Embedded resources are loaded once and cached</description></item>
+            <item><description><strong>Progressive Enhancement:</strong> Core functionality works without JavaScript</description></item>
+            <item><description><strong>Error Tolerance:</strong> Failed script loading doesn't break the interface</description></item>
+            </list>
+            
+            <para><strong>Integration Testing:</strong></para>
+            <para>
+            The transformation includes built-in diagnostic functionality that verifies plugin operation
+            and provides visual feedback to administrators about the plugin's status.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Input JSON format
+            var inputData = @"{
+                ""contents"": ""// Original Jellyfin JavaScript\nconsole.log('Jellyfin ready');""
+            }";
+            
+            // Transform JavaScript
+            var enhancedData = JsTransformation.TransformJs(inputData);
+            
+            // Enhanced output includes:
+            // 1. Original Jellyfin JavaScript (preserved)
+            // 2. Netflix-style interactive behaviors
+            // 3. Lazy loading functionality
+            // 4. Responsive design adjustments
+            // 5. Error handling and diagnostics
+            
+            // Output format:
+            // {
+            //   "contents": "original content + Netflix enhancements"
+            // }
+            </code>
+            
+            <para><strong>Error Scenarios Handled:</strong></para>
+            <code>
+            // Invalid JSON input
+            var result1 = TransformJs("invalid json"); // Returns original input
+            
+            // Missing contents property
+            var result2 = TransformJs(@"{""other"": ""data""}"); // Returns original input
+            
+            // Null or empty input
+            var result3 = TransformJs(null); // Returns original input safely
+            
+            // Embedded resource loading failure
+            // Automatically falls back to basic test functionality
+            </code>
+            </example>
+            <exception cref="T:System.Text.Json.JsonException">
+            Caught and handled gracefully - returns original input if JSON parsing fails.
+            This typically occurs when transformation data format is unexpected or corrupted.
+            </exception>
+            <seealso cref="M:Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation.GetNetflixRowsJs"/>
+            <seealso cref="M:Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation.GetBasicTestJs"/>
+            <seealso cref="T:Jellyfin.Plugin.NetflixRows.Transformations.TransformData"/>
+        </member>
+        <member name="T:Jellyfin.Plugin.NetflixRows.Transformations.TransformData">
+            <summary>
+            Data transfer object for JavaScript transformation operations in the File Transformation plugin system.
+            </summary>
+            <remarks>
+            <para><strong>Purpose:</strong></para>
+            <para>
+            This class represents the data structure used for communication between Jellyfin's File Transformation
+            plugin and the Netflix Rows transformation handlers. It encapsulates the original file content and
+            provides metadata needed for transformation operations.
+            </para>
+            
+            <para><strong>JSON Serialization:</strong></para>
+            <para>
+            This class is designed to be JSON-serialized and deserialized by the transformation system.
+            The File Transformation plugin sends transformation requests as JSON, and expects JSON responses
+            containing the modified content.
+            </para>
+            
+            <para><strong>Thread Safety:</strong></para>
+            <para>
+            This class is designed to be immutable during transformation operations. Each transformation
+            should create a new instance rather than modifying existing instances to ensure thread safety
+            in concurrent transformation scenarios.
+            </para>
+            
+            <para><strong>Validation Considerations:</strong></para>
+            <para>
+            The Contents property may be null or empty, indicating either an empty source file or
+            a transformation error. Transformation methods should always validate this property
+            before attempting to process the content.
+            </para>
+            </remarks>
+            <example>
+            <code>
+            // Example of transformation data structure:
+            var transformData = new TransformData
+            {
+                Contents = "// Original JavaScript content\nconsole.log('Hello World');"
+            };
+            
+            // JSON representation (as received from File Transformation plugin):
+            // {
+            //   "contents": "// Original JavaScript content\nconsole.log('Hello World');"
+            // }
+            
+            // Usage in transformation method:
+            var data = JsonSerializer.Deserialize&lt;TransformData&gt;(jsonInput);
+            if (!string.IsNullOrEmpty(data?.Contents))
+            {
+                var enhancedContent = data.Contents + additionalJavaScript;
+                return JsonSerializer.Serialize(new { contents = enhancedContent });
+            }
+            </code>
+            </example>
+            <seealso cref="T:Jellyfin.Plugin.NetflixRows.Transformations.JsTransformation"/>
+            <seealso cref="T:Jellyfin.Plugin.NetflixRows.Transformations.CssTransformation"/>
+        </member>
+        <member name="P:Jellyfin.Plugin.NetflixRows.Transformations.TransformData.Contents">
+            <summary>
+            Gets or sets the original file contents to be transformed.
+            </summary>
+            <value>
+            The raw content of the JavaScript file being transformed, or <c>null</c> if the file is empty
+            or if there was an error reading the original content.
+            </value>
+            <remarks>
+            <para><strong>Content Handling:</strong></para>
+            <para>
+            This property contains the unmodified JavaScript content from Jellyfin's original files.
+            Transformation methods should preserve this content and append enhancements rather than
+            replacing it, ensuring backward compatibility and integration with existing functionality.
+            </para>
+            
+            <para><strong>Null Handling:</strong></para>
+            <para>
+            A null value typically indicates one of the following scenarios:
+            </para>
+            <list type="bullet">
+            <item><description>The source file is empty or doesn't exist</description></item>
+            <item><description>There was an error reading the original file</description></item>
+            <item><description>The transformation data was malformed during transmission</description></item>
+            <item><description>The File Transformation plugin encountered an internal error</description></item>
+            </list>
+            
+            <para><strong>Content Validation:</strong></para>
+            <para>
+            Transformation methods should always validate this property before processing:
+            </para>
+            <code>
+            if (string.IsNullOrEmpty(data?.Contents))
+            {
+                // Handle null/empty content gracefully
+                return originalInput; // Fail-safe approach
+            }
+            </code>
+            </remarks>
+        </member>
+    </members>
+</doc>
